@@ -1,0 +1,6 @@
+ez_setup.py
+setup.py
+gazehound.egg-info/PKG-INFO
+gazehound.egg-info/SOURCES.txt
+gazehound.egg-info/dependency_links.txt
+gazehound.egg-info/top_level.txt
