@@ -30,5 +30,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Information Analysis"
-    )
+    ),
+    test_suite = 'nose.collector'
 )

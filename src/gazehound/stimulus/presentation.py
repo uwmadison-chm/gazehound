@@ -44,7 +44,7 @@ class PresentationFactory(object):
     def __init__(self, type_to_produce=Presentation):
         self.type_to_produce = type_to_produce
     
-    def from_component_list(components, attribute_list):
+    def from_component_list(self, components, attribute_list):
         """ 
         Build a list of Presentations from a set of components.
         Presentations will be of the type specified at factory construction
@@ -70,7 +70,7 @@ class PresentationFactory(object):
                 
                 # Map the listed attributes to 
                 for i in range(0, expected_length):
-                    setattr(pres, attr[i], data[i])
+                    setattr(pres, attribute_list[i], data[i])
                     
                 presentations.append(pres)
         return presentations
