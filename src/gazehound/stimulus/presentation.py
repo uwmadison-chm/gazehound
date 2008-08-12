@@ -55,24 +55,27 @@ class PresentationFactory(object):
             containing one presentation, each item of the second containing
             one attribute.
         
-        attribute_list -- A list containing the expected attributes for each
-            stimulus, in the order they appear on each line.
+        attribute_list -- A list of dictionaries with one key:value mapping. 
+            The key is the name of the attribute, value is the type.
             
         Components containing a different number of elements than the
-        attribute_list will be skipped.
+        attribute_list will cause problems -- make sure you've filtered
+        your input.
         """
         
         presentations = []
         expected_length = len(attribute_list)
         for data in components:
-            if len(data) == expected_length:
-                pres = self.type_to_produce()
-                
-                # Map the listed attributes to 
-                for i in range(0, expected_length):
-                    setattr(pres, attribute_list[i], data[i])
-                    
-                presentations.append(pres)
+            pres = self.type_to_produce()
+            
+            # Map the listed attributes to their proper homes
+            for i in range(0, expected_length):
+                mapping = attribute_list[i]
+                attr = mapping.keys()[0]
+                attr_type = mapping[attr]
+                setattr(pres, attr, attr_type(data[i]))
+            
+            presentations.append(pres)
         return presentations
     
 
