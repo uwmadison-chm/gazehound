@@ -4,7 +4,7 @@
 #
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
-
+import csv
 
 class Presentation(object):
     """ The generic stimulus presentation, providing start time, end time, and
@@ -55,8 +55,7 @@ class PresentationFactory(object):
             containing one presentation, each item of the second containing
             one attribute.
         
-        attribute_list -- A list of dictionaries with one key:value mapping. 
-            The key is the name of the attribute, value is the type.
+        attribute_list -- A list of tuples, containing (attribute_name, type). 
             
         Components containing a different number of elements than the
         attribute_list will cause problems -- make sure you've filtered
@@ -71,11 +70,54 @@ class PresentationFactory(object):
             # Map the listed attributes to their proper homes
             for i in range(0, expected_length):
                 mapping = attribute_list[i]
-                attr = mapping.keys()[0]
-                attr_type = mapping[attr]
+                attr = mapping[0]
+                attr_type = mapping[1]
                 setattr(pres, attr, attr_type(data[i]))
             
             presentations.append(pres)
         return presentations
     
 
+class DelimitedReader(object):
+    """
+    Presentations from themReads an enumeration of delimited strings and 
+    constructs Presentations from them."""
+    
+    def __init__(self, lines = [], 
+        delimiter = "\t",
+        lines_to_skip = 0, 
+        type_to_produce = Presentation,
+        mapping = [('name', str), ('start', int), ('end', int)]):
+        
+        self.lines = lines
+        self.delimiter = delimiter
+        self.lines_to_skip = lines_to_skip
+        self.type_to_produce = type_to_produce
+        self.mapping = mapping
+        
+    
+    def make_presentations(self):
+        """
+        Create a list of Presentation objects from self.lines, delimited with
+        self.delimter after skipping self.lines_to_skip. Always return
+        a list or raise an error.
+        """
+        if self.lines is None:
+            return []
+        factory = PresentationFactory(self.type_to_produce)
+        reader = csv.reader(
+            self.lines_after_skip(),
+            delimiter=self.delimiter
+        )
+        pres_list = factory.from_component_list(
+            reader, self.mapping
+        )
+        return pres_list
+        
+    def lines_after_skip(self):
+        """"""
+        return self.lines[self.lines_to_skip:]
+            
+    
+
+        

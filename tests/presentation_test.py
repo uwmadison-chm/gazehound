@@ -11,9 +11,9 @@ class TestPresentationFactory(object):
         ]
         
         self.name_on_off_map = [
-            {'name': str},
-            {'start': int},
-            {'end': int}
+            ('name', str),
+            ('start', int),
+            ('end', int)
         ]
         
         self.on_off_name_ary = [
@@ -21,10 +21,11 @@ class TestPresentationFactory(object):
             ['60', '90', 'kitten'],
             ['100', '150', 'batman']
         ]
+        
         self.on_off_name_map = [
-            {'start':int},
-            {'end':int},
-            {'name':str}
+            ('start', int),
+            ('end', int),
+            ('name', str)
         ]
         
         self.generic_factory = presentation.PresentationFactory(
@@ -66,4 +67,30 @@ class TestPresentationFactory(object):
         )
         for i in range(0, len(stims)):
             assert stims[i].name == self.on_off_name_ary[i][2]
+     
+
+class TestDelimitedReader(object):
+    def setup(self):
+        f = open('tests/examples/presentation_tabs.txt')
+        self.lines = f.readlines()
+        f.close()
+        self.reader = presentation.DelimitedReader(self.lines)
+        self.reader.lines_to_skip = 1
         
+    def teardown(self):
+        pass
+    
+    def test_make_presentations_should_be_empty_if_no_lines(self):
+        self.reader.lines = None
+        result = self.reader.make_presentations()
+        assert len(result) == 0
+        
+    def test_make_presentation_should_return_mapped_presentations(self):
+        result = self.reader.make_presentations()
+        assert len(result) == (len(self.lines) - 1)
+    
+    def test_lines_after_skip_should_be_short(self):
+        self.reader.lines_to_skip = 1
+        assert (
+            len(self.reader.lines_after_skip()) == 
+            (len(self.lines) - self.reader.lines_to_skip))
