@@ -52,7 +52,8 @@ class PointFactory(object):
             for i in range(len(attribute_list)):
                 attr_name = attribute_list[i][0]
                 attr_type = attribute_list[i][1]
-                setattr(point, attr_name, attr_type(point_data[i]))
+                if attr_type is not None:
+                    setattr(point, attr_name, attr_type(point_data[i]))
 
             points.append(point)
         return points
