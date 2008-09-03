@@ -57,4 +57,4 @@ class PointFactory(object):
 
             points.append(point)
         return points
-            
+
