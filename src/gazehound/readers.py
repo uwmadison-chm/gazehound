@@ -36,6 +36,17 @@ class DelimitedReader(object):
         self.__setup_parser()
         return len(self.__lines_cleaned)
     
+    def comment_lines(self):
+        comment_lines = []
+        for line in self.file_data:
+            stripped = line.strip()
+            if (len(stripped) == 0 or
+                stripped.startswith(self.comment_char)):
+                comment_lines.append(line)
+            else:
+                break
+        return comment_lines
+    
     def __iter__(self):
         return self
     
@@ -65,4 +76,4 @@ class DelimitedReader(object):
                 break
         
         self.__lines_cleaned = self.file_data[i:]
-            
+    

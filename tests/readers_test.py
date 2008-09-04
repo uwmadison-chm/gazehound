@@ -27,7 +27,8 @@ class TestDelimitedReader(object):
             self.comment_inbody = f.readlines()
         
         self.EXPECTED_LINES = 13
-    
+        self.COMMENT_LINES = 11
+        
     def teardown(self):
         pass
         
@@ -54,5 +55,11 @@ class TestDelimitedReader(object):
         
         first_element = dr.next()
         for l in dr:
+            assert len(l) > 1
             assert len(l) == len(first_element)
     
+    def test_reader_yields_comment_lines(self):
+        dr = DelimitedReader(self.norm_lines,
+            skip_comments = True, comment_char = "#")
+            
+        assert len(dr.comment_lines()) == self.COMMENT_LINES
