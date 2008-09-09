@@ -8,7 +8,7 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.readers import DelimitedReader
+from gazehound.readers import DelimitedReader, IViewReader
 
 
 class TestDelimitedReader(object):
@@ -63,3 +63,36 @@ class TestDelimitedReader(object):
             skip_comments = True, comment_char = "#")
             
         assert len(dr.comment_lines()) == self.COMMENT_LINES
+        
+class TestIViewReader(object):
+    """Exercise the IViewReader class"""
+    def setup(self):
+        p = path.abspath(path.dirname(__file__))
+        with open(path.join(p, "examples/iview_normal.txt")) as f:
+            self.norm_lines = f.readlines()
+
+        self.EXPECTED_LINES = 13
+    
+    
+    def test_reader_basically_works(self):
+        ir = IViewReader(self.norm_lines)
+        
+        assert len(ir) == self.EXPECTED_LINES
+        
+    def test_basic_header_parsing(self):
+        ir = IViewReader(self.norm_lines)
+        h = ir.header()
+        print(h)
+        assert h.get('file_version') == '2'
+        
+    def test_calibration_size_parses_into_int_list(self):
+        ir = IViewReader(self.norm_lines)
+        h = ir.header()
+        
+        assert h.get('calibration_size') == [800,600]
+    
+    def test_scanpath_returns_expected_points(self):
+        ir = IViewReader(self.norm_lines)
+        
+        scanpath = ir.scanpath()
+        #assert len(scanpath) == self.EXPECTED_LINES

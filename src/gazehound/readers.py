@@ -5,6 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import csv
+import re
 
 class DelimitedReader(object):
     
@@ -76,4 +77,74 @@ class DelimitedReader(object):
                 break
         
         self.__lines_cleaned = self.file_data[i:]
+    
+
+class IViewReader(DelimitedReader):
+
+    # The second parameter is a function, taking one string argument,
+    # that converts the value to its expected format.
+    HEADER_MAPPING = {
+        'FileVersion': ('file_version', str),
+        'Fileformat': ('file_format', str),
+        'Subject': ('subject', str),
+        'Date': ('date_string', str),
+        'Description': ('description', str),
+        '# of Pts Recorded': ('recorded_points', int),
+        'Offset Of Calibration Area': (
+            'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
+        ),
+        'Size Of Calibration Area': (
+            'calibration_size', lambda x: [int(e) for e in x.split("\t")]
+        ),
+        'Sample Rate': ('sample_rate', int)
+    }
+    
+    SEP = ":\t"
+    
+    """A reader for files produced by SMI's iView software"""
+    def __init__(self, 
+        file_data = None, skip_comments = True, comment_char = "#",
+        opts_for_parser = {}):
+        
+        super(IViewReader, self).__init__(
+            file_data, skip_comments, comment_char, opts_for_parser
+        )
+    
+    def header(self):
+        coms = self.comment_lines()
+        coms = [re.sub('^#', '', l) for l in coms] # Strip leading "#"
+        header_pairs = [l.split(self.__class__.SEP, 1) for l in coms]
+        
+        header_pairs = [p for p in header_pairs if len(p) == 2]
+        # Kill line endings in header_pairs
+        header_pairs = [[p[0], p[1].strip()] for p in header_pairs]
+        
+        header_ret = {}
+        for p in header_pairs:
+            cleaned_pair = self.__map_header_value(p)
+            if cleaned_pair is not None:
+                header_ret.update([cleaned_pair])
+        return header_ret
+        
+    
+    def scanpath(self):
+        """Return a list of Points representing the scan path."""
+        pass
+    
+    def __map_header_value(self, pair):
+        """
+        Return a tuple of the form (key, value), or None if 
+        pair[0] isn't in HEADER_MAPPING
+        """
+        
+        raw_key, raw_val = pair
+        mapper = self.__class__.HEADER_MAPPING.get(raw_key)
+        if mapper is None:
+            return None
+    
+        cleaned_key, converter = mapper
+        
+        cleaned_val = converter(raw_val)
+        return (cleaned_key, cleaned_val)
+    
     
