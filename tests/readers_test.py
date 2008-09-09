@@ -82,7 +82,6 @@ class TestIViewReader(object):
     def test_basic_header_parsing(self):
         ir = IViewReader(self.norm_lines)
         h = ir.header()
-        print(h)
         assert h.get('file_version') == '2'
         
     def test_calibration_size_parses_into_int_list(self):
