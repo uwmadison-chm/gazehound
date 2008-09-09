@@ -94,4 +94,5 @@ class TestIViewReader(object):
         ir = IViewReader(self.norm_lines)
         
         scanpath = ir.scanpath()
-        #assert len(scanpath) == self.EXPECTED_LINES
+        assert len(scanpath) == self.EXPECTED_LINES
+        

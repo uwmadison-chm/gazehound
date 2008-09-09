@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import csv
 import re
+from gaze.point import *
 
 class DelimitedReader(object):
     
@@ -99,6 +100,10 @@ class IViewReader(DelimitedReader):
         'Sample Rate': ('sample_rate', int)
     }
     
+    # The definition of output mapping
+    #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
+    
+    
     SEP = ":\t"
     
     """A reader for files produced by SMI's iView software"""
@@ -129,7 +134,22 @@ class IViewReader(DelimitedReader):
     
     def scanpath(self):
         """Return a list of Points representing the scan path."""
-        pass
+        fact = PointFactory()
+        return fact.from_component_list(
+            self, [
+                #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
+                ('time', int),
+                ('set', str),
+                ('pupil_h', int),
+                ('pupil_v', int),
+                ('corneal_reflex_h', int),
+                ('corneal_reflex_v', int),
+                ('x', int),
+                ('y', int),
+                ('diam_h', int),
+                ('diam_v', int)
+            ]
+        )
     
     def __map_header_value(self, pair):
         """
