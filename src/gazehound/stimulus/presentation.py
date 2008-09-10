@@ -32,8 +32,8 @@ class Picture(Presentation):
 class Blank(Presentation):
     """ A 'nothing' type stimulus.
     """
-    def __init__(self, *args):
-        Presentation.__init__(self, *args)
+    def __init__(self, *args, **keywords):
+        Presentation.__init__(self, *args, **keywords)
         
 
 
