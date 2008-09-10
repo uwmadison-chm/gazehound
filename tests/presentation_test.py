@@ -4,6 +4,7 @@
 #
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
+from __future__ import with_statement
 
 import gazehound.stimulus
 from gazehound.stimulus import presentation
@@ -78,9 +79,10 @@ class TestPresentationFactory(object):
 
 class TestDelimitedReader(object):
     def setup(self):
-        f = open('tests/examples/presentation_tabs.txt')
-        self.lines = f.readlines()
-        f.close()
+        
+        with open('tests/examples/presentation_tabs.txt') as f:
+            self.lines = f.readlines()
+
         self.reader = presentation.DelimitedReader(self.lines)
         self.reader.lines_to_skip = 1
         
