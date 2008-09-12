@@ -14,12 +14,25 @@ class Point(object):
         self.x = x
         self.y = y
         self.time = time
+        
+    
+    def valid(criteria):
+        """ Evaluate criteria() for this point. critiera() should return
+            True or False.
+        """
+        return critera(self)
 
 class ScanPath(object):
     """ A set of Points arranged sequentially in time """
-    def __init__(self, points = None):
+    def __init__(self, points = [], 
+                 min_x = None, min_y = None, max_x = None, max_y = None):
         self.points = points
         
+    def __len__(self):
+        return self.points.__len__()
+        
+    def __iter__(self):
+        return self.points.__iter__()
         
 
 class PointFactory(object):

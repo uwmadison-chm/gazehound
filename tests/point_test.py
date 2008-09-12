@@ -91,3 +91,41 @@ class TestPointFactory(object):
         for point in points:
             for mapping in nones:
                 assert not hasattr(point, mapping[0])
+                
+class TestScanPath(object):
+    def setup(self):
+        # Fields are:
+        # Time | Set | Pupil H | Pupil V | C.R. H | C.R. V | ScreenH | ScreenV | Diam H | Diam V 
+        self.smi_gaze_ary = [
+            ['0', '0', '5034', '3490', '4687', '3380', '358', '543', '2400', '2080'],
+            ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
+            ['33', '0', '5050', '3477', '4692', '3388', '357', '490', '2432', '2144'],
+            ['50', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
+            ['66', '0', '5017', '3595', '4691', '3367', '58', '986', '2368', '1824'],
+            ['83', '0', '4929', '3946', '4686', '3357', '518', '-56', '2144', '1184']
+        ]
+        
+        self.smi_mapping = [
+            ('time', int),
+            ('set', None),
+            ('pupil_h', None),
+            ('pupil_v', None),
+            ('cr_h', None),
+            ('cr_v', None),
+            ('x', int),
+            ('y', int),
+            ('diam_h', None),
+            ('diam_v', None)
+        ]
+        
+        self.generic_factory = point.PointFactory()
+        self.points = self.generic_factory.from_component_list(
+            self.smi_gaze_ary,
+            self.smi_mapping
+        )
+        
+    
+    def test_scanpath_iterates(self):
+        scanpath = point.ScanPath(points = self.points)
+        for p in scanpath:
+            assert type(p) == self.generic_factory.type_to_produce
