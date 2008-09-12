@@ -15,6 +15,12 @@ class Presentation(object):
         self.start = start
         self.end = end
         self.name = name
+        
+    def valid(self):
+        try:
+            return self.start < self.end
+        except:
+            return False
 
 
 class Picture(Presentation):
