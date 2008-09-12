@@ -33,3 +33,16 @@ class TestTimeline(object):
             
         list = t.filled_list()
         assert len(list) == 13
+    
+    def test_timeline_valid_without_overlapping_times(self):
+        t = timeline.Timeline(
+            presentations = self.presentations
+        )
+        assert t.valid()
+    
+    def test_timeline_not_valid_if_times_overlap(self):
+        p = self.presentations
+        p[0].end = (p[1].start + 1)
+        
+        t = timeline.Timeline(presentations = p)
+        assert not t.valid()

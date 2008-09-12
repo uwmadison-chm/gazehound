@@ -47,3 +47,28 @@ class Timeline(object):
                 start = cur_pres.end+1, end = self.min_length))
         return full_list
         
+    
+    def valid(self):
+        """
+        Ensure every presentation is valid, that presentation start times
+        increase monotonically, and that no times overlap.
+        """
+        def valid_pres(pres):
+            pres.valid()
+            
+        invalids = filter(valid_pres, self.presentations)
+        if len(invalids) > 0:
+            return False
+        
+        # Handle the case where we won't be able to compare
+        if len(self.presentations) < 2:
+            return True
+        
+        prev_end = self.presentations[0].end
+        for p in self.presentations[1:]:
+            if p.start <= prev_end:
+                return False
+            prev_end = p.end
+        
+        # Passed all tests. We're valid!
+        return True
