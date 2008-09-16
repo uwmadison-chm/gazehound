@@ -8,7 +8,7 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.stimulus import presentation, timeline
+from gazehound import presentation, timeline
 
 class TestTimeline(object):
     def setup(self):

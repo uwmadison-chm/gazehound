@@ -5,8 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-import gazehound.gaze
-from gazehound.gaze import point
+from gazehound import point
 
 class TestPointFactory(object):
     

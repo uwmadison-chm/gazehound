@@ -6,7 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import csv
 import re
-from gaze.point import *
+from point import *
 
 class DelimitedReader(object):
     

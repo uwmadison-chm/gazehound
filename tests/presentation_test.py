@@ -6,8 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 from __future__ import with_statement
 
-import gazehound.stimulus
-from gazehound.stimulus import presentation
+from gazehound import presentation
 
 class TestPresentation(object):
     def setup(self):
