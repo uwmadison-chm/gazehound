@@ -84,7 +84,7 @@ class IViewReader(DelimitedReader):
 
     # The second parameter is a function, taking one string argument,
     # that converts the value to its expected format.
-    HEADER_MAPPING = {
+    HEADER_MAP = {
         'FileVersion': ('file_version', str),
         'Fileformat': ('file_format', str),
         'Subject': ('subject', str),
@@ -102,7 +102,19 @@ class IViewReader(DelimitedReader):
     
     # The definition of output mapping
     #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
-    
+    DATA_MAP = [
+        #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
+        ('time', int),
+        ('set', str),
+        ('pupil_h', int),
+        ('pupil_v', int),
+        ('corneal_reflex_h', int),
+        ('corneal_reflex_v', int),
+        ('x', int),
+        ('y', int),
+        ('diam_h', int),
+        ('diam_v', int)
+    ]
     
     SEP = ":\t"
     
@@ -135,30 +147,19 @@ class IViewReader(DelimitedReader):
     def scanpath(self):
         """Return a list of Points representing the scan path."""
         fact = PointFactory()
-        return fact.from_component_list(
-            self, [
-                #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
-                ('time', int),
-                ('set', str),
-                ('pupil_h', int),
-                ('pupil_v', int),
-                ('corneal_reflex_h', int),
-                ('corneal_reflex_v', int),
-                ('x', int),
-                ('y', int),
-                ('diam_h', int),
-                ('diam_v', int)
-            ]
+        points = fact.from_component_list(
+            self, self.__class__.DATA_MAP
         )
+        return ScanPath(points = points)
     
     def __map_header_value(self, pair):
         """
         Return a tuple of the form (key, value), or None if 
-        pair[0] isn't in HEADER_MAPPING
+        pair[0] isn't in HEADER_MAP
         """
         
         raw_key, raw_val = pair
-        mapper = self.__class__.HEADER_MAPPING.get(raw_key)
+        mapper = self.__class__.HEADER_MAP.get(raw_key)
         if mapper is None:
             return None
     
