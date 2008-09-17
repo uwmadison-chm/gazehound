@@ -5,7 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-from gazehound import point
+from gazehound import gazepoint
 
 class TestPointFactory(object):
     
@@ -48,7 +48,7 @@ class TestPointFactory(object):
             ('diam_v', None)
         ]
         
-        self.generic_factory = point.PointFactory()
+        self.generic_factory = gazepoint.PointFactory()
         
     def test_factory_produces_proper_count_from_dense(self):
         points = self.generic_factory.from_component_list(
@@ -117,7 +117,7 @@ class TestScanPath(object):
             ('diam_v', None)
         ]
         
-        self.generic_factory = point.PointFactory()
+        self.generic_factory = gazepoint.PointFactory()
         self.points = self.generic_factory.from_component_list(
             self.smi_gaze_ary,
             self.smi_mapping
@@ -125,6 +125,6 @@ class TestScanPath(object):
         
     
     def test_scanpath_iterates(self):
-        scanpath = point.ScanPath(points = self.points)
+        scanpath = gazepoint.ScanPath(points = self.points)
         for p in scanpath:
             assert type(p) == self.generic_factory.type_to_produce
