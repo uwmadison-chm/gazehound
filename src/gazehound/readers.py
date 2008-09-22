@@ -100,22 +100,6 @@ class IViewReader(DelimitedReader):
         'Sample Rate': ('sample_rate', int)
     }
     
-    # The definition of output mapping
-    #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
-    DATA_MAP = [
-        #Time	Set	Pupil H	Pupil V	C.R. H	C.R. V	ScreenH	ScreenV	Diam H	Diam V
-        ('time', int),
-        ('set', str),
-        ('pupil_h', int),
-        ('pupil_v', int),
-        ('corneal_reflex_h', int),
-        ('corneal_reflex_v', int),
-        ('x', int),
-        ('y', int),
-        ('diam_h', int),
-        ('diam_v', int)
-    ]
-    
     SEP = ":\t"
     
     """A reader for files produced by SMI's iView software"""
@@ -146,10 +130,8 @@ class IViewReader(DelimitedReader):
     
     def scanpath(self):
         """Return a list of Points representing the scan path."""
-        fact = PointFactory()
-        points = fact.from_component_list(
-            self, self.__class__.DATA_MAP
-        )
+        fact = IViewPointFactory()
+        points = fact.from_component_list(self)
         return ScanPath(points = points)
     
     def __map_header_value(self, pair):

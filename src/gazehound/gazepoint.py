@@ -71,3 +71,30 @@ class PointFactory(object):
             points.append(point)
         return points
 
+
+class IViewPointFactory(PointFactory):
+    """
+    Maps a list of gaze point data to a list of Points, using SMI's iView
+    data scheme.
+    """
+
+        
+    def __init__(self, type_to_produce = Point):
+        super(IViewPointFactory, self).__init__(type_to_produce)
+        self.data_map = [
+            ('time', int),
+            ('set', str),
+            ('pupil_h', int),
+            ('pupil_v', int),
+            ('corneal_reflex_h', int),
+            ('corneal_reflex_v', int),
+            ('x', int),
+            ('y', int),
+            ('diam_h', int),
+            ('diam_v', int)
+        ]
+        
+    def from_component_list(self, components):
+        return super(IViewPointFactory, self).from_component_list(
+            components, self.data_map
+        )

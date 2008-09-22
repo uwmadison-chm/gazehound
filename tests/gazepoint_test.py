@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from gazehound import gazepoint
+import mock_objects
 
 class TestPointFactory(object):
     
@@ -91,6 +92,20 @@ class TestPointFactory(object):
             for mapping in nones:
                 assert not hasattr(point, mapping[0])
                 
+class TestIViewPointFactory(object):
+    def setup(self):
+        self.point_ary = mock_objects.smi_ary_spreadout()
+        self.iview_fact = gazepoint.IViewPointFactory()
+        
+    def test_get_components_returns_proper_number_of_elements(self):
+        points = self.iview_fact.from_component_list(self.point_ary)
+        assert len(points) == len(self.point_ary)
+        
+    def test_get_components_returns_points(self):
+        points = self.iview_fact.from_component_list(self.point_ary)
+        assert all(type(p) == gazepoint.Point for p in points)
+        
+
 class TestScanPath(object):
     def setup(self):
         # Fields are:
