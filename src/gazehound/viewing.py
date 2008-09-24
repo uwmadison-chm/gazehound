@@ -5,14 +5,8 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import copy
+import gazepoint
 
-
-class Viewing(object):
-    """Viewings represent a combination of presentations and view data."""
-    def __init__(self, presentation = None, viewdata = None):
-        self.presentation = presentation
-        self.viewdata = viewdata
-        
     
 class Combiner(object):
     """Combines timelines of presentations with scanpath data"""
@@ -22,4 +16,8 @@ class Combiner(object):
     
     def viewings(self):
         t2 = copy.copy(self.timeline)
+        for pres in t2:
+            points = [p for p in self.scanpath 
+                if (p.time >= pres.start and p.time < pres.end)]
+            pres.scanpath = gazepoint.ScanPath(points)
         return t2

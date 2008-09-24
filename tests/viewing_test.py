@@ -10,6 +10,7 @@ from os import path
 from gazehound import viewing, gazepoint
 import mock_objects
 from nose.tools import ok_, eq_
+from testutils import lt_, gt_
 
 class TestTimelineScanpathCombiner(object):
     def setup(self):
@@ -30,4 +31,44 @@ class TestTimelineScanpathCombiner(object):
         eq_(len(viewings), len(self.timeline))
         
     def test_combiner_adds_scanpath_to_presentations(self):
-        pass
+        # This test assures we've got non-None scanpaths in each pres
+        combiner = viewing.Combiner(
+            timeline = self.timeline,
+            scanpath = self.scanpath
+        )
+        
+        viewings = combiner.viewings()
+        assert all(p.scanpath is not None for p in viewings)
+
+    def test_combiner_adds_gazepoints_to_presentations(self):
+        combiner = viewing.Combiner(
+            timeline = self.timeline,
+            scanpath = self.scanpath
+        )
+        
+        viewings = combiner.viewings()
+        assert all(len(p.scanpath) > 0 for p in viewings)
+        
+    def test_combiner_drops_out_of_bounds_points(self):
+        # Some gazepoints are outside of the presentation timeline...
+        combiner = viewing.Combiner(
+            timeline = self.timeline,
+            scanpath = self.scanpath
+        )
+        viewings = combiner.viewings()
+        lt_(
+            sum(len(pres.scanpath) for pres in viewings),
+            len(self.scanpath)
+        )
+        
+    def test_combiner_contains_all_points_when_in_bounds(self):
+        combiner = viewing.Combiner(
+            timeline = self.timeline.filled_list(),
+            scanpath = self.scanpath
+        )
+        
+        viewings = combiner.viewings()
+        eq_(
+            sum(len(pres.scanpath) for pres in viewings),
+            len(self.scanpath)
+        )
