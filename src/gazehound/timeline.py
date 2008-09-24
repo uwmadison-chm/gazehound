@@ -15,6 +15,9 @@ class Timeline(object):
         self.min_length = min_length
         
     
+    def __len__(self):
+        return len(self.presentations)
+    
     def filled_list(self):
         """Return a list of presentations with a presentation in every
         millisecond. Gaps in self.presentations are filled with Blanks.
