@@ -26,3 +26,7 @@ def lte_(a, b, msg = None):
     """
     assert a <= b, msg or "%r > %r" % (a, b)
 
+def includes_(l, elem, msg = None):
+    """ Shorthand for 'assert elem in l'
+    """
+    assert elem in l, msg or "%r does not contain %r" % (l, elem)
