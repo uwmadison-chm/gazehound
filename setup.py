@@ -5,8 +5,15 @@ ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 setup(
     name = "gazehound",
-    version = "0.0.1",
-    packages = find_packages(),
+    version = "0.0.2",
+    package_dir = {'':'src'},
+    packages = find_packages('src'),
+    
+    entry_points = {
+        'console_scripts': [
+            'gazehound_test = gazehound.test:main'
+        ]
+    },
 
     package_data = {
     },
@@ -20,7 +27,7 @@ setup(
     keywords = "gazetracking eyetracking psychology science research",
     url = "http://code.google.com/p/gazehound",
     classifiers = (
-        "Development Status :: 1 - Planning",
+        "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
