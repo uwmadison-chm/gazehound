@@ -11,7 +11,7 @@ setup(
     
     entry_points = {
         'console_scripts': [
-            'gazehound_test = gazehound.test:main'
+            'scanpath_stats = gazehound.runners.gaze_statistics:main'
         ]
     },
 
