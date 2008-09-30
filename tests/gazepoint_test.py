@@ -7,6 +7,8 @@
 
 from gazehound import gazepoint
 import mock_objects
+from nose.tools import eq_
+from testutils import gt_, lt_, gte_, lte_, includes_
 
 class TestPointFactory(object):
     
@@ -143,3 +145,34 @@ class TestScanPath(object):
         scanpath = gazepoint.ScanPath(points = self.points)
         for p in scanpath:
             assert type(p) == self.generic_factory.type_to_produce
+    
+    def test_scanpath_is_iterable(self):
+        scanpath = gazepoint.ScanPath(points = self.points)
+        eq_(scanpath[0].time, 0)
+    
+    def test_scanpath_is_slicable(self):
+        scanpath = gazepoint.ScanPath(points = self.points)
+        eq_(len(scanpath[0:2]), 2)
+        eq_(type(scanpath[0:2]), type(scanpath))
+    
+    def test_scanpath_returns_all_with_free_criterion_in_valid(self):
+        def criterion(point):
+            return True
+            
+        scanpath = gazepoint.ScanPath(points = self.points)
+        valid = scanpath.valid_points(criterion)
+        eq_(len(valid), len(scanpath))
+        
+        
+    def test_scanpath_returns_none_with_false_criterion_in_valid(self):
+        def criterion(point):
+            return False
+            
+        scanpath = gazepoint.ScanPath(points = self.points)
+        valid = scanpath.valid_points(criterion)
+        eq_(len(valid), 0)
+        
+    def test_scanpath_returns_valid_points_with_limiting_criterin(self):
+        def criterion(point):
+            return (point.x > 0 and point.x < 800)
+        

@@ -5,6 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
+
 class Point(object):
     """ 
     A point with x, y, and time coordinates -- one point in a scan path 
@@ -24,8 +25,7 @@ class Point(object):
 
 class ScanPath(object):
     """ A set of Points arranged sequentially in time """
-    def __init__(self, points = [], 
-                 min_x = None, min_y = None, max_x = None, max_y = None):
+    def __init__(self, points = []):
         self.points = points
         
     def __len__(self):
@@ -33,7 +33,19 @@ class ScanPath(object):
         
     def __iter__(self):
         return self.points.__iter__()
+    
+    def __getitem__(self, i):
+        return self.points[i]
         
+    def __getslice__(self, i, j):
+        return ScanPath(self.points[i:j])
+    
+    def valid_points(self, criterion):
+        return ScanPath(
+            [point for point in self.points if criterion(point)]
+        )
+    
+    
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
