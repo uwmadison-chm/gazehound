@@ -8,7 +8,11 @@
 # A simple set of functions to generate mock objects for use in
 # our tests
 
+from __future__ import with_statement
 from gazehound import gazepoint, presentation, timeline, readers
+from os import path
+
+EX_PATH = path.abspath(path.dirname(__file__))+"/examples"
 
 def smi_ary_spreadout():
     return ([
@@ -21,6 +25,13 @@ def smi_ary_spreadout():
     ])
     
     
+
+def smi_scanpath_normal():
+    lines = []
+    with open(EX_PATH+"/iview_normal.txt") as f:
+        lines = f.readlines()
+    ir = readers.IViewReader(lines)
+    return ir.scanpath()
 
 def smi_scanpath_spreadout():
     ivf = gazepoint.IViewPointFactory()
