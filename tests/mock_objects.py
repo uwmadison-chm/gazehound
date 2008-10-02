@@ -10,6 +10,7 @@
 
 from __future__ import with_statement
 from gazehound import gazepoint, presentation, timeline, readers
+from gazehound.runners import gaze_statistics
 from os import path
 
 EX_PATH = path.abspath(path.dirname(__file__))+"/examples"
@@ -49,3 +50,13 @@ def simple_timeline():
         data, [('start', int), ('end', int), ('name', str)]
     )
     return timeline.Timeline(presentations)
+    
+def general_gaze_stats():
+    return [
+        gaze_statistics.GazeStats(
+            presented = 'screen', area = 'all', start_ms = 0, end_ms = 21000, 
+            total_points = 350, 
+            points_in = 296, points_out = 54, 
+            valid_strict = 296, valid_lax = 316
+        )
+    ]

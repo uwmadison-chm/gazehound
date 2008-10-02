@@ -7,7 +7,9 @@
 
 import StringIO
 from nose.tools import eq_
+from ..testutils import gt_, lt_, includes_
 from gazehound.writers import delimited
+from .. import mock_objects
 
 class TestDelimitedWriter(object):
     def __init__(self):
@@ -42,4 +44,32 @@ class TestDelimitedWriter(object):
         lines = [line.strip() for line in self.out.readlines()]
         eq_(len(lines), len(self.data))
         eq_(lines[0], 'foo\t15')
+        
+class TestGazeStatsWriter(object):
+    def __init__(self):
+        super(TestGazeStatsWriter, self).__init__()
+        
+    def setup(self):
+        self.stats = mock_objects.general_gaze_stats()
+        self.out = StringIO.StringIO()
+        
+    def teardown(self):
+        self.out.close()
+        
+    def test_writer_prints_headers(self):
+        writer = delimited.GazeStatsWriter(out = self.out)
+        writer.write_header()
+        self.out.seek(0)
+        lines = [line.strip() for line in self.out.readlines()]
+        gt_(len(lines), 0)
+        includes_(lines[0], 'Presented')
+        
+    def test_writer_outputs_data(self):
+        writer = delimited.GazeStatsWriter(out = self.out)
+        writer.write(self.stats)
+        self.out.seek(0)
+        lines = [line.strip() for line in self.out.readlines()]
+        gt_(len(lines), 0)
+        includes_(lines[0], 'screen')
+        includes_(lines[0], '21.000')
         

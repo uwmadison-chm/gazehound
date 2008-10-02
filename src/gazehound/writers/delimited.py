@@ -28,3 +28,28 @@ class DelimitedWriter(object):
             row_mapped = [ elem[1](row) for elem in self.mapping ]
             self.writer.writerow(row_mapped)
     
+    
+class GazeStatsWriter(DelimitedWriter):
+    mapper = [
+        ('Presented', lambda s: s.presented),
+        ('Area', lambda s: s.area),
+        ('Start', lambda s: "%.3f" % (s.start_ms/1000.0)),
+        ('End', lambda s: "%.3f" % (s.end_ms/1000.0)),
+        ('Total points', lambda s: s.total_points),
+        ('Points in', lambda s: s.points_in),
+        ('Points out', lambda s: s.points_out),
+        ('Valid strict', lambda s: s.valid_strict),
+        ('Valid lax', lambda s: s.valid_lax),
+        ('%% in', lambda s: '%.3f' % (float(s.points_in)/s.total_points)),
+        ('%% valid strict', 
+            lambda s: '%.3f' % (float(s.valid_strict)/s.total_points)),
+        ('%% valid lax', 
+            lambda s: '%.3f' % (float(s.valid_lax)/s.total_points))
+    ]
+    
+    """Writes gaze stats items into a delimited file"""
+    def __init__(self, out = sys.stdout, delimiter = "\t"):
+        super(GazeStatsWriter, self).__init__(
+            GazeStatsWriter.mapper, out, delimiter
+        )
+        
