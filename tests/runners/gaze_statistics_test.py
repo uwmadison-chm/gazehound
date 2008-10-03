@@ -8,28 +8,72 @@
 from __future__ import with_statement
 from gazehound.runners import gaze_statistics
 from ..testutils import includes_
-from nose.tools import eq_
+from nose.tools import *
 from .. import mock_objects
 import os
+import StringIO
 
 class TestGazeStatsOptionParser(object):
     def __init__(self):
         super(TestGazeStatsOptionParser, self).__init__()
         
     def setup(self):
+        # Gather error messages to clean test output
+        self.err_dump = StringIO.StringIO() 
+        
         self.path_base = p = os.path.abspath(os.path.dirname(__file__)+"/..")
         self.example_path = self.path_base+'/examples/'
         self.normal_file = os.path.join(self.example_path, 'iview_normal.txt')
+        self.presentations_file = os.path.join(
+            self.example_path, 'presentation_tabs'
+        )
         
     def teardown(self):
-        pass
+        self.err_dump.close()
         
     def test_analyzer_parses_filename(self):
         args = [__file__, self.normal_file]
         
         analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
         includes_(analyzer.args, self.normal_file)
+    
+    @raises(SystemExit)
+    def test_analyzer_fails_with_no_filename(self):
+        args = [__file__]
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args, 
+            err = self.err_dump
+        )
+    
+    def test_analyzer_parses_stimlui(self):
+        args = [__file__, '--stimuli=foo', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
+        eq_(analyzer.options.stim_file, 'foo')
         
+
+
+class TestGazeStatisticsRunner(object):
+    def __init__(self):
+        super(TestGazeStatisticsRunner, self).__init__()
+    
+    def setup(self):
+        self.path_base = p = os.path.abspath(os.path.dirname(__file__)+"/..")
+        self.example_path = self.path_base+'/examples/'
+        self.scan_file = os.path.join(self.example_path, 'iview_normal.txt')
+        self.stim_file = os.path.join(self.example_path, 'pres_tiny.txt')
+
+    def test_runner_builds_timeline(self):
+        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
+        gsr = gaze_statistics.GazeStatsRunner(args)
+        assert gsr.timeline is not None, "Timeline shouldn't be None"
+        eq_(len(gsr.timeline), 2)
+    
+    def test_runner_timeline_has_scanpaths(self):
+        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
+        gsr = gaze_statistics.GazeStatsRunner(args)
+        assert all(pres.scanpath is not None for pres in gsr.timeline), \
+            "All presentations should have gaze data"
+        
+
 
 class TestGazeStatisticsAnalyzer(object):
     def __init__(self):

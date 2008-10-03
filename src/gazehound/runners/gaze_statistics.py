@@ -7,7 +7,8 @@
 
 from __future__ import with_statement
 from optparse import OptionParser
-from .. import readers
+from .. import readers, timeline, viewing
+from ..writers import delimited
 import sys
 
 def main(argv = None):
@@ -23,12 +24,23 @@ class GazeStatisticsOptionParser(object):
     Parses the command line options for the analyzer
     """
     
-    def __init__(self, argv):
+    def __init__(self, argv, err = sys.stderr):
+        old_err = err
+        sys.stderr = err
         super(GazeStatisticsOptionParser, self).__init__()
         self.argv = argv
         parser = OptionParser()
+        parser.add_option(
+            "--stimuli", dest = "stim_file", 
+            help = "Read stimulus timings from FILE",
+            metavar = "FILE"
+        )
+        
         self.options, self.args = parser.parse_args(argv[1:])
+        if len(self.args) == 0:
+            parser.error("No scanpath file specified")
         self.gaze_file = self.args[0]
+        sys.stderr = err
         
 
 class GazeStatsRunner(object):
@@ -44,21 +56,33 @@ class GazeStatsRunner(object):
             self.file_data = ir
             self.scanpath = ir.scanpath()
 
+        self.timeline = None
+        
+        if hasattr(op.options, 'stim_file'):
+            self.timeline = self.__build_timeline(op.options.stim_file)
+            
         # And build the analyzer
         self.analyzer = GazeStatisticsAnalyzer(
             scanpath = self.scanpath
         )
     
     def print_analysis(self):
-        general_analysis = self.analyzer.general_stats()
-        fields = [
-            'presented', 'area', 'start_ms', 'end_ms', 'total_points',
-            'points_in', 'points_out', 'valid_strict', 'valid_lax'
-        ]
+        gsw = delimited.GazeStatsWriter()
+        gsw.write_header()
+        gsw.write([self.analyzer.general_stats()])
         
-        print("\t".join(fields))
-        getter = lambda field: str(getattr(general_analysis, field))
-        print("\t".join(map(getter, fields)))
+    
+    def __build_timeline(self, filename):
+        """Build the timeline from a file."""
+        timeline = None
+        with open(filename) as f:
+            lines = [l.strip() for l in f.readlines()]
+            tr = readers.TimelineReader(lines)
+            ttl = tr.timeline()
+            timeline = viewing.Combiner(
+                timeline = ttl, scanpath = self.scanpath
+            ).viewings()
+        return timeline
         
 
 class GazeStatisticsAnalyzer(object):
