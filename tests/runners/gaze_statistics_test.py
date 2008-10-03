@@ -72,7 +72,7 @@ class TestGazeStatisticsRunner(object):
         gsr = gaze_statistics.GazeStatsRunner(args)
         assert all(pres.scanpath is not None for pres in gsr.timeline), \
             "All presentations should have gaze data"
-        
+        assert all(len(pres.scanpath) > 0 for pres in gsr.timeline)
 
 
 class TestGazeStatisticsAnalyzer(object):
@@ -82,8 +82,10 @@ class TestGazeStatisticsAnalyzer(object):
     
     def setup(self):
         self.scanpath = mock_objects.smi_scanpath_normal()
+        self.timeline = mock_objects.tiny_viewings()
         self.gsa = gaze_statistics.GazeStatisticsAnalyzer(
-            scanpath = self.scanpath
+            scanpath = self.scanpath,
+            timeline = self.timeline
         )
         
     def test_gaze_stats_checker_returns_general_stats(self):

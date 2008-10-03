@@ -58,18 +58,21 @@ class GazeStatsRunner(object):
 
         self.timeline = None
         
-        if hasattr(op.options, 'stim_file'):
+        if op.options.stim_file is not None:
             self.timeline = self.__build_timeline(op.options.stim_file)
             
         # And build the analyzer
         self.analyzer = GazeStatisticsAnalyzer(
-            scanpath = self.scanpath
+            scanpath = self.scanpath,
+            timeline = self.timeline
         )
     
     def print_analysis(self):
         gsw = delimited.GazeStatsWriter()
         gsw.write_header()
         gsw.write([self.analyzer.general_stats()])
+        if self.timeline is not None:
+            gsw.write(self.analyzer.timeline_stats())
         
     
     def __build_timeline(self, filename):
@@ -90,9 +93,11 @@ class GazeStatisticsAnalyzer(object):
     def __init__(self, 
         scanpath = None,
         strict_valid_fun = None,
-        scanpath_meta = None):
+        scanpath_meta = None,
+        timeline = []):
         super(GazeStatisticsAnalyzer, self).__init__()
         self.scanpath = scanpath
+        self.timeline = timeline
         
         # TODO: Don't hardcode these.
         MAX_X = 800
@@ -122,7 +127,7 @@ class GazeStatisticsAnalyzer(object):
     
 
     def general_stats(self):
-        """Return a dict containing basic data about the scanpath"""
+        """Return a GazeStats containing basic data about the scanpath"""
         
         data = GazeStats(
             presented = 'screen',
@@ -143,6 +148,31 @@ class GazeStatisticsAnalyzer(object):
         
         return data
         
+    def timeline_stats(self):
+        """ 
+        Return a list of GazeStats containing data about all the events
+        in the timeline.
+        """
+        
+        data = []
+        for pres in self.timeline:
+            stats = GazeStats(
+                presented = pres.name,
+                area = 'all',
+                total_points = len(pres.scanpath),
+                start_ms = pres.start,
+                end_ms = pres.end,
+                valid_strict = len(pres.scanpath.valid_points(
+                    self.strict_valid_fun
+                )),
+                valid_lax = len(pres.scanpath.valid_points(
+                    self.lax_valid_fun
+                ))
+            )
+            stats.points_in = stats.valid_strict
+            stats.points_out = stats.total_points - stats.valid_strict
+            data.append(stats)
+        return data
 
 class GazeStats(object):
     """A data structure containing stats about a scanpath"""

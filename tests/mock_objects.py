@@ -9,7 +9,7 @@
 # our tests
 
 from __future__ import with_statement
-from gazehound import gazepoint, presentation, timeline, readers
+from gazehound import gazepoint, presentation, timeline, readers, viewing
 from gazehound.runners import gaze_statistics
 from os import path
 
@@ -33,6 +33,20 @@ def smi_scanpath_normal():
         lines = f.readlines()
     ir = readers.IViewReader(lines)
     return ir.scanpath()
+
+def tiny_timeline():
+    lines = []
+    with open(EX_PATH+"/pres_tiny.txt") as f:
+        lines = [line.strip() for line in f.readlines()]
+    tr = readers.TimelineReader(lines)
+    return tr.timeline()
+    
+def tiny_viewings():
+    scanpath = smi_scanpath_normal()
+    timeline = tiny_timeline()
+    return viewing.Combiner(
+        scanpath = scanpath, timeline = timeline
+    ).viewings()
 
 def smi_scanpath_spreadout():
     ivf = gazepoint.IViewPointFactory()

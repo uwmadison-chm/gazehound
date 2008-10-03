@@ -40,10 +40,10 @@ class GazeStatsWriter(DelimitedWriter):
         ('Points out', lambda s: s.points_out),
         ('Valid strict', lambda s: s.valid_strict),
         ('Valid lax', lambda s: s.valid_lax),
-        ('%% in', lambda s: '%.3f' % (float(s.points_in)/s.total_points)),
-        ('%% valid strict', 
+        ('% in', lambda s: '%.3f' % (float(s.points_in)/s.total_points)),
+        ('% valid strict', 
             lambda s: '%.3f' % (float(s.valid_strict)/s.total_points)),
-        ('%% valid lax', 
+        ('% valid lax', 
             lambda s: '%.3f' % (float(s.valid_lax)/s.total_points))
     ]
     
