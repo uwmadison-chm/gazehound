@@ -7,6 +7,8 @@
 import csv
 import re
 from gazepoint import *
+import timeline
+import presentation
 
 class DelimitedReader(object):
     
@@ -150,4 +152,19 @@ class IViewReader(DelimitedReader):
         cleaned_val = converter(raw_val)
         return (cleaned_key, cleaned_val)
     
-    
+
+class TimelineReader(object):
+    """ 
+    Reads files of the format: stim_name \t onset \t offset and creates
+    timelines from them.
+    """
+    def __init__(self, stim_lines = None):
+        super(TimelineReader, self).__init__()
+        self.stim_lines = stim_lines
+        
+    def timeline(self):
+        dr = presentation.DelimitedReader(
+            lines = self.stim_lines, lines_to_skip = 1
+        )
+        presentations = dr.make_presentations()
+        return timeline.Timeline(presentations = presentations)
