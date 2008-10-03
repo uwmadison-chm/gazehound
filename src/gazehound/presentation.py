@@ -122,7 +122,6 @@ class DelimitedReader(object):
         return pres_list
         
     def lines_after_skip(self):
-        """"""
         return self.lines[self.lines_to_skip:]
             
     
