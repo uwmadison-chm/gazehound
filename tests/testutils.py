@@ -30,3 +30,8 @@ def includes_(l, elem, msg = None):
     """ Shorthand for 'assert elem in l'
     """
     assert elem in l, msg or "%r does not contain %r" % (l, elem)
+
+def not_includes_(l, elem, msg = None):
+    """ Shorthand for 'assert elem not in l'
+    """
+    assert not elem in l, msg or "%r contains %r" % (l, elem)
