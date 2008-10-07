@@ -7,8 +7,10 @@
 
 class Shape(object):
     """docstring for Shape"""
-    def __init__(self):
+    def __init__(self, name = '', description = ''):
         super(Shape, self).__init__()
+        self.name = name
+        self.description = description
         
     def __contains__(self, point):
         raise NotImplementedError(
@@ -18,8 +20,11 @@ class Shape(object):
 
 
 class Rectangle(Shape):
-    def __init__(self, x1 = None, y1 = None, x2 = None, y2 = None):
-        super(Rectangle, self).__init__()
+    def __init__(self, x1 = None, y1 = None, x2 = None, y2 = None, 
+    name = '', description = ''):
+        super(Rectangle, self).__init__(
+            name = name, description = description
+        )
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -39,8 +44,11 @@ class Rectangle(Shape):
 
 class Ellipse(Shape):
     """An ellipse-shaped area of interest"""
-    def __init__(self, cx = None, cy = None, semix = None, semiy = None):
-        super(Ellipse, self).__init__()
+    def __init__(self, cx = None, cy = None, semix = None, semiy = None, 
+    name='', description = ''):
+        super(Ellipse, self).__init__(
+            name = name, description = description
+        )
         self.cx = cx
         self.cy = cy
         self.semix = semix
