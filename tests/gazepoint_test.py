@@ -68,7 +68,7 @@ class TestPointFactory(object):
         )
         
         for point in points:
-            assert type(point) is self.generic_factory.type_to_produce
+            assert isinstance(point, self.generic_factory.type_to_produce)
     
     def test_factory_produces_proper_data_mappings(self):
         points = self.generic_factory.from_component_list(
@@ -80,7 +80,7 @@ class TestPointFactory(object):
                 attr_name = map[0]
                 expected_type = map[1]
                 attr = getattr(point, attr_name)
-                assert type(attr) is expected_type
+                assert isinstance(attr, expected_type)
 
     def test_factory_skips_none_attributes(self):
         points = self.generic_factory.from_component_list(
@@ -105,7 +105,7 @@ class TestIViewPointFactory(object):
         
     def test_get_components_returns_points(self):
         points = self.iview_fact.from_component_list(self.point_ary)
-        assert all(type(p) == gazepoint.Point for p in points)
+        assert all(isinstance(p, gazepoint.Point) for p in points)
         
 
 class TestScanPath(object):
@@ -144,7 +144,7 @@ class TestScanPath(object):
     def test_scanpath_iterates(self):
         scanpath = gazepoint.ScanPath(points = self.points)
         for p in scanpath:
-            assert type(p) == self.generic_factory.type_to_produce
+            assert isinstance(p, self.generic_factory.type_to_produce)
     
     def test_scanpath_is_iterable(self):
         scanpath = gazepoint.ScanPath(points = self.points)

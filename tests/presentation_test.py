@@ -84,8 +84,7 @@ class TestPresentationFactory(object):
             self.name_on_off_ary,
             self.name_on_off_map
         )
-        for i in range(0, len(stims)):
-            assert type(stims[i].start) is int
+        assert all(isinstance(stim.start, int) for stim in stims)
     
     def test_components_maps_name_out_of_order(self):
         stims = self.generic_factory.from_component_list(
