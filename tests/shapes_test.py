@@ -43,3 +43,22 @@ class TestRectangle(object):
     
     def test_rectangle_knows_points_in(self):
         includes_(self.origin_rect, (50,50))
+        
+
+class TestRectangle(object):
+    def __init__(self):
+        super(TestRectangle, self).__init__()
+        
+    def setup(self):
+        self.ellipse = shapes.Ellipse(50,50,20,40)
+        
+    def test_ellipse_knows_points_out(self):
+        not_includes_(self.ellipse, (0,0))
+        
+    def test_ellipse_knows_points_in(self):
+        includes_(self.ellipse, (50,50))
+        includes_(self.ellipse, (70,50))
+        includes_(self.ellipse, (30,50))
+        includes_(self.ellipse, (50,90))
+        includes_(self.ellipse, (50,10))
+        
