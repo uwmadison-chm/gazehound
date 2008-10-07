@@ -26,6 +26,10 @@ class Rectangle(Shape):
         self.y2 = y2
         
     def __contains__(self, point):
+        """
+        Return true if and only if the (x,y) tuple in point lies inside
+        this rectangle or on its border.
+        """
         x,y = point
         return (
             (x >= self.x1 and x <= self.x2) and
@@ -44,7 +48,7 @@ class Ellipse(Shape):
         
     def __contains__(self, point):
         """ 
-        Return true if and only if the (x,y) tuple in point would lie inside 
+        Return true if and only if the (x,y) tuple in point lies inside 
         this ellipse or on the border.
         """
         x,y = point
