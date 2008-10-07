@@ -77,7 +77,8 @@ class ShapeParser(object):
     def __init__(self):
         super(ShapeParser, self).__init__()
         self.OBT_MAP = {
-            '1': self.__parse_rectangle
+            '1': self.__parse_rectangle,
+            '2': self.__parse_ellipse
         }
         
         
@@ -113,6 +114,13 @@ class ShapeParser(object):
         y2, description = rest.split(" ", 1)
         x1, y1, x2, y2 = [ int(e) for e in [x1, y1, x2, y2]]
         return Rectangle(x1, y1, x2, y2, description = description)
+        
+    def __parse_ellipse(self, str):
+        """ str should not contain the leading 2"""
+        x, y, semi_x, rest = str.split(", ", 3)
+        semi_y, description = rest.split(" ", 1)
+        x, y, semi_x, semi_y = [ int(e) for e in [x, y, semi_x, semi_y]]
+        return Ellipse(x, y, semi_x, semi_y, description = description)
     
     def __parse_trash(self, str):
         return None

@@ -88,3 +88,12 @@ class TestShapeParser(object):
         eq_(s.y1, 1)
         eq_(s.x2, 60)
         eq_(s.y2, 24)
+    
+    def test_parser_makes_ellipses_from_obt(self):
+        s = self.parser.parse_obt_str(self.ell_str)
+        assert isinstance(s, shapes.Ellipse)
+        eq_(s.cx, 0)
+        eq_(s.cy, 1)
+        eq_(s.semix, 21)
+        eq_(s.semiy, 599)
+        
