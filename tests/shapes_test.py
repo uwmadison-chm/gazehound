@@ -23,7 +23,7 @@ class TestShapes(object):
         s = shapes.Shape()
         p = (0,0)
         assert p not in s
-        
+                
 
 class TestRectangle(object):
     def __init__(self):
@@ -62,3 +62,29 @@ class TestRectangle(object):
         includes_(self.ellipse, (50,90))
         includes_(self.ellipse, (50,10))
         
+
+class TestShapeParser(object):
+    def __init__(self):
+        super(TestShapeParser, self).__init__()
+    
+    def setup(self):
+        self.rect_str = '1, 0, 1, 60, 24  Rect, topleft, long x short y'
+        self.ell_str = '2, 0, 1, 21, 599  Ellipse topleft short x long y'
+        self.parser = shapes.ShapeParser()
+    
+    def test_parser_makes_none_from_empty_str(self):
+        s = self.parser.parse_obt_str("")
+        assert s is None
+    
+    def tesT_parser_makes_none_from_invalid_str(self):
+        s = self.parser.parse_obt_str("0, Foo")
+        assert s is None
+    
+    def test_parser_makes_rectangles_from_obt(self):
+        pass
+        s = self.parser.parse_obt_str(self.rect_str)
+        assert isinstance(s, shapes.Rectangle)
+        eq_(s.x1, 0)
+        eq_(s.y1, 1)
+        eq_(s.x2, 60)
+        eq_(s.y2, 24)
