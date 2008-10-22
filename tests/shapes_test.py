@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from __future__ import with_statement
+from os import path
 from nose.tools import *
 from testutils import includes_, not_includes_
 from gazehound import shapes
@@ -22,7 +23,7 @@ class TestShapes(object):
     def test_shape_does_not_have_contains(self):
         s = shapes.Shape()
         p = (0,0)
-        assert p not in s
+        assert p not in s # Should raise NotImplentedError
                 
 
 class TestRectangle(object):
@@ -97,3 +98,35 @@ class TestShapeParser(object):
         eq_(s.semix, 21)
         eq_(s.semiy, 599)
         
+class TestShapeReader(object):
+    def __init__(self):
+        super(TestShapeReader, self).__init__()
+    
+    def setup(self):
+        p = path.abspath(path.dirname(__file__))
+        self.obt_file = path.join(p, 'examples/OBJECTS.OBT')
+        self.reader = shapes.ShapeReader()
+        # Object01=2, 0, 1, 21, 599  Ellipse topleft short x long y
+        # Object02=1, 0, 0, 60, 24  Rect, topleft, long x short y
+        self.shape_cfg = [
+            ('Object01', '1, 0, 1, 60, 24  Rect, topleft, long x short y'),
+            ('Object02', '2, 0, 1, 21, 599  Ellipse topleft short x long y')
+        ]
+    
+    def test_reader_makes_shapes_from_shape_data(self):
+        slist = self.reader.shapes_from_config_section(self.shape_cfg)
+        eq_(len(slist), len(self.shape_cfg))
+        assert all(isinstance(s, shapes.Shape) for s in slist)
+        
+    
+    def test_reader_makes_shapes_from_obtfile(self):
+        slist = self.reader.shapes_from_obt_file(self.obt_file)
+
+        assert all(isinstance(s, shapes.Shape) for s in slist)
+        # I know it contains a rect and an ellipse
+        assert any(isinstance(s, shapes.Rectangle) for s in slist)
+        assert any(isinstance(s, shapes.Ellipse) for s in slist)        
+        
+    def test_reader_sets_nanes(self):
+        slist = self.reader.shapes_from_obt_file(self.obt_file)
+        eq_(slist[0].name, 'object01')

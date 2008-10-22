@@ -5,6 +5,8 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
+from ConfigParser import SafeConfigParser
+
 class Shape(object):
     """docstring for Shape"""
     def __init__(self, name = '', description = ''):
@@ -82,7 +84,7 @@ class ShapeParser(object):
         }
         
         
-    def parse_obt_str(self, str):
+    def parse_obt_str(self, str, name = None):
         """
         Parse an object string into an Ellipse or a Rectangle, or None if
         neither option is reasonaoble.
@@ -103,21 +105,46 @@ class ShapeParser(object):
         try:
             shape_type, params = str.split(", ", 1)
             subparser = self.OBT_MAP[shape_type]
-            return subparser(params)
+            return subparser(params, name)
         except:
             return None
         
         
-    def __parse_rectangle(self, str):
+    def __parse_rectangle(self, str, name):
         """ str should not contain the leading 1"""
         x1, y1, x2, rest = str.split(", ", 3)
         y2, description = rest.split(" ", 1)
         x1, y1, x2, y2 = [ int(e) for e in [x1, y1, x2, y2]]
-        return Rectangle(x1, y1, x2, y2, description = description)
+        return Rectangle(x1, y1, x2, y2, 
+                            description = description, name = name)
         
-    def __parse_ellipse(self, str):
+    def __parse_ellipse(self, str, name):
         """ str should not contain the leading 2"""
         x, y, semi_x, rest = str.split(", ", 3)
         semi_y, description = rest.split(" ", 1)
         x, y, semi_x, semi_y = [ int(e) for e in [x, y, semi_x, semi_y]]
-        return Ellipse(x, y, semi_x, semi_y, description = description)
+        return Ellipse(x, y, semi_x, semi_y, 
+                            description = description, name = name)
+
+class ShapeReader(object):
+    """
+    Reads shape (.OBT) files and turns them into a collection of
+    Shape objects.
+    """
+
+        
+    def __init__(self):
+        super(ShapeReader, self).__init__()
+
+    def shapes_from_config_section(self, shape_tuples):
+        parser = ShapeParser()
+        return [
+            parser.parse_obt_str(st[1], name = st[0]) for st in shape_tuples
+        ]
+        
+    def shapes_from_obt_file(self, filename):
+        cp = SafeConfigParser()
+        cp.read(filename)
+        tuples = [tup for tup in cp.items('Objects') if tup[1] != '0']
+        tuples.sort()
+        return self.shapes_from_config_section(tuples)
