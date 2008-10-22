@@ -121,6 +121,3 @@ class ShapeParser(object):
         semi_y, description = rest.split(" ", 1)
         x, y, semi_x, semi_y = [ int(e) for e in [x, y, semi_x, semi_y]]
         return Ellipse(x, y, semi_x, semi_y, description = description)
-    
-    def __parse_trash(self, str):
-        return None
