@@ -5,6 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
+import os.path
 from ConfigParser import SafeConfigParser
 
 class Shape(object):
@@ -132,19 +133,58 @@ class ShapeReader(object):
     Shape objects.
     """
 
-        
-    def __init__(self):
+    def __init__(self, path = '.'):
         super(ShapeReader, self).__init__()
+        self.path = path
 
     def shapes_from_config_section(self, shape_tuples):
         parser = ShapeParser()
         return [
             parser.parse_obt_str(st[1], name = st[0]) for st in shape_tuples
         ]
-        
+    
     def shapes_from_obt_file(self, filename):
         cp = SafeConfigParser()
         cp.read(filename)
         tuples = [tup for tup in cp.items('Objects') if tup[1] != '0']
         tuples.sort()
         return self.shapes_from_config_section(tuples)
+
+    def find_file_and_create_shapes(self, filename_part):
+        sf = ShapeFilename(filename_part, self.path)
+        fname = sf.first_valid()
+        if fname is None:
+            return None
+        
+        return self.shapes_from_obt_file(os.path.join(self.path, fname))
+
+class ShapeFilename(object):
+    """
+    Represents the various permutations to try for a shape's filename, and
+    computes the first valid possible match.
+    """
+    
+    def __init__(self, name, path = '.'):
+        super(ShapeFilename, self).__init__()
+        self.name = name
+        self.path = path
+        
+    def permutations(self):
+        perms = []
+        for suffix in ['', '.obt', '.OBT']:
+            for prefix in [self.name, self.name.upper()]:
+                perms.append(prefix+suffix)
+        
+        return perms
+        
+    def first_valid(self):
+        """
+        Return the first thing from self.path/[self.permutations()] that's
+        a readable file, or None if there isn't one.
+        """
+        for filename in self.permutations():
+            tryfile = os.path.join(self.path, filename)
+            if os.path.isfile(tryfile):
+                return filename
+        
+        return None

@@ -104,6 +104,7 @@ class TestShapeReader(object):
     
     def setup(self):
         p = path.abspath(path.dirname(__file__))
+        self.path = p
         self.obt_file = path.join(p, 'examples/OBJECTS.OBT')
         self.reader = shapes.ShapeReader()
         # Object01=2, 0, 1, 21, 599  Ellipse topleft short x long y
@@ -130,3 +131,35 @@ class TestShapeReader(object):
     def test_reader_sets_nanes(self):
         slist = self.reader.shapes_from_obt_file(self.obt_file)
         eq_(slist[0].name, 'object01')
+    
+    def test_reader_does_convienence_reading(self):
+        self.reader.path = self.path+"/examples"
+        slist = self.reader.find_file_and_create_shapes('objects')
+        eq_(len(slist), len(self.shape_cfg))
+        
+
+class TestShapeFilename(object):
+    def __init__(self):
+        super(TestShapeFilename, self).__init__()
+    
+    def setup(self):
+        p = path.abspath(path.dirname(__file__)+"/examples")
+        self.a = shapes.ShapeFilename('a')
+        self.objects = shapes.ShapeFilename('objects', path = p)
+    
+    def test_perms_contain_self(self):
+        includes_(self.a.permutations(), 'a')
+        
+    def test_perms_tries_upcasing(self):
+        includes_(self.a.permutations(), 'A')
+    
+    def test_perms_adds_obt(self):
+        includes_(self.a.permutations(), 'a.obt')
+    
+    def test_perms_caps_with_obt(self):
+        includes_(self.a.permutations(), 'A.OBT')
+    
+    def test_finds_first_valid(self):
+        valid = self.objects.first_valid()
+        should_valid = (self.objects.name+('.OBT')).upper()
+        eq_(should_valid, valid.upper())
