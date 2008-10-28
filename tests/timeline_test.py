@@ -26,6 +26,10 @@ class TestTimeline(object):
         list = t.filled_list()
         assert len(list) == 12
         
+    def test_timeline_is_subescriptable(self):
+        t = timeline.Timeline(presentations = self.presentations)
+        assert t[0] is not None
+        
     def test_timeline_full_adds_blank_if_min_length_requires(self):
         t = timeline.Timeline(
             presentations = self.presentations,

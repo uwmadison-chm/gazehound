@@ -20,6 +20,10 @@ class Timeline(object):
     
     def __iter__(self):
         return self.presentations.__iter__()
+        
+
+    def __getitem__(self, i):
+        return self.presentations[i]
     
     def filled_list(self):
         """Return a list of presentations with a presentation in every
