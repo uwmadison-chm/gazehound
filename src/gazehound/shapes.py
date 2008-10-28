@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 import os.path
+import copy
 from ConfigParser import SafeConfigParser
 
 class Shape(object):
@@ -188,3 +189,31 @@ class ShapeFilename(object):
                 return filename
         
         return None
+        
+
+class TimelineDecorator(object):
+    """
+    Adds shape data to a timeline.
+    """
+    
+    def __init__(self, reader = ShapeReader()):
+        super(TimelineDecorator, self).__init__()
+        self.shape_reader = reader
+    
+    def add_shapes_to_timeline(self, timeline, shape_hash):
+        my_tl = copy.deepcopy(timeline)
+        for pres in my_tl:
+            pres.shapes = shape_hash.get(pres.name)
+        return my_tl
+    
+    def find_shape_files_and_add_to_timeline(self, timeline):
+        my_tl = copy.deepcopy(timeline)
+        for pres in my_tl:
+            pass
+        return my_tl
+        
+    def find_file_and_add_shapes_to_presentation(self, presentation):
+        presentation.shapes = self.shape_reader.find_file_and_create_shapes(
+            presentation.name
+        )
+        return presentation

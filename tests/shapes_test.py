@@ -163,3 +163,41 @@ class TestShapeFilename(object):
         valid = self.objects.first_valid()
         should_valid = (self.objects.name+('.OBT')).upper()
         eq_(should_valid, valid.upper())
+        
+class TestTimelineDecorator(object):
+    def __init__(self):
+        super(TestTimelineDecorator, self).__init__()
+        
+    def setup(self):
+        self.epath = path.abspath(path.dirname(__file__)+"/examples")
+        self.reader = shapes.ShapeReader(path = self.epath)
+        self.shape_hash = {
+            'objects': mock_objects.shape_tuples()
+        }
+        self.timeline = mock_objects.simple_timeline()
+        
+    def test_decorator_adds_shapes_to_timeline(self):
+        dec = shapes.TimelineDecorator()
+        tls = dec.add_shapes_to_timeline(self.timeline, self.shape_hash)
+        assert(tls[0].shapes is None)
+        assert(tls[1].shapes is not None)
+    
+    def test_decorator_does_not_modify_original_timeline(self):
+        dec = shapes.TimelineDecorator()
+        tls = dec.add_shapes_to_timeline(self.timeline, self.shape_hash)
+        assert(not hasattr(self.timeline[0], 'shapes'))
+    
+    def test_decorator_finds_shapes_in_path(self):
+        dec = shapes.TimelineDecorator(self.reader)
+        tls = dec.find_shape_files_and_add_to_timeline(self.timeline)
+        #assert(tls[0].shapes is None)
+    
+    def test_find_shape_file_adds_none_for_failed_match(self):
+        dec = shapes.TimelineDecorator(self.reader)
+        p = dec.find_file_and_add_shapes_to_presentation(self.timeline[0])
+        assert p.shapes is None
+        
+    def test_find_shape_file_adds_shape_for_good_match(self):
+        dec = shapes.TimelineDecorator(self.reader)
+        p = dec.find_file_and_add_shapes_to_presentation(self.timeline[1])
+        assert p.shapes is not None

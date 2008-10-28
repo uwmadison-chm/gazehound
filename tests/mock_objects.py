@@ -9,7 +9,7 @@
 # our tests
 
 from __future__ import with_statement
-from gazehound import gazepoint, presentation, timeline, readers, viewing
+from gazehound import gazepoint, presentation, timeline, readers, viewing, shapes
 from gazehound.runners import gaze_statistics
 from os import path
 
@@ -56,7 +56,7 @@ def smi_scanpath_spreadout():
 def simple_timeline():
     data = [
         ['120', '1350', 'stim1'],
-        ['1490', '1900', 'stim2']
+        ['1490', '1900', 'objects']
     ]
     
     pres_fact = presentation.PresentationFactory()
@@ -74,3 +74,10 @@ def general_gaze_stats():
             valid_strict = 296, valid_lax = 316
         )
     ]
+    
+def shape_tuples():
+    return [
+        ('object1', shapes.Rectangle(0, 1, 60, 24)),
+        ('object2', shapes.Ellipse(0, 1, 21, 599))
+    ]
+    
