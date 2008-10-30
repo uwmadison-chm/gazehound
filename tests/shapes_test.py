@@ -190,7 +190,8 @@ class TestTimelineDecorator(object):
     def test_decorator_finds_shapes_in_path(self):
         dec = shapes.TimelineDecorator(self.reader)
         tls = dec.find_shape_files_and_add_to_timeline(self.timeline)
-        #assert(tls[0].shapes is None)
+        assert(tls[0].shapes is None)
+        assert(tls[1].shapes is not None)
     
     def test_find_shape_file_adds_none_for_failed_match(self):
         dec = shapes.TimelineDecorator(self.reader)

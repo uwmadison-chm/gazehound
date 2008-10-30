@@ -209,7 +209,8 @@ class TimelineDecorator(object):
     def find_shape_files_and_add_to_timeline(self, timeline):
         my_tl = copy.deepcopy(timeline)
         for pres in my_tl:
-            pass
+            self.find_file_and_add_shapes_to_presentation(pres)
+        my_tl.has_shapes = True
         return my_tl
         
     def find_file_and_add_shapes_to_presentation(self, presentation):
