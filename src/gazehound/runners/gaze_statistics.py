@@ -6,10 +6,11 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from __future__ import with_statement
-from optparse import OptionParser
-from .. import readers, timeline, viewing
-from ..writers import delimited
 import sys
+import os.path
+from optparse import OptionParser
+from .. import readers, timeline, viewing, shapes
+from ..writers import delimited
 
 def main(argv = None):
     if argv is None:
@@ -36,9 +37,23 @@ class GazeStatisticsOptionParser(object):
             metavar = "FILE"
         )
         
+        parser.add_option(
+            "--obt_dir", dest = "object_dir",
+            help = "Find .OBT files in PATH. Requires --stimuli",
+            metavar = "PATH"
+        )
+        
         self.options, self.args = parser.parse_args(argv[1:])
+            
         if len(self.args) == 0:
             parser.error("No scanpath file specified")
+
+        if self.options.object_dir is not None:
+            if not os.path.isdir(self.options.object_dir):
+                parser.error(self.options.object_dir+" is not a directory")
+            if self.options.stim_file is None:
+                parser.error("You must use --stimuli with --obt_dir")  
+                
         self.gaze_file = self.args[0]
         sys.stderr = err
         
@@ -60,6 +75,12 @@ class GazeStatsRunner(object):
         
         if op.options.stim_file is not None:
             self.timeline = self.__build_timeline(op.options.stim_file)
+            if op.options.object_dir is not None:
+                r = shapes.ShapeReader(path = op.options.object_dir)
+                dec = shapes.TimelineDecorator(r)
+                self.timeline = dec.find_shape_files_and_add_to_timeline(
+                    self.timeline
+                )
             
         # And build the analyzer
         self.analyzer = GazeStatisticsAnalyzer(
@@ -124,7 +145,11 @@ class GazeStatisticsAnalyzer(object):
             
         self.strict_valid_fun = svf
         self.lax_valid_fun = lvf
-    
+        
+        def in_fun(shape, point):
+            return (point.x, point.y) in shape
+        
+        self.in_fun = in_fun
 
     def general_stats(self):
         """Return a GazeStats containing basic data about the scanpath"""
@@ -155,6 +180,7 @@ class GazeStatisticsAnalyzer(object):
         """
         
         data = []
+        doshapes = hasattr(self.timeline, 'has_shapes')
         for pres in self.timeline:
             stats = GazeStats(
                 presented = pres.name,
@@ -172,7 +198,42 @@ class GazeStatisticsAnalyzer(object):
             stats.points_in = stats.valid_strict
             stats.points_out = stats.total_points - stats.valid_strict
             data.append(stats)
+            if doshapes:
+                for ss in self.shape_stats(pres):
+                    data.append(ss)
+                    pass
         return data
+    
+    def shape_stats(self, pres):
+        stats_list = []
+        if pres.shapes is None:
+            return[GazeStats(
+                presented = pres.name, 
+                area = "Can't read shape file")
+            ]
+        for s in pres.shapes:
+            stats = GazeStats(
+                presented = pres.name,
+                area = s.name,
+                total_points = len(pres.scanpath),
+                start_ms = pres.start,
+                end_ms = pres.end,
+                valid_strict = len(pres.scanpath.valid_points(
+                    self.strict_valid_fun
+                )),
+                valid_lax = len(pres.scanpath.valid_points(
+                    self.lax_valid_fun
+                ))
+            )
+            
+            def f(point):
+                return self.in_fun(s, point)
+                
+            stats.points_in = len(pres.scanpath.valid_points(f))
+            stats.points_out = stats.total_points - stats.points_in
+            stats_list.append(stats)
+            
+        return stats_list
 
 class GazeStats(object):
     """A data structure containing stats about a scanpath"""

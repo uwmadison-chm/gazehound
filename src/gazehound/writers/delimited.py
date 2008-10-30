@@ -30,6 +30,7 @@ class DelimitedWriter(object):
     
     
 class GazeStatsWriter(DelimitedWriter):
+        
     mapper = [
         ('Presented', lambda s: s.presented),
         ('Area', lambda s: s.area),
@@ -40,11 +41,11 @@ class GazeStatsWriter(DelimitedWriter):
         ('Points out', lambda s: s.points_out),
         ('Valid strict', lambda s: s.valid_strict),
         ('Valid lax', lambda s: s.valid_lax),
-        ('% in', lambda s: '%.3f' % (float(s.points_in)/s.total_points)),
+        ('% in', lambda s: '%.1f' % (100*dfnz(s.points_in, s.total_points))),
         ('% valid strict', 
-            lambda s: '%.3f' % (float(s.valid_strict)/s.total_points)),
+            lambda s: '%.1f' % (100*dfnz(s.valid_strict, s.total_points))),
         ('% valid lax', 
-            lambda s: '%.3f' % (float(s.valid_lax)/s.total_points))
+            lambda s: '%.1f' % (100*dfnz(s.valid_lax,s.total_points)))
     ]
     
     """Writes gaze stats items into a delimited file"""
@@ -52,4 +53,8 @@ class GazeStatsWriter(DelimitedWriter):
         super(GazeStatsWriter, self).__init__(
             GazeStatsWriter.mapper, out, delimiter
         )
-        
+
+def dfnz(num1, num2):
+    if num2 == 0:
+        return 0
+    return float(num1)/num2

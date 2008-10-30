@@ -44,13 +44,37 @@ class TestGazeStatsOptionParser(object):
             err = self.err_dump
         )
     
+    @raises(SystemExit)
+    def test_analyzer_fails_with_bogus_option(self):
+        args = [__file__, '--bogus', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args, 
+            err = self.err_dump
+        )
+    
     def test_analyzer_parses_stimlui(self):
         args = [__file__, '--stimuli=foo', 'bar']
         analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
         eq_(analyzer.options.stim_file, 'foo')
+    
+    def test_analyzer_parses_obt_dir(self):
+        args = [__file__, '--stimuli=foo', '--obt_dir=.', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
+        assert analyzer.options.object_dir is not None
+    
+    @raises(SystemExit)
+    def test_analyzer_errors_with_bogus_obt_dir(self):
+        args = [__file__, '--stimuli=foo', '--obt_dir=bogus', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args,
+            err = self.err_dump
+        )
+    
+    @raises(SystemExit)
+    def test_analyzer_errors_when_obt_dir_specd_without_stimuli(self):
+        args = [__file__, '--obt_dir=.', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args,
+            err = self.err_dump
+        )
         
-
-
 class TestGazeStatisticsRunner(object):
     def __init__(self):
         super(TestGazeStatisticsRunner, self).__init__()
