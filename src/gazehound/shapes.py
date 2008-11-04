@@ -7,6 +7,7 @@
 
 import os.path
 import copy
+import array
 from ConfigParser import SafeConfigParser
 
 class Shape(object):
@@ -43,6 +44,23 @@ class Rectangle(Shape):
             (x >= self.x1 and x <= self.x2) and
             (y >= self.y1 and y <= self.y2)
         )
+    
+    def to_matrix(self, type_str = 'f', fill_value = 1.0, bkg_value = 0.0):
+        """
+        Return a list of array.array objects, sized with this rectangle's
+        width and height, composed of elements of type_str and filled
+        with fill_value. 
+        
+        bkg_value is ignored here, but included for API compatibility with 
+        other Shape#to_matrix methods.
+        """
+        w = abs(self.x2 - self.x1)
+        h = abs(self.y2 - self.y1)
+        matrix = [
+            array.array(type_str, [fill_value]*h)
+            for c in range(0, w)
+        ]
+        return matrix
         
     def __repr__(self):
         return "Rectangle"+str((self.x1, self.y1, self.x2, self.y2))
@@ -71,7 +89,30 @@ class Ellipse(Shape):
         return (
         ((x - self.cx)**2/float(self.semix**2) +
         (y - self.cy)**2/float(self.semiy**2))
-        <= 1 ) 
+        <= 1 )
+        
+    def height(self):
+        return self.semiy*2
+    
+    def width(self):
+        return self.semix*2
+        
+    def to_matrix(self, type_str = 'f', fill_value = 1.0, bkg_value = 0.0):
+        h = self.height()
+        w = self.width()
+        matrix = [
+            array.array(type_str, [bkg_value]*h)
+            for c in range(0, w)
+        ]
+        
+        for i in range(0, w):
+            for j in range(0, h):
+                x = i+self.cx-self.semix
+                y = j+self.cy-self.semiy
+                point = (x,y)
+                if point in self:
+                    matrix[i][j] = fill_value
+        return matrix
         
     def __repr__(self):
         return "Ellipse"+str((self.cx, self.cy, self.semix, self.semiy))

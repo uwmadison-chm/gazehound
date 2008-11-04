@@ -24,31 +24,39 @@ class TestShapes(object):
         s = shapes.Shape()
         p = (0,0)
         assert p not in s # Should raise NotImplentedError
-                
 
 class TestRectangle(object):
     def __init__(self):
         super(TestRectangle, self).__init__()
         
     def setup(self):
-        self.origin_rect = shapes.Rectangle(0,0,99,99)
+        self.origin_rect = shapes.Rectangle(0,0,99,98)
         
     def test_rectangle_knows_points_out(self):
         not_includes_(self.origin_rect, (100,100))
         
     def test_rectangle_knows_points_on_edge(self):
         includes_(self.origin_rect, (0,0))
-        includes_(self.origin_rect, (0,99))
-        includes_(self.origin_rect, (99,99))
+        includes_(self.origin_rect, (0,98))
+        includes_(self.origin_rect, (99,98))
         includes_(self.origin_rect, (99, 0))
     
     def test_rectangle_knows_points_in(self):
         includes_(self.origin_rect, (50,50))
         
+    def test_to_matrix_creates_arrays_of_correct_size(self):
+        mat = self.origin_rect.to_matrix()
+        eq_(len(mat), 99)
+        eq_(len(mat[0]), 98)
+    
+    def test_to_matrix_creates_array_of_correct_type_and_value(self):
+        mat = self.origin_rect.to_matrix('i', 1)
+        eq_(mat[0][0], 1)
+        eq_(type([0][0]), type(int(1)))
 
-class TestRectangle(object):
+class TestEllipse(object):
     def __init__(self):
-        super(TestRectangle, self).__init__()
+        super(TestEllipse, self).__init__()
         
     def setup(self):
         self.ellipse = shapes.Ellipse(50,50,20,40)
@@ -62,8 +70,29 @@ class TestRectangle(object):
         includes_(self.ellipse, (30,50))
         includes_(self.ellipse, (50,90))
         includes_(self.ellipse, (50,10))
+    
+    def test_height_and_width_work(self):
+        h = self.ellipse.height()
+        w = self.ellipse.width()
+        eq_(h, self.ellipse.semiy*2)
+        eq_(w, self.ellipse.semix*2)
         
-
+    def test_to_matrix_creates_arrays_of_correct_size(self):
+        mat = self.ellipse.to_matrix()
+        eq_(len(mat), self.ellipse.width())
+        eq_(len(mat[0]), self.ellipse.height())
+    
+    def test_to_matrix_fills_with_fill_value(self):
+        # top-right corner should be filled with fill_value
+        mat = self.ellipse.to_matrix('i', 1, 0)
+        eq_(mat[0][0], 0)
+    
+    def test_to_matrix_puts_fill_color_in_middle(self):
+        mat = self.ellipse.to_matrix('i', 1, 0)
+        h = self.ellipse.height()
+        w = self.ellipse.width()
+        eq_(mat[w/2][h/2], 1)
+        
 class TestShapeParser(object):
     def __init__(self):
         super(TestShapeParser, self).__init__()
@@ -107,8 +136,6 @@ class TestShapeReader(object):
         self.path = p
         self.obt_file = path.join(p, 'examples/OBJECTS.OBT')
         self.reader = shapes.ShapeReader()
-        # Object01=2, 0, 1, 21, 599  Ellipse topleft short x long y
-        # Object02=1, 0, 0, 60, 24  Rect, topleft, long x short y
         self.shape_cfg = [
             ('Object01', '1, 0, 1, 60, 24  Rect, topleft, long x short y'),
             ('Object02', '2, 0, 1, 21, 599  Ellipse topleft short x long y')
@@ -202,3 +229,11 @@ class TestTimelineDecorator(object):
         dec = shapes.TimelineDecorator(self.reader)
         p = dec.find_file_and_add_shapes_to_presentation(self.timeline[1])
         assert p.shapes is not None
+        
+
+def print_matrix(mat):
+    for r in range(0, len(mat[0])):
+        row = []
+        for c in range(0, len(mat)):
+            row.append(str(mat[c][r]))
+        print(''.join(row))
