@@ -39,6 +39,9 @@ class ScanPath(object):
         
     def __getslice__(self, i, j):
         return ScanPath(self.points[i:j])
+        
+    def extend(self, sp):
+        self.points.extend(sp.points)
     
     def valid_points(self, criterion):
         return ScanPath(
