@@ -61,7 +61,7 @@ class CanvasWriter(object):
                     else:
                         val = self.channels[k]
                     val = int(val*MAX)
-                    vals[j+k] = val
+                    vals[(j*len(self.channels))+k] = val
             if self.bytes_per_sample > 1:
                 # Pack and unpack the ints to get the proper ordering...
                 fmt_str = ">"+str(self.width*len(self.channels))+"H"

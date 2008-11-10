@@ -8,7 +8,7 @@
 from __future__ import with_statement
 from os import path
 from nose.tools import *
-from testutils import includes_, not_includes_
+from testutils import includes_, not_includes_, print_matrix
 from gazehound import shapes
 import mock_objects
 
@@ -231,9 +231,3 @@ class TestTimelineDecorator(object):
         assert p.shapes is not None
         
 
-def print_matrix(mat):
-    for r in range(0, len(mat[0])):
-        row = []
-        for c in range(0, len(mat)):
-            row.append(str(mat[c][r]))
-        print(''.join(row))

@@ -35,3 +35,10 @@ def not_includes_(l, elem, msg = None):
     """ Shorthand for 'assert elem not in l'
     """
     assert not elem in l, msg or "%r contains %r" % (l, elem)
+
+def print_matrix(mat):
+    for r in range(0, len(mat[0])):
+        row = []
+        for c in range(0, len(mat)):
+            row.append(str(mat[c][r])+' ')
+        print(''.join(row))

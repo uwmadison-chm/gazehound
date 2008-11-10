@@ -9,7 +9,7 @@ from __future__ import with_statement
 import StringIO
 
 from nose.tools import eq_
-from ..testutils import gt_, lt_, includes_
+from ..testutils import gt_, lt_, includes_, print_matrix
 from .. import mock_objects
 
 from gazehound import view_plotter, shapes
@@ -109,13 +109,24 @@ class TestPngWriter(object):
             width = 10, height = 8,
             channels = [0.75,1,1])
         assert pw.greyscale() == False
+    
+    def test_to_bytes_produces_uniform_matrix_from_single_values(self):
+        pw = png.CanvasWriter(
+            width = 10, height = 8,
+            channels = [1, 0, 0])
+        bytes = pw.to_bytes()
+        vals = (255, 0, 0)
+        for row in bytes:
+            for i in range(0, len(row)):
+                eq_(row[i], vals[i%3])
+        
         
     def test_write_works(self):
         out = StringIO.StringIO()
         pw = png.CanvasWriter(
-            width = 10, height = 8,
-            channels = [0.75])
-        
+            width = 10, height = 8, 
+            channels = [1, 0, 1, .5])
         eq_(out.getvalue(), '')
         pw.write(out)
         gt_(len(out.getvalue()), 0)
+        out.close()
