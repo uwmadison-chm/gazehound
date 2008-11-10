@@ -96,15 +96,3 @@ class TestCanvas(object):
         self.canvas.add_matrix(self.rmat, (11,9))
         eq_(self.canvas[9][7], 0.0)
         
-
-    def test_to_trans_bytes_makes_arrays(self):
-        self.canvas.add_matrix(self.rmat, (11,9))
-        rows = self.canvas.to_trans_bytes()
-        eq_(len(rows), self.canvas.height())
-        for r in rows:
-            eq_(type(r), array.array)
-    
-    def test_file_gets_writ(self):
-        self.canvas.add_matrix(self.rmat, (1,1))
-        self.canvas.to_trans_file('../test.png')
-        

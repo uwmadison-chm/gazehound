@@ -70,18 +70,3 @@ class Canvas(object):
             for j in range(0, ycount):
                 self[tx1+i][ty1+j] += source[sx1+i][sy1+j]
         
-    def to_trans_bytes(self):
-        #colorstr = '\xcc\xcc\xcc\xcc\xcc\xcc'
-        rows = []
-        for rcount in range(0, self.height()):
-            row = []
-            for col in range(0, self.width()):
-                row.extend([128,128,128,int(255*(1-self.data[col][rcount]))])
-            rows.append(array.array('B', row))
-        return rows
-
-    def to_trans_file(self, filename):
-        f = open(filename, 'w')
-        w = png.Writer(self.width(),self.height(), has_alpha=True)
-        w.write(f, self.to_trans_bytes())
-        f.close()
