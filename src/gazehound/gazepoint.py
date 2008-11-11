@@ -70,7 +70,12 @@ class ScanPath(object):
             point.y += y
         return ScanPath(points = points)
     
-
+    def points_within(self, shape):
+        plist = copy.deepcopy(self.points)
+        return ScanPath(
+            points = [p for p in plist if (p.x, p.y) in shape]
+        )
+    
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
 

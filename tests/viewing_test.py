@@ -7,7 +7,7 @@
 
 from __future__ import with_statement
 from os import path
-from gazehound import viewing, gazepoint
+from gazehound import viewing, gazepoint, shapes
 import mock_objects
 from nose.tools import ok_, eq_
 from testutils import lt_, gt_
@@ -72,3 +72,22 @@ class TestTimelineScanpathCombiner(object):
             sum(len(pres.scanpath) for pres in viewings),
             len(self.scanpath)
         )
+        
+    def test_viewings_can_recenter(self):
+        viewings = viewing.Combiner(
+            timeline = self.timeline,
+            scanpath = self.scanpath
+        ).viewings()
+        
+        centered = viewings.recenter_on('stim1', 400, 300)
+        eq_(len(centered.presentations), len(viewings.presentations))
+        assert centered[0].scanpath[0].x != viewings[0].scanpath[0].x
+        
+    def test_viewings_will_recenter_with_bounding_rect(self):
+        viewings = viewing.Combiner(
+            timeline = self.timeline,
+            scanpath = self.scanpath
+        ).viewings()
+        bounds = shapes.Rectangle(350, 500, 400, 600)
+        centered = viewings.recenter_on('stim1', 400, 300, bounds = bounds)
+        eq_(centered[0].scanpath[0].x, 400)

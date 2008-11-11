@@ -5,7 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-from gazehound import gazepoint
+from gazehound import gazepoint, shapes
 import mock_objects
 from nose.tools import eq_
 from testutils import gt_, lt_, gte_, lte_, includes_
@@ -200,6 +200,13 @@ class TestScanPath(object):
             np = sp2[i]
             eq_(op.x-10, np.x)
             eq_(op.y-20, np.y)
+    
+    def test_points_in_filters(self):
+        scanpath = gazepoint.ScanPath(points = self.points)
+        rect = shapes.Rectangle(300,500,360,600)
+        filtered = scanpath.points_within(rect)
+        assert len(filtered) < len(scanpath)
+        
 
 class TestPoint(object):
     def __init__(self):

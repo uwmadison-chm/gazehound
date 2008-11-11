@@ -6,6 +6,8 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from __future__ import with_statement
+import copy
+
 from presentation import *
 
 class Timeline(object):
@@ -56,6 +58,31 @@ class Timeline(object):
             full_list.append(Blank(
                 start = cur_pres.end+1, end = self.min_length))
         return full_list
+        
+    def recenter_on(self, name, x_center, y_center, bounds = None):
+        newtl = copy.deepcopy(self)
+        x_offset, y_offset = 0, 0
+        for pres in newtl.presentations:
+            if hasattr(pres, 'scanpath'):
+                if pres.name == name:
+                    x_offset, y_offset = self.__recenter_point(
+                        pres, x_offset, y_offset, x_center, y_center, bounds
+                    )
+                pres.scanpath = pres.scanpath.recenter_by(x_offset, y_offset)
+        return newtl
+        
+    
+    def __recenter_point(
+        self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds = None
+    ):
+        xoff, yoff = cur_x_offset, cur_y_offset
+        sp = pres.scanpath
+        if bounds is not None:
+            sp = sp.points_within(bounds)
+        m = sp.mean()
+        if m is not None:
+            xoff, yoff = int(cx-m[0]), int(cy-m[1])
+        return (xoff, yoff)
         
     
     def valid(self):

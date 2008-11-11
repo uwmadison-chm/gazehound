@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import copy
 import gazepoint
+import timeline
 
     
 class Combiner(object):
@@ -20,4 +21,4 @@ class Combiner(object):
             points = [p for p in self.scanpath 
                 if (p.time >= pres.start and p.time < pres.end)]
             pres.scanpath = gazepoint.ScanPath(points)
-        return t2
+        return timeline.Timeline(t2)
