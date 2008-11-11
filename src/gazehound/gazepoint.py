@@ -57,6 +57,8 @@ class ScanPath(object):
         )
     
     def mean(self):
+        if len(self.points) == 0:
+            return None
         xtotal = float(sum((p.x for p in self.points), 0))
         ytotal = float(sum((p.y for p in self.points), 0))
         return (xtotal/len(self.points), ytotal/len(self.points))

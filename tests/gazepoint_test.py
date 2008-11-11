@@ -181,6 +181,11 @@ class TestScanPath(object):
          x, y = scanpath.mean()
          eq_(int(x), 334)
          eq_(int(y), 494)
+    
+    def tets_mean_returns_none_for_zero_length(self):
+        sp = gazepoint.ScanPath(points = [])
+        p = scanpath.mean()
+        assert p is None
 
     def test_recenter_duplicates_scanpath(self):
         scanpath = gazepoint.ScanPath(points = self.points)
