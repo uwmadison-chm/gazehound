@@ -182,6 +182,19 @@ class TestScanPath(object):
          eq_(int(x), 334)
          eq_(int(y), 494)
 
+    def test_recenter_duplicates_scanpath(self):
+        scanpath = gazepoint.ScanPath(points = self.points)
+        sp2 = scanpath.recenter_by(-10, -20)
+        assert not scanpath[0] is sp2[0]
+    
+    def test_recenter_changes_x_and_y(self):
+        scanpath = gazepoint.ScanPath(points = self.points)
+        sp2 = scanpath.recenter_by(-10, -20)
+        for i in range(0, len(scanpath)):
+            op = scanpath[i]
+            np = sp2[i]
+            eq_(op.x-10, np.x)
+            eq_(op.y-20, np.y)
 
 class TestPoint(object):
     def __init__(self):

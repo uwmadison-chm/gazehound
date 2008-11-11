@@ -5,6 +5,7 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
+import copy
 
 class Point(object):
     """ 
@@ -59,7 +60,13 @@ class ScanPath(object):
         xtotal = float(sum((p.x for p in self.points), 0))
         ytotal = float(sum((p.y for p in self.points), 0))
         return (xtotal/len(self.points), ytotal/len(self.points))
-    
+
+    def recenter_by(self, x, y):
+        points = copy.deepcopy(self.points)
+        for point in points:
+            point.x += x
+            point.y += y
+        return ScanPath(points = points)
     
 
 class PointFactory(object):
