@@ -91,3 +91,4 @@ class TestTimelineScanpathCombiner(object):
         bounds = shapes.Rectangle(350, 500, 400, 600)
         centered = viewings.recenter_on('stim1', 400, 300, bounds = bounds)
         eq_(centered[0].scanpath[0].x, 400)
+        eq_(centered[0].scanpath[0].y, 300)
