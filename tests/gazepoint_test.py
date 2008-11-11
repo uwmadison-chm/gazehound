@@ -175,4 +175,27 @@ class TestScanPath(object):
     def test_scanpath_returns_valid_points_with_limiting_criterin(self):
         def criterion(point):
             return (point.x > 0 and point.x < 800)
+    
+    def test_scanpath_computes_mean(self):
+         scanpath = gazepoint.ScanPath(points = self.points)
+         x, y = scanpath.mean()
+         eq_(int(x), 334)
+         eq_(int(y), 494)
+
+
+class TestPoint(object):
+    def __init__(self):
+        super(TestPoint, self).__init__()
+    
+    def setup(self):
+        self.hundreds = gazepoint.Point(100,100)
         
+    def teardown(self):
+        pass
+        
+    def test_within(self):
+        in_bounds = (50,50,150,150)
+        out_bounds = (0,0,50,50)
+        
+        assert self.hundreds.within(in_bounds)
+        assert not self.hundreds.within(out_bounds)

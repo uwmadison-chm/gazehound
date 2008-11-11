@@ -22,6 +22,13 @@ class Point(object):
             True or False.
         """
         return critera(self)
+        
+    def within(self, bounds):
+        x1, y1, x2, y2 = bounds
+        return (
+            (self.x >= x1 and self.x <= x2) and
+            (self.y >= y1 and self.y <= y2)
+        )
 
 class ScanPath(object):
     """ A set of Points arranged sequentially in time """
@@ -47,6 +54,11 @@ class ScanPath(object):
         return ScanPath(
             [point for point in self.points if criterion(point)]
         )
+    
+    def mean(self):
+        xtotal = float(sum((p.x for p in self.points), 0))
+        ytotal = float(sum((p.y for p in self.points), 0))
+        return (xtotal/len(self.points), ytotal/len(self.points))
     
     
 
