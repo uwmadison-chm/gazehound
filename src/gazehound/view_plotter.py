@@ -70,3 +70,11 @@ class Canvas(object):
             for j in range(0, ycount):
                 self[tx1+i][ty1+j] += source[sx1+i][sy1+j]
         
+    
+    def clip_to(self, min_val = None, max_val = None):
+        for i in range(0, self.width()):
+            for j in range(0, self.height()):
+                if min_val is not None:
+                    self.data[i][j] = max(self.data[i][j], min_val)
+                if max_val is not None:
+                    self.data[i][j] = min(self.data[i][j], max_val)

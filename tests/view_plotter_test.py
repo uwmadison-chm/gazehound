@@ -95,4 +95,18 @@ class TestCanvas(object):
     def test_canvas_adds_matrix_adds_from_oob_bottomright(self):
         self.canvas.add_matrix(self.rmat, (11,9))
         eq_(self.canvas[9][7], 0.0)
-        
+    
+    def test_canvas_clips_max(self):
+        self.canvas[0][0] = 2.0
+        self.canvas[0][1] = 0.7
+        self.canvas.clip_to(max_val = 1.0)
+        eq_(round(self.canvas[0][0]*10), 10.0)
+        eq_(round(self.canvas[0][1]*10), 7.0)
+    
+    def test_canvas_clips_min(self):
+        self.canvas[0][0] = -2.0
+        self.canvas[0][1] = 0.7
+        self.canvas.clip_to(min_val = 0.0)
+        eq_(round(self.canvas[0][0]*10), 0.0)
+        eq_(round(self.canvas[0][1]*10), 7.0)
+            
