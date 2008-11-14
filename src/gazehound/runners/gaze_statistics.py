@@ -38,9 +38,15 @@ class GazeStatisticsOptionParser(object):
         )
         
         parser.add_option(
-            "--obt_dir", dest = "object_dir",
+            "--obt-dir", dest = "object_dir",
             help = "Find .OBT files in PATH. Requires --stimuli",
             metavar = "PATH"
+        )
+        
+        parser.add_option(
+            "--recenter-on", dest = "recenter_on",
+            help = "Recenter when stimuli named NAME are shown",
+            metavar = "NAME"
         )
         
         self.options, self.args = parser.parse_args(argv[1:])
@@ -80,6 +86,14 @@ class GazeStatsRunner(object):
                 dec = shapes.TimelineDecorator(r)
                 self.timeline = dec.find_shape_files_and_add_to_timeline(
                     self.timeline
+                )
+            if op.options.recenter_on is not None:
+                #TODO: Make these sepeficiable on the command line
+                rx = 400
+                ry = 300
+                limiter = shapes.Rectangle(300, 200, 500, 400)
+                self.timeline = self.timeline.recenter_on(
+                    op.options.recenter_on, rx, ry, limiter
                 )
             
         # And build the analyzer
