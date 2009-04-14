@@ -12,11 +12,11 @@ class Point(object):
     A point with x, y, and time coordinates -- one point in a scan path 
     """
     
-    def __init__(self, x = None, y = None, time = None):
+    def __init__(self, x = None, y = None, time = None, duration = 0):
         self.x = x
         self.y = y
         self.time = time
-        
+        self.duration = duration
     
     def valid(criteria):
         """ Evaluate criteria() for this point. critiera() should return
@@ -30,6 +30,9 @@ class Point(object):
             (self.x >= x1 and self.x <= x2) and
             (self.y >= y1 and self.y <= y2)
         )
+    
+    def time_midpoint(self):
+        return (self.time + (self.duration / 2))
 
 class ScanPath(object):
     """ A set of Points arranged sequentially in time """
@@ -137,5 +140,28 @@ class IViewPointFactory(PointFactory):
         
     def from_component_list(self, components):
         return super(IViewPointFactory, self).from_component_list(
+            components, self.data_map
+        )
+
+class IViewFixationFactory(PointFactory):
+    """
+    Maps a list of fixations into a list of Points.
+    """
+    
+    def __init__(self, type_to_produce = Point):
+        super(IViewFixationFactory, self).__init__(type_to_produce)
+        self.data_map = [
+            ('start_num', int),
+            ('end_num', int),
+            ('time', int),
+            ('end_time', int),
+            ('x', int),
+            ('y', int),
+            ('object', str),
+            ('duration', int)
+        ]
+    
+    def from_component_list(self, components):
+        return super(IViewFixationFactory, self).from_component_list(
             components, self.data_map
         )

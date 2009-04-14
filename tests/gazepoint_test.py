@@ -108,6 +108,26 @@ class TestIViewPointFactory(object):
         assert all(isinstance(p, gazepoint.Point) for p in points)
         
 
+class TestFixationFactory(object):
+    def setup(self):
+        self.fix_ary = mock_objects.smi_fixation_ary()
+        self.fix_fact = gazepoint.IViewFixationFactory()
+    
+    def test_get_components_returns_proper_number_of_elements(self):
+        fixations = self.fix_fact.from_component_list(self.fix_ary)
+        eq_(len(fixations), len(self.fix_ary))
+        
+    def test_components_have_proper_properties(self):
+        fixations = self.fix_fact.from_component_list(self.fix_ary)
+        for fix in fixations:
+            for mapping in self.fix_fact.data_map:
+                eq_(type(getattr(fix, mapping[0])), mapping[1])
+    # and a spot test...
+    def test_one_value(self):
+        fixations = self.fix_fact.from_component_list(self.fix_ary)
+        # Check the mock_objects
+        eq_(fixations[0].x, 365)
+
 class TestScanPath(object):
     def setup(self):
         # Fields are:
@@ -224,3 +244,8 @@ class TestPoint(object):
         
         assert self.hundreds.within(in_bounds)
         assert not self.hundreds.within(out_bounds)
+    
+    def test_time_midpoint(self):
+        self.hundreds.time = 100
+        self.hundreds.duration = 50
+        eq_(self.hundreds.time_midpoint(), 125)
