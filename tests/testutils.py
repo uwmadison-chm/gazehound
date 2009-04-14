@@ -20,6 +20,8 @@ def lt_(a, b, msg = None):
     """
     assert a < b, msg or "%r >= %r" % (a, b)
 
+def eq_(a, b, msg = None):
+    assert a == b, msg or "%r != %r" % (a, b)
 
 def lte_(a, b, msg = None):
     """Shorthand for 'assert a <= b, "%r != %r" % (a, b)

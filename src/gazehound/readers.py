@@ -52,6 +52,7 @@ class DelimitedReader(object):
         return comment_lines
     
     def __iter__(self):
+        # We just need to implement next(self)
         return self
     
     def next(self):
@@ -83,76 +84,119 @@ class DelimitedReader(object):
     
 
 class IViewReader(DelimitedReader):
-
-    # The second parameter is a function, taking one string argument,
-    # that converts the value to its expected format.
-    HEADER_MAP = {
-        'FileVersion': ('file_version', str),
-        'Fileformat': ('file_format', str),
-        'Subject': ('subject', str),
-        'Date': ('date_string', str),
-        'Description': ('description', str),
-        '# of Pts Recorded': ('recorded_points', int),
-        'Offset Of Calibration Area': (
-            'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
-        ),
-        'Size Of Calibration Area': (
-            'calibration_size', lambda x: [int(e) for e in x.split("\t")]
-        ),
-        'Sample Rate': ('sample_rate', int)
-    }
-    
-    SEP = ":\t"
-    
     """A reader for files produced by SMI's iView software"""
-    def __init__(self, 
+    def __init__(self, header_map,
         file_data = None, skip_comments = True, comment_char = "#",
         opts_for_parser = {}):
         
         super(IViewReader, self).__init__(
             file_data, skip_comments, comment_char, opts_for_parser
         )
-    
-    def header(self):
+        self.header_map = header_map
+
+    def header_pairs(self):
         coms = self.comment_lines()
-        coms = [re.sub('^#', '', l) for l in coms] # Strip leading "#"
-        header_pairs = [l.split(self.__class__.SEP, 1) for l in coms]
-        
+        coms = [re.sub(("^%s" % self.comment_char), '', l).strip() for l in coms]
+        return [l.split(":\t", 1) for l in coms]
+
+    def header(self):
+        header_pairs = self.header_pairs()
+
         header_pairs = [p for p in header_pairs if len(p) == 2]
         # Kill line endings in header_pairs
         header_pairs = [[p[0], p[1].strip()] for p in header_pairs]
-        
+
         header_ret = {}
         for p in header_pairs:
             cleaned_pair = self.__map_header_value(p)
             if cleaned_pair is not None:
                 header_ret.update([cleaned_pair])
         return header_ret
+
+    def __map_header_value(self, pair):
+        """
+        Return a tuple of the form (key, value), or None if 
+        pair[0] isn't in HEADER_MAP
+        """
+        raw_key, raw_val = pair
+        mapper = self.header_map.get(raw_key)
+        if mapper is None:
+            return None
+
+        cleaned_key, converter = mapper
+
+        cleaned_val = converter(raw_val)
+        return (cleaned_key, cleaned_val)
+
         
+class IViewScanpathReader(IViewReader):
+
+    """A reader for files produced by SMI's iView software"""
+    def __init__(self, 
+        file_data = None, skip_comments = True, comment_char = "#",
+        opts_for_parser = {}):
+        
+        super(IViewScanpathReader, self).__init__(
+            self.__header_map(), file_data, skip_comments, 
+            comment_char, opts_for_parser
+        )
     
     def scanpath(self):
         """Return a list of Points representing the scan path."""
         fact = IViewPointFactory()
         points = fact.from_component_list(self)
         return ScanPath(points = points)
-    
-    def __map_header_value(self, pair):
-        """
-        Return a tuple of the form (key, value), or None if 
-        pair[0] isn't in HEADER_MAP
-        """
         
-        raw_key, raw_val = pair
-        mapper = self.__class__.HEADER_MAP.get(raw_key)
-        if mapper is None:
-            return None
     
-        cleaned_key, converter = mapper
-        
-        cleaned_val = converter(raw_val)
-        return (cleaned_key, cleaned_val)
+    def __header_map(self):
+        # The second parameter is a function, taking one string argument,
+        # that converts the value to its expected format.
+        return {
+            'FileVersion': ('file_version', str),
+            'Fileformat': ('file_format', str),
+            'Subject': ('subject', str),
+            'Date': ('date_string', str),
+            'Description': ('description', str),
+            '# of Pts Recorded': ('recorded_points', int),
+            'Offset Of Calibration Area': (
+                'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
+            ),
+            'Size Of Calibration Area': (
+                'calibration_size', lambda x: [int(e) for e in x.split("\t")]
+            ),
+            'Sample Rate': ('sample_rate', int)
+        }
     
 
+class FixationReader(DelimitedReader):
+    # The second parameter is a function, taking one string argument,
+    # that converts the value to its expected format.
+    HEADER_MAP = {
+        'Subject': ('subject', str),
+        'Date': ('date_string', str),
+        'Description': ('description', str),
+        '# Of Fixations': ('recorded_fixations', int),
+        'Sample Rate': ('sample_rate', int),
+        'Offset Of Calibration Area': (
+            'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
+        ),
+        'Size Of Calibration Area': (
+            'calibration_size', lambda x: [int(e) for e in x.split("\t")]
+        ),
+        'Minimal Time': ('minimal_time', int),
+        'Maximal Pixel': ('maximal_pixel', int)
+    }
+    
+    def __init__self( 
+        file_data = None, skip_comments = True, comment_char = "#",
+        opts_for_parser = {}):
+        super(FixationReader, self).__init__(
+            file_data, skip_comments, comment_char, opts_for_parser
+        )
+        
+    def header(self):
+        return None
+        
 class TimelineReader(object):
     """ 
     Reads files of the format: stim_name \t onset \t offset and creates

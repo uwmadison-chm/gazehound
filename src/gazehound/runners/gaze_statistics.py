@@ -73,7 +73,7 @@ class GazeStatsRunner(object):
         # Read and parse the gazestream
         
         with open(op.gaze_file) as gf:
-            ir = readers.IViewReader(gf.readlines())
+            ir = readers.IViewScanpathReader(gf.readlines())
             self.file_data = ir
             self.scanpath = ir.scanpath()
 

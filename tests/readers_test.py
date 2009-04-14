@@ -8,8 +8,8 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.readers import DelimitedReader, IViewReader
-
+from gazehound.readers import DelimitedReader, IViewScanpathReader, FixationReader
+from testutils import *
 
 class TestDelimitedReader(object):
     """Exercises the DelmitedReader class"""
@@ -61,38 +61,71 @@ class TestDelimitedReader(object):
     def test_reader_yields_comment_lines(self):
         dr = DelimitedReader(self.norm_lines,
             skip_comments = True, comment_char = "#")
-            
-        assert len(dr.comment_lines()) == self.COMMENT_LINES
+
+        eq_(len(dr.comment_lines()), self.COMMENT_LINES)
         
-class TestIViewReader(object):
-    """Exercise the IViewReader class"""
+class TestIViewScanpathReader(object):
+    """Exercise the IVIewScanpathReader class"""
     def setup(self):
         p = path.abspath(path.dirname(__file__))
         with open(path.join(p, "examples/iview_normal.txt")) as f:
             self.norm_lines = f.readlines()
 
         self.EXPECTED_LINES = 13
+        self.COMMENT_LINES = 11
     
+    def test_header_map_lives_on(self):
+        ir = IViewScanpathReader(self.norm_lines)
+        includes_(ir.header_map, "FileVersion")
     
     def test_reader_basically_works(self):
-        ir = IViewReader(self.norm_lines)
+        ir = IViewScanpathReader(self.norm_lines)
         
         assert len(ir) == self.EXPECTED_LINES
         
+    def test_reader_finds_comment_lines(self):
+        ir = IViewScanpathReader(self.norm_lines)
+        comment_lines = ir.comment_lines()
+        
+        eq_(ir.comment_char, "#")
+        eq_(len(comment_lines), self.COMMENT_LINES)
+    
     def test_basic_header_parsing(self):
-        ir = IViewReader(self.norm_lines)
+        ir = IViewScanpathReader(self.norm_lines)
         h = ir.header()
-        assert h.get('file_version') == '2'
+        assert h is not None
+        includes_(h, 'file_version')
+        eq_(h.get('file_version'), '2')
         
     def test_calibration_size_parses_into_int_list(self):
-        ir = IViewReader(self.norm_lines)
+        ir = IViewScanpathReader(self.norm_lines)
         h = ir.header()
         
-        assert h.get('calibration_size') == [800,600]
+        eq_(h.get('calibration_size'), [800,600])
     
     def test_scanpath_returns_expected_points(self):
-        ir = IViewReader(self.norm_lines)
+        ir = IViewScanpathReader(self.norm_lines)
         
         scanpath = ir.scanpath()
-        assert len(scanpath) == self.EXPECTED_LINES
+        eq_(len(scanpath), self.EXPECTED_LINES)
+    
+
+class TestFixationReader(object):
+    """Exercise the FixationReader"""
+    def __init__(self):
+        p = path.abspath(path.dirname(__file__))
+        with open(path.join(p, "examples/fixations.txt")) as f:
+            self.fixation_lines = f.readlines()
+
+        self.EXPECTED_FIXATIONS = 8
         
+    def test_reader_basically_works(self):
+        fr = FixationReader(self.fixation_lines)
+        
+        eq_(len(fr), self.EXPECTED_FIXATIONS)
+        
+    def test_basic_header_parsing(self):
+        fr = FixationReader(self.fixation_lines)
+        
+        h = fr.header()
+        #assert h.get('subject') == '001'

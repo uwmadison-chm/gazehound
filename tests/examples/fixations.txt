@@ -1,0 +1,19 @@
+#Subject:	001
+#Date:	01/15/2009
+#Description:	run1
+## Of Fixations:	8
+#Sample Rate:	60
+#Offset Of Calibration Area:	0	0
+#Size Of Calibration Area:	800	600
+#Minimal Time:	50
+#Maximal Pixel:	20
+#
+#Start#	End#	StartT	EndT	X	Y	Object	Duration
+1125	1141	18750	19017	365	236	1	83	
+1166	1188	19433	19800	182	551	1	83	
+1201	1255	20017	20917	410	299	1	83	
+1260	1263	21000	21051	365	236	1	83	
+1278	1321	21305	22017	365	236	1	83	
+1345	1375	22416	22914	365	236	1	83	
+1475	1629	24583	27150	365	236	1	83	
+1927	2083	32117	34717	365	236	1	83	

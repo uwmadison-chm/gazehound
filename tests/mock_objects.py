@@ -31,7 +31,7 @@ def smi_scanpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
-    ir = readers.IViewReader(lines)
+    ir = readers.IViewScanpathReader(lines)
     return ir.scanpath()
 
 def tiny_timeline():
