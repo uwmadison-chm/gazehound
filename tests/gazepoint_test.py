@@ -133,7 +133,7 @@ class TestFixationFactory(object):
         # Check the mock_objects
         eq_(fixations[0].x, 365)
         eq_(fixations[0].time, 18750)
-        eq_(fixations[0].time_midpoint(), 18791)
+        eq_(fixations[0].time_midpoint(), 18883)
 
 class TestPointPath(object):
     def setup(self):

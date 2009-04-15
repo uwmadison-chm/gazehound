@@ -116,5 +116,11 @@ class TestFixatedTimeline(object):
             len(self.fixations)
         )
         
+    def test_spot_check_hand_computed_fixation_counts(self):
+        # First one, the "fixation" should have exactly one fix
+        eq_(len(self.viewings[0].pointpath), 1)
+        # And this should have 4
+        eq_(len(self.viewings[1].pointpath), 4)
+        #eq_(self.viewings[1].pointpath[-1], 1)
     
     

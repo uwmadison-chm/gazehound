@@ -34,6 +34,11 @@ class Point(object):
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
 
+    def __repr__(self):
+        return (
+            "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
+            (self.x, self.y, self.time, self.duration)
+        )
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
     def __init__(self, points = []):
