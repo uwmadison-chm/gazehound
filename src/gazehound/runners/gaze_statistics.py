@@ -54,6 +54,10 @@ class GazeStatisticsOptionParser(object):
         if len(self.args) == 0:
             parser.error("No pointpath file specified")
 
+        if (self.options.recenter_on is not None and 
+                self.options.stim_file is None):
+            parser.error("You must use --stimuli with --recenter-on")
+            
         if self.options.object_dir is not None:
             if not os.path.isdir(self.options.object_dir):
                 parser.error(self.options.object_dir+" is not a directory")

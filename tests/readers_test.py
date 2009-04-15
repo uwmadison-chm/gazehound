@@ -8,7 +8,7 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.readers import DelimitedReader, IViewScanpathReader, FixationReader
+from gazehound.readers import DelimitedReader, IViewScanpathReader, IViewFixationReader
 from testutils import *
 
 class TestDelimitedReader(object):
@@ -110,8 +110,8 @@ class TestIViewScanpathReader(object):
         eq_(len(pointpath), self.EXPECTED_LINES)
     
 
-class TestFixationReader(object):
-    """Exercise the FixationReader"""
+class TestIViewFixationReader(object):
+    """Exercise the IViewFixationReader"""
     def __init__(self):
         p = path.abspath(path.dirname(__file__))
         with open(path.join(p, "examples/fixations.txt")) as f:
@@ -120,12 +120,12 @@ class TestFixationReader(object):
         self.EXPECTED_FIXATIONS = 8
         
     def test_reader_basically_works(self):
-        fr = FixationReader(self.fixation_lines)
+        fr = IViewFixationReader(self.fixation_lines)
         
         eq_(len(fr), self.EXPECTED_FIXATIONS)
         
     def test_basic_header_parsing(self):
-        fr = FixationReader(self.fixation_lines)
+        fr = IViewFixationReader(self.fixation_lines)
         
         h = fr.header()
-        #assert h.get('subject') == '001'
+        eq_(h.get('subject'), '001')

@@ -113,6 +113,12 @@ class IViewReader(DelimitedReader):
                 header_ret.update([cleaned_pair])
         return header_ret
 
+    def pointpath(self):
+        """Return a list of Points representing the scan path."""
+        fact = IViewPointFactory()
+        points = fact.from_component_list(self)
+        return PointPath(points = points)
+
     def __map_header_value(self, pair):
         """
         Return a tuple of the form (key, value), or None if 
@@ -141,12 +147,6 @@ class IViewScanpathReader(IViewReader):
             comment_char, opts_for_parser
         )
     
-    def pointpath(self):
-        """Return a list of Points representing the scan path."""
-        fact = IViewPointFactory()
-        points = fact.from_component_list(self)
-        return PointPath(points = points)
-        
     
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
@@ -168,35 +168,36 @@ class IViewScanpathReader(IViewReader):
         }
     
 
-class FixationReader(DelimitedReader):
-    # The second parameter is a function, taking one string argument,
-    # that converts the value to its expected format.
-    HEADER_MAP = {
-        'Subject': ('subject', str),
-        'Date': ('date_string', str),
-        'Description': ('description', str),
-        '# Of Fixations': ('recorded_fixations', int),
-        'Sample Rate': ('sample_rate', int),
-        'Offset Of Calibration Area': (
-            'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
-        ),
-        'Size Of Calibration Area': (
-            'calibration_size', lambda x: [int(e) for e in x.split("\t")]
-        ),
-        'Minimal Time': ('minimal_time', int),
-        'Maximal Pixel': ('maximal_pixel', int)
-    }
-    
-    def __init__self( 
+class IViewFixationReader(IViewReader):
+
+    def __init__(self, 
         file_data = None, skip_comments = True, comment_char = "#",
         opts_for_parser = {}):
-        super(FixationReader, self).__init__(
-            file_data, skip_comments, comment_char, opts_for_parser
+        
+        super(IViewFixationReader, self).__init__(
+            self.__header_map(), file_data, skip_comments, 
+            comment_char, opts_for_parser
         )
-        
-    def header(self):
-        return None
-        
+    
+    def __header_map(self):
+        # The second parameter is a function, taking one string argument,
+        # that converts the value to its expected format.
+        return {
+            'Subject': ('subject', str),
+            'Date': ('date_string', str),
+            'Description': ('description', str),
+            '# Of Fixations': ('recorded_fixations', int),
+            'Sample Rate': ('sample_rate', int),
+            'Offset Of Calibration Area': (
+                'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
+            ),
+            'Size Of Calibration Area': (
+                'calibration_size', lambda x: [int(e) for e in x.split("\t")]
+            ),
+            'Minimal Time': ('minimal_time', int),
+            'Maximal Pixel': ('maximal_pixel', int)
+        }
+       
 class TimelineReader(object):
     """ 
     Reads files of the format: stim_name \t onset \t offset and creates

@@ -55,6 +55,18 @@ class TestGazeStatsOptionParser(object):
         args = [__file__, '--stimuli=foo', 'bar']
         analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
         eq_(analyzer.options.stim_file, 'foo')
+
+    @raises(SystemExit)
+    def test_analyzer_fails_with_recenter_but_no_stimuli(self):
+        args = [__file__, '--recenter-on=foo', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args,
+            err = self.err_dump
+        )        
+
+    def test_analyzer_parses_recenter_on(self):
+        args = [__file__, '--stimuli=corge', '--recenter-on=foo', 'bar']
+        analyzer = gaze_statistics.GazeStatisticsOptionParser(args)
+        eq_(analyzer.options.recenter_on, 'foo')        
     
     def test_analyzer_parses_obt_dir(self):
         args = [__file__, '--stimuli=foo', '--obt-dir=.', 'bar']
