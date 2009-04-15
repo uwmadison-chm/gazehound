@@ -22,7 +22,7 @@ class TestScanpathPlotter(object):
         self.canvas = view_plotter.Canvas(
             height = 600, width = 400, type_str = 'f', fill_value = 0.0
         )
-        self.scanpath = mock_objects.smi_scanpath_spreadout()
+        self.pointpath = mock_objects.smi_pointpath_spreadout()
         self.view_matrix = shapes.Ellipse(0,0,20,20).to_matrix()
         
     def teardown(self):
@@ -31,11 +31,11 @@ class TestScanpathPlotter(object):
     def test_plotter_draws_on_matrix(self):
         p = view_plotter.ScanpathPlotter(
             canvas = self.canvas,
-            scanpath = self.scanpath,
+            pointpath = self.pointpath,
             view_matrix = self.view_matrix
         )
-        p.draw_scanpath()
-        p1 = self.scanpath[0]
+        p.draw_pointpath()
+        p1 = self.pointpath[0]
         gt_(p.canvas[p1.x][p1.y], 0)
         
     

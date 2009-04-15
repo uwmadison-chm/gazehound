@@ -116,6 +116,11 @@ class TestFixationFactory(object):
     def test_get_components_returns_proper_number_of_elements(self):
         fixations = self.fix_fact.from_component_list(self.fix_ary)
         eq_(len(fixations), len(self.fix_ary))
+    
+    def test_converting_to_pointpath_does_not_change_length(self):
+        fixations = self.fix_fact.from_component_list(self.fix_ary)
+        pointpath = gazepoint.PointPath(fixations)
+        eq_(len(fixations), len(pointpath))
         
     def test_components_have_proper_properties(self):
         fixations = self.fix_fact.from_component_list(self.fix_ary)
@@ -127,8 +132,10 @@ class TestFixationFactory(object):
         fixations = self.fix_fact.from_component_list(self.fix_ary)
         # Check the mock_objects
         eq_(fixations[0].x, 365)
+        eq_(fixations[0].time, 18750)
+        eq_(fixations[0].time_midpoint(), 18791)
 
-class TestScanPath(object):
+class TestPointPath(object):
     def setup(self):
         # Fields are:
         # Time | Set | Pupil H | Pupil V | C.R. H | C.R. V | ScreenH | ScreenV | Diam H | Diam V 
@@ -161,71 +168,71 @@ class TestScanPath(object):
         )
         
     
-    def test_scanpath_iterates(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
-        for p in scanpath:
+    def test_pointpath_iterates(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        for p in pointpath:
             assert isinstance(p, self.generic_factory.type_to_produce)
     
-    def test_scanpath_is_iterable(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
-        eq_(scanpath[0].time, 0)
+    def test_pointpath_is_iterable(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        eq_(pointpath[0].time, 0)
     
-    def test_scanpath_is_slicable(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
-        eq_(len(scanpath[0:2]), 2)
-        eq_(type(scanpath[0:2]), type(scanpath))
+    def test_pointpath_is_slicable(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        eq_(len(pointpath[0:2]), 2)
+        eq_(type(pointpath[0:2]), type(pointpath))
     
-    def test_scanpath_returns_all_with_free_criterion_in_valid(self):
+    def test_pointpath_returns_all_with_free_criterion_in_valid(self):
         def criterion(point):
             return True
             
-        scanpath = gazepoint.ScanPath(points = self.points)
-        valid = scanpath.valid_points(criterion)
-        eq_(len(valid), len(scanpath))
+        pointpath = gazepoint.PointPath(points = self.points)
+        valid = pointpath.valid_points(criterion)
+        eq_(len(valid), len(pointpath))
         
         
-    def test_scanpath_returns_none_with_false_criterion_in_valid(self):
+    def test_pointpath_returns_none_with_false_criterion_in_valid(self):
         def criterion(point):
             return False
             
-        scanpath = gazepoint.ScanPath(points = self.points)
-        valid = scanpath.valid_points(criterion)
+        pointpath = gazepoint.PointPath(points = self.points)
+        valid = pointpath.valid_points(criterion)
         eq_(len(valid), 0)
         
-    def test_scanpath_returns_valid_points_with_limiting_criterin(self):
+    def test_pointpath_returns_valid_points_with_limiting_criterin(self):
         def criterion(point):
             return (point.x > 0 and point.x < 800)
     
-    def test_scanpath_computes_mean(self):
-         scanpath = gazepoint.ScanPath(points = self.points)
-         x, y = scanpath.mean()
+    def test_pointpath_computes_mean(self):
+         pointpath = gazepoint.PointPath(points = self.points)
+         x, y = pointpath.mean()
          eq_(int(x), 334)
          eq_(int(y), 494)
     
     def tets_mean_returns_none_for_zero_length(self):
-        sp = gazepoint.ScanPath(points = [])
-        p = scanpath.mean()
+        sp = gazepoint.PointPath(points = [])
+        p = pointpath.mean()
         assert p is None
 
-    def test_recenter_duplicates_scanpath(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
-        sp2 = scanpath.recenter_by(-10, -20)
-        assert not scanpath[0] is sp2[0]
+    def test_recenter_duplicates_pointpath(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        sp2 = pointpath.recenter_by(-10, -20)
+        assert not pointpath[0] is sp2[0]
     
     def test_recenter_changes_x_and_y(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
-        sp2 = scanpath.recenter_by(-10, -20)
-        for i in range(0, len(scanpath)):
-            op = scanpath[i]
+        pointpath = gazepoint.PointPath(points = self.points)
+        sp2 = pointpath.recenter_by(-10, -20)
+        for i in range(0, len(pointpath)):
+            op = pointpath[i]
             np = sp2[i]
             eq_(op.x-10, np.x)
             eq_(op.y-20, np.y)
     
     def test_points_in_filters(self):
-        scanpath = gazepoint.ScanPath(points = self.points)
+        pointpath = gazepoint.PointPath(points = self.points)
         rect = shapes.Rectangle(300,500,360,600)
-        filtered = scanpath.points_within(rect)
-        assert len(filtered) < len(scanpath)
+        filtered = pointpath.points_within(rect)
+        assert len(filtered) < len(pointpath)
         
 
 class TestPoint(object):

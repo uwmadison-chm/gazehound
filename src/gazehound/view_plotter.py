@@ -5,23 +5,23 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-# This module contains tools to convert scanpaths into images indicating
+# This module contains tools to convert pointpaths into images indicating
 # where a subject's gaze lingered.
 
 import array
 from ext import png
 
 class ScanpathPlotter(object):
-    """Plots scanpath on a canvas"""
-    def __init__(self, canvas, scanpath, view_matrix):
+    """Plots pointpath on a canvas"""
+    def __init__(self, canvas, pointpath, view_matrix):
         super(ScanpathPlotter, self).__init__()
         self.canvas = canvas
-        self.scanpath = scanpath
+        self.pointpath = pointpath
         self.view_matrix = view_matrix
         
     
-    def draw_scanpath(self):
-        for point in self.scanpath:
+    def draw_pointpath(self):
+        for point in self.pointpath:
             self.canvas.add_matrix(self.view_matrix, (point.x, point.y))
         
         

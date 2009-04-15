@@ -25,12 +25,12 @@ def smi_ary_spreadout():
         ['1830', '0', '4929', '3946', '4686', '3357', '518', '-56', '2144', '1184'],
     ])
         
-def smi_scanpath_normal():
+def smi_pointpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
     ir = readers.IViewScanpathReader(lines)
-    return ir.scanpath()
+    return ir.pointpath()
 
 def smi_fixation_ary():
     # Fields are:
@@ -46,6 +46,10 @@ def smi_fixation_ary():
     ['1927', '2083', '32117', '34717', '365', '236', '1', '83'],
     ])
 
+def smi_fixation_points():
+    ivf = gazepoint.IViewFixationFactory()
+    return gazepoint.PointPath(ivf.from_component_list(smi_fixation_ary()))
+
 def tiny_timeline():
     lines = []
     with open(EX_PATH+"/pres_tiny.txt") as f:
@@ -54,16 +58,32 @@ def tiny_timeline():
     return tr.timeline()
     
 def tiny_viewings():
-    scanpath = smi_scanpath_normal()
+    pointpath = smi_pointpath_normal()
     timeline = tiny_timeline()
     return viewing.Combiner(
-        scanpath = scanpath, timeline = timeline
+        pointpath = pointpath, timeline = timeline
     ).viewings()
 
-def smi_scanpath_spreadout():
+def smi_pointpath_spreadout():
     ivf = gazepoint.IViewPointFactory()
-    return gazepoint.ScanPath(ivf.from_component_list(smi_ary_spreadout()))
+    return gazepoint.PointPath(ivf.from_component_list(smi_ary_spreadout()))
     
+
+def standard_timeline():
+    data = [
+        ['fixation', '19992', '20892'],
+        ['3102', '21003', '32992'],
+        ['fixation', '42992', '43892'],
+        ['6230', '43992', '55992'],
+        ['fixation', '60992', '61892'],
+        ['9810', '62008', '73992'],
+    ]
+    pres_fact = presentation.PresentationFactory()
+    return timeline.Timeline(
+        pres_fact.from_component_list(
+            data, [('name', str), ('start', int), ('end', int)]
+        )
+    )
 
 def simple_timeline():
     data = [

@@ -14,81 +14,107 @@ from testutils import lt_, gt_
 
 class TestTimelineScanpathCombiner(object):
     def setup(self):
-        self.scanpath = mock_objects.smi_scanpath_spreadout()
+        self.pointpath = mock_objects.smi_pointpath_spreadout()
         self.timeline = mock_objects.simple_timeline()
         
     def teardown(self):
         pass
         
     def test_combiner_returns_as_many_viewings_as_presentations(self):
-        
         combiner = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         )
         
         viewings = combiner.viewings()
         eq_(len(viewings), len(self.timeline))
         
-    def test_combiner_adds_scanpath_to_presentations(self):
-        # This test assures we've got non-None scanpaths in each pres
+    def test_combiner_adds_pointpath_to_presentations(self):
+        # This test assures we've got non-None pointpaths in each pres
         combiner = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         )
         
         viewings = combiner.viewings()
-        assert all(p.scanpath is not None for p in viewings)
+        assert all(p.pointpath is not None for p in viewings)
 
     def test_combiner_adds_gazepoints_to_presentations(self):
         combiner = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         )
         
         viewings = combiner.viewings()
-        assert all(len(p.scanpath) > 0 for p in viewings)
+        assert all(len(p.pointpath) > 0 for p in viewings)
         
     def test_combiner_drops_out_of_bounds_points(self):
         # Some gazepoints are outside of the presentation timeline...
         combiner = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         )
         viewings = combiner.viewings()
         lt_(
-            sum(len(pres.scanpath) for pres in viewings),
-            len(self.scanpath)
+            sum(len(pres.pointpath) for pres in viewings),
+            len(self.pointpath)
         )
         
     def test_combiner_contains_all_points_when_in_bounds(self):
         combiner = viewing.Combiner(
             timeline = self.timeline.filled_list(),
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         )
         
         viewings = combiner.viewings()
         eq_(
-            sum(len(pres.scanpath) for pres in viewings),
-            len(self.scanpath)
+            sum(len(pres.pointpath) for pres in viewings),
+            len(self.pointpath)
         )
         
     def test_viewings_can_recenter(self):
         viewings = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         ).viewings()
         
         centered = viewings.recenter_on('stim1', 400, 300)
         eq_(len(centered.presentations), len(viewings.presentations))
-        assert centered[0].scanpath[0].x != viewings[0].scanpath[0].x
+        assert centered[0].pointpath[0].x != viewings[0].pointpath[0].x
         
     def test_viewings_will_recenter_with_bounding_rect(self):
         viewings = viewing.Combiner(
             timeline = self.timeline,
-            scanpath = self.scanpath
+            pointpath = self.pointpath
         ).viewings()
         bounds = shapes.Rectangle(350, 500, 400, 600)
         centered = viewings.recenter_on('stim1', 400, 300, bounds = bounds)
-        eq_(centered[0].scanpath[0].x, 400)
-        eq_(centered[0].scanpath[0].y, 300)
+        eq_(centered[0].pointpath[0].x, 400)
+        eq_(centered[0].pointpath[0].y, 300)
+        
+
+class TestFixatedTimeline(object):
+    def setup(self):
+        self.fixations = mock_objects.smi_fixation_points()
+        self.timeline = mock_objects.standard_timeline()
+        self.viewings = viewing.Combiner(
+            timeline = self.timeline,
+            pointpath = self.fixations
+        ).viewings()
+    
+    def test_timeline_and_fixations_are_not_empty(self):
+        gt_(len(self.timeline), 0)
+        eq_(len(mock_objects.smi_fixation_ary()), len(self.fixations))
+    
+    def test_viewings_gets_at_least_some_fixations(self):
+        gt_(len(self.viewings), 0, "Viweings should not be empty.")
+        gt_(sum(len(pres.pointpath) for pres in self.viewings), 0)
+    
+    def test_viewings_drops_fixations_outside_stimuli(self):
+        lt_(
+            sum(len(pres.pointpath) for pres in self.viewings),
+            len(self.fixations)
+        )
+        
+    
+    

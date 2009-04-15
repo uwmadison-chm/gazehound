@@ -34,7 +34,7 @@ class Point(object):
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
 
-class ScanPath(object):
+class PointPath(object):
     """ A set of Points arranged sequentially in time """
     def __init__(self, points = []):
         self.points = points
@@ -49,33 +49,40 @@ class ScanPath(object):
         return self.points[i]
         
     def __getslice__(self, i, j):
-        return ScanPath(self.points[i:j])
+        return PointPath(self.points[i:j])
         
     def extend(self, sp):
         self.points.extend(sp.points)
     
     def valid_points(self, criterion):
-        return ScanPath(
+        return PointPath(
             [point for point in self.points if criterion(point)]
         )
     
     def mean(self):
         if len(self.points) == 0:
             return None
-        xtotal = float(sum((p.x for p in self.points), 0))
-        ytotal = float(sum((p.y for p in self.points), 0))
-        return (xtotal/len(self.points), ytotal/len(self.points))
+        xtotal = 0.0
+        ytotal = 0.0
+        total_dur = 0.0
+        for p in self.points:
+            dur = float(max(p.duration, 1))
+            xtotal += dur*p.x
+            ytotal += dur*p.y
+            total_dur += dur
+            
+        return (xtotal/total_dur, ytotal/total_dur)
 
     def recenter_by(self, x, y):
         points = copy.deepcopy(self.points)
         for point in points:
             point.x += x
             point.y += y
-        return ScanPath(points = points)
+        return PointPath(points = points)
     
     def points_within(self, shape):
         plist = copy.deepcopy(self.points)
-        return ScanPath(
+        return PointPath(
             points = [p for p in plist if (p.x, p.y) in shape]
         )
     

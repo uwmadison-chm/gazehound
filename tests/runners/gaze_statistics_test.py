@@ -91,12 +91,12 @@ class TestGazeStatisticsRunner(object):
         assert gsr.timeline is not None, "Timeline shouldn't be None"
         eq_(len(gsr.timeline), 2)
     
-    def test_runner_timeline_has_scanpaths(self):
+    def test_runner_timeline_has_pointpaths(self):
         args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
         gsr = gaze_statistics.GazeStatsRunner(args)
-        assert all(pres.scanpath is not None for pres in gsr.timeline), \
+        assert all(pres.pointpath is not None for pres in gsr.timeline), \
             "All presentations should have gaze data"
-        assert all(len(pres.scanpath) > 0 for pres in gsr.timeline)
+        assert all(len(pres.pointpath) > 0 for pres in gsr.timeline)
 
 
 class TestGazeStatisticsAnalyzer(object):
@@ -105,10 +105,10 @@ class TestGazeStatisticsAnalyzer(object):
         
     
     def setup(self):
-        self.scanpath = mock_objects.smi_scanpath_normal()
+        self.pointpath = mock_objects.smi_pointpath_normal()
         self.timeline = mock_objects.tiny_viewings()
         self.gsa = gaze_statistics.GazeStatisticsAnalyzer(
-            scanpath = self.scanpath,
+            pointpath = self.pointpath,
             timeline = self.timeline
         )
         
@@ -118,7 +118,7 @@ class TestGazeStatisticsAnalyzer(object):
     
     def test_gen_stats_counts_total_points(self):
         stats = self.gsa.general_stats()
-        eq_(stats.total_points, len(self.scanpath))
+        eq_(stats.total_points, len(self.pointpath))
         
     def test_gen_stats_knows_start_and_end_times(self):
         stats = self.gsa.general_stats()

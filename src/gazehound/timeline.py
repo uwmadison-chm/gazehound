@@ -63,12 +63,12 @@ class Timeline(object):
         newtl = copy.deepcopy(self)
         x_offset, y_offset = 0, 0
         for pres in newtl.presentations:
-            if hasattr(pres, 'scanpath'):
+            if hasattr(pres, 'pointpath'):
                 if pres.name == name:
                     x_offset, y_offset = self.__recenter_point(
                         pres, x_offset, y_offset, x_center, y_center, bounds
                     )
-                pres.scanpath = pres.scanpath.recenter_by(x_offset, y_offset)
+                pres.pointpath = pres.pointpath.recenter_by(x_offset, y_offset)
         return newtl
         
     
@@ -76,7 +76,7 @@ class Timeline(object):
         self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds = None
     ):
         xoff, yoff = cur_x_offset, cur_y_offset
-        sp = pres.scanpath
+        sp = pres.pointpath
         if bounds is not None:
             sp = sp.points_within(bounds)
         m = sp.mean()

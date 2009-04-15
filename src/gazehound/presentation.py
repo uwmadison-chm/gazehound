@@ -11,11 +11,11 @@ class Presentation(object):
     name. Can also contain viewing data (Is this a good idea?)
     """
     
-    def __init__(self, start=None, end=None, name=None, scanpath = None):
+    def __init__(self, start=None, end=None, name=None, pointpath = None):
         self.start = start
         self.end = end
         self.name = name
-        self.scanpath = scanpath
+        self.pointpath = pointpath
         
     def valid(self):
         try:

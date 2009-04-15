@@ -141,11 +141,11 @@ class IViewScanpathReader(IViewReader):
             comment_char, opts_for_parser
         )
     
-    def scanpath(self):
+    def pointpath(self):
         """Return a list of Points representing the scan path."""
         fact = IViewPointFactory()
         points = fact.from_component_list(self)
-        return ScanPath(points = points)
+        return PointPath(points = points)
         
     
     def __header_map(self):

@@ -10,15 +10,15 @@ import timeline
 
     
 class Combiner(object):
-    """Combines timelines of presentations with scanpath data"""
-    def __init__(self, timeline = None, scanpath = None):
+    """Combines timelines of presentations with pointpath data"""
+    def __init__(self, timeline = None, pointpath = None):
         self.timeline = timeline
-        self.scanpath = scanpath
+        self.pointpath = pointpath
     
     def viewings(self):
         t2 = copy.copy(self.timeline)
         for pres in t2:
-            points = [p for p in self.scanpath 
-                if (p.time >= pres.start and p.time < pres.end)]
-            pres.scanpath = gazepoint.ScanPath(points)
+            points = [p for p in self.pointpath 
+                if (p.time_midpoint() >= pres.start and p.time_midpoint() < pres.end)]
+            pres.pointpath = gazepoint.PointPath(points)
         return timeline.Timeline(t2)
