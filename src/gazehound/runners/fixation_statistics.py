@@ -8,18 +8,17 @@
 from __future__ import with_statement
 import sys
 import os.path
+import math
 from optparse import OptionParser
 from .. import readers, timeline, viewing, shapes
 from ..writers import delimited
 
-#def main(argv = None):
-#    if argv is None:
-#        argv = sys.argv
-#        
-#    gsr = FixationStatsRunner(argv)
-#    gsr.print_analysis()
-
-
+def main(argv = None):
+    if argv is None:
+        argv = sys.argv
+        
+    gsr = FixationStatsRunner(argv)
+    gsr.print_analysis()
 
 
 class FixationStatisticsOptionParser(object):
@@ -55,7 +54,7 @@ class FixationStatisticsOptionParser(object):
         self.options, self.args = parser.parse_args(argv[1:])
 
         if len(self.args) == 0:
-            parser.error("No pointpath file specified")
+            parser.error("No fixation file specified")
 
         if (self.options.recenter_on is not None and 
                 self.options.stim_file is None):
@@ -86,189 +85,231 @@ class FixationStatsRunner(object):
 
         self.timeline = None
 
-#        if op.options.stim_file is not None:
-#            self.timeline = self.__build_timeline(op.options.stim_file)
-#            if op.options.object_dir is not None:
-#                r = shapes.ShapeReader(path = op.options.object_dir)
-#                dec = shapes.TimelineDecorator(r)
-#                self.timeline = dec.find_shape_files_and_add_to_timeline(
-#                    self.timeline
-#                )
-#            if op.options.recenter_on is not None:
-#                #TODO: Make these sepeficiable on the command line
-#                rx = 400
-#                ry = 300
-#                limiter = shapes.Rectangle(300, 200, 500, 400)
-#                self.timeline = self.timeline.recenter_on(
-#                    op.options.recenter_on, rx, ry, limiter
-#                )
-#
-#        # And build the analyzer
-#        self.analyzer = FixationStatisticsAnalyzer(
-#            pointpath = self.pointpath,
-#            timeline = self.timeline
-#        )
-#
-#    def print_analysis(self):
-#        gsw = delimited.FixationStatsWriter()
-#        gsw.write_header()
-#        gsw.write([self.analyzer.general_stats()])
-#        if self.timeline is not None:
-#            gsw.write(self.analyzer.timeline_stats())
-#
-#
-#    def __build_timeline(self, filename):
-#        """Build the timeline from a file."""
-#        timeline = None
-#        with open(filename) as f:
-#            lines = [l.strip() for l in f.readlines()]
-#            tr = readers.TimelineReader(lines)
-#            ttl = tr.timeline()
-#            timeline = viewing.Combiner(
-#                timeline = ttl, pointpath = self.pointpath
-#            ).viewings()
-#        return timeline
-#
-#
-#class FixationStatisticsAnalyzer(object):
-#
-#    def __init__(self, 
-#        pointpath = None,
-#        strict_valid_fun = None,
-#        pointpath_meta = None,
-#        timeline = []):
-#        super(FixationStatisticsAnalyzer, self).__init__()
-#        self.pointpath = pointpath
-#        self.timeline = timeline
-#
-#        # TODO: Don't hardcode these.
-#        MAX_X = 800
-#        MAX_Y = 600
-#
-#        def default_valid(x_width, y_width, slop_frac, point):
-#            xslop = x_width*slop_frac
-#            yslop = y_width*slop_frac
-#            max_x = x_width+xslop
-#            min_x = 0-xslop
-#            max_y = y_width+yslop
-#            min_y = 0-yslop
-#
-#            return ((point.x >= min_x and point.x < max_x) and
-#            (point.y >= min_y and point.y < max_y) and not
-#            (point.x == 0 and point.y == 0
-#            ))
-#
-#        def svf(point):
-#            return default_valid(MAX_X, MAX_Y, 0, point)
-#
-#        def lvf(point):
-#            return default_valid(MAX_X, MAX_Y, .1, point)
-#
-#        self.strict_valid_fun = svf
-#        self.lax_valid_fun = lvf
-#
-#        def in_fun(shape, point):
-#            return (point.x, point.y) in shape
-#
-#        self.in_fun = in_fun
-#
-#    def general_stats(self):
-#        """Return a FixationStats containing basic data about the pointpath"""
-#
-#        data = FixationStats(
-#            presented = 'screen',
-#            area = 'all',
-#            total_points = len(self.pointpath),
-#            start_ms = self.pointpath[0].time,
-#            end_ms = self.pointpath[-1].time,
-#            valid_strict = len(self.pointpath.valid_points(
-#                self.strict_valid_fun
-#            )),
-#            valid_lax = len(self.pointpath.valid_points(
-#                self.lax_valid_fun
-#            ))
-#        )
-#
-#        data.points_in = data.valid_strict
-#        data.points_out = data.total_points - data.valid_strict
-#
-#        return data
-#
-#    def timeline_stats(self):
-#        """ 
-#        Return a list of FixationStats containing data about all the events
-#        in the timeline.
-#        """
-#
-#        data = []
-#        doshapes = hasattr(self.timeline, 'has_shapes')
-#        for pres in self.timeline:
-#            stats = FixationStats(
-#                presented = pres.name,
-#                area = 'all',
-#                total_points = len(pres.pointpath),
-#                start_ms = pres.start,
-#                end_ms = pres.end,
-#                valid_strict = len(pres.pointpath.valid_points(
-#                    self.strict_valid_fun
-#                )),
-#                valid_lax = len(pres.pointpath.valid_points(
-#                    self.lax_valid_fun
-#                ))
-#            )
-#            stats.points_in = stats.valid_strict
-#            stats.points_out = stats.total_points - stats.valid_strict
-#            data.append(stats)
-#            if doshapes:
-#                for ss in self.shape_stats(pres):
-#                    data.append(ss)
-#                    pass
-#        return data
-#
-#    def shape_stats(self, pres):
-#        stats_list = []
-#        if pres.shapes is None:
-#            return[FixationStats(
-#                presented = pres.name, 
-#                area = "Can't read shape file")
-#            ]
-#        for s in pres.shapes:
-#            stats = FixationStats(
-#                presented = pres.name,
-#                area = s.name,
-#                total_points = len(pres.pointpath),
-#                start_ms = pres.start,
-#                end_ms = pres.end,
-#                valid_strict = len(pres.pointpath.valid_points(
-#                    self.strict_valid_fun
-#                )),
-#                valid_lax = len(pres.pointpath.valid_points(
-#                    self.lax_valid_fun
-#                ))
-#            )
-#
-#            def f(point):
-#                return self.in_fun(s, point)
-#
-#            stats.points_in = len(pres.pointpath.valid_points(f))
-#            stats.points_out = stats.total_points - stats.points_in
-#            stats_list.append(stats)
-#
-#        return stats_list
-#
-#class FixationStats(object):
-#    """A data structure containing stats about a pointpath"""
-#    def __init__(self, 
-#    presented = None, area = None, start_ms = 0, end_ms = 0, total_points = 0, 
-#    points_in = 0, points_out = 0, valid_strict = 0, valid_lax = 0
-#    ):
-#        super(FixationStats, self).__init__()
-#        self.presented = presented
-#        self.area = area
-#        self.start_ms = start_ms
-#        self.end_ms = end_ms
-#        self.total_points = total_points
-#        self.points_in = points_in
-#        self.points_out = points_out
-#        self.valid_strict = valid_strict
-#        self.valid_lax = valid_lax
+        if op.options.stim_file is not None:
+            self.timeline = self.__build_timeline(op.options.stim_file)
+            if op.options.object_dir is not None:
+                r = shapes.ShapeReader(path = op.options.object_dir)
+                dec = shapes.TimelineDecorator(r)
+                self.timeline = dec.find_shape_files_and_add_to_timeline(
+                    self.timeline
+                )
+            if op.options.recenter_on is not None:
+                #TODO: Make these sepeficiable on the command line
+                rx = 400
+                ry = 300
+                limiter = shapes.Rectangle(300, 200, 500, 400)
+                self.timeline = self.timeline.recenter_on(
+                    op.options.recenter_on, rx, ry, limiter
+                )
+
+        # And build the analyzer
+        self.analyzer = FixationStatisticsAnalyzer(
+            pointpath = self.pointpath,
+            timeline = self.timeline
+        )
+
+    def print_analysis(self):
+        gsw = delimited.FixationStatsWriter()
+        gsw.write_header()
+        gsw.write([self.analyzer.general_stats()])
+        if self.timeline is not None:
+            gsw.write(self.analyzer.timeline_stats())
+
+
+    def __build_timeline(self, filename):
+        """Build the timeline from a file."""
+        timeline = None
+        with open(filename) as f:
+            lines = [l.strip() for l in f.readlines()]
+            tr = readers.TimelineReader(lines)
+            ttl = tr.timeline()
+            timeline = viewing.Combiner(
+                timeline = ttl, pointpath = self.pointpath
+            ).viewings()
+        return timeline
+
+
+class FixationStatisticsAnalyzer(object):
+
+    def __init__(self, 
+        pointpath = None,
+        strict_valid_fun = None,
+        pointpath_meta = None,
+        timeline = []):
+        super(FixationStatisticsAnalyzer, self).__init__()
+        self.pointpath = pointpath
+        self.timeline = timeline
+
+        # TODO: Don't hardcode these.
+        MAX_X = 800
+        MAX_Y = 600
+
+        def default_valid(x_width, y_width, slop_frac, point):
+            xslop = x_width*slop_frac
+            yslop = y_width*slop_frac
+            max_x = x_width+xslop
+            min_x = 0-xslop
+            max_y = y_width+yslop
+            min_y = 0-yslop
+
+            return ((point.x >= min_x and point.x < max_x) and
+            (point.y >= min_y and point.y < max_y) and not
+            (point.x == 0 and point.y == 0
+            ))
+
+        def svf(point):
+            return default_valid(MAX_X, MAX_Y, 0, point)
+
+        def lvf(point):
+            return default_valid(MAX_X, MAX_Y, .1, point)
+
+        self.strict_valid_fun = svf
+        self.lax_valid_fun = lvf
+
+        def in_fun(shape, point):
+            return (point.x, point.y) in shape
+
+        self.in_fun = in_fun
+
+    def general_stats(self):
+        """Return a FixationStats containing basic data about the pointpath"""
+
+        data = FixationStats(
+            presented = 'screen',
+            area = 'all',
+            start_ms = self.pointpath[0].time,
+            end_ms = self.pointpath[-1].time+self.pointpath[-1].duration,
+            total_fixations = len(self.pointpath),
+            time_fixating = self.__time_fixating(self.pointpath),
+            fixations_per_second = self.__fixations_per_second(self.pointpath),
+            distance_between_fixations = self.__distance_between_fixations(
+                self.pointpath
+            )
+        )
+
+        data.time_in = data.time_fixating
+        data.time_out = (data.end_ms - data.start_ms) - data.time_fixating
+
+        return data
+        
+    def timeline_stats(self):
+        """ 
+        Return a list of FixationStats containing data about all the events
+        in the timeline.
+        """
+
+        data = []
+        doshapes = hasattr(self.timeline, 'has_shapes')
+        for pres in self.timeline:
+            if len(pres.pointpath) == 0:
+                stats = FixationStats(
+                    presented = pres.name,
+                    area = 'all'
+                )
+            else:
+                stats = FixationStats(
+                    presented = pres.name,
+                    area = 'all',
+                    start_ms = pres.pointpath[0].time,
+                    end_ms = pres.pointpath[-1].time+pres.pointpath[-1].duration,
+                    total_fixations = len(pres.pointpath),
+                    time_fixating = self.__time_fixating(pres.pointpath),
+                    fixations_per_second = self.__fixations_per_second(
+                        pres.pointpath),
+                    distance_between_fixations = self.__distance_between_fixations(
+                        pres.pointpath))
+            
+                stats.time_in = stats.time_fixating
+                stats.time_out = (stats.end_ms - stats.start_ms) - stats.time_fixating
+            data.append(stats)
+            if doshapes:
+                for ss in self.shape_stats(pres):
+                    data.append(ss)
+                    pass
+        return data
+
+    def shape_stats(self, pres):
+        stats_list = []
+        if pres.shapes is None:
+            return[FixationStats(
+                presented = pres.name, 
+                area = "Can't read shape file")
+            ]
+        for s in pres.shapes:
+            if len(pres.pointpath) == 0:
+                stats = FixationStats(
+                    presented = pres.name,
+                    area = s.name
+                )
+            else:
+                stats = FixationStats(
+                    presented = pres.name,
+                    area = s.name,
+                    start_ms = pres.pointpath[0].time,
+                    end_ms = pres.pointpath[-1].time+pres.pointpath[-1].duration,
+                    total_fixations = len(pres.pointpath),
+                    time_fixating = self.__time_fixating(pres.pointpath),
+                    fixations_per_second = self.__fixations_per_second(
+                        pres.pointpath),
+                    distance_between_fixations = self.__distance_between_fixations(
+                        pres.pointpath))
+
+                def f(point):
+                    return self.in_fun(s, point)
+
+                stats.time_in = sum(p.duration for p in pres.pointpath.valid_points(f))
+                stats.time_out =(stats.end_ms - stats.start_ms) - stats.time_in
+            stats_list.append(stats)
+
+        return stats_list
+
+    def __total_fixations(self, pointpath):
+        """The total number of fixations in a point path"""
+        return len(pointpath)
+        
+    def __time_fixating(self, pointpath):
+        """Time spent fixating during a point path"""
+        return sum(p.duration for p in pointpath)
+    
+    def __pp_duration(self, pointpath):
+        if len(pointpath) == 0: return 0
+        start = pointpath[0].time
+        end = pointpath[-1].time+pointpath[-1].duration
+        return end-start
+    
+    def __fixations_per_second(self, pointpath):
+        """ Number of fixations divided by seconds fixating """
+        tf = self.__time_fixating(pointpath)*1000.0
+        if tf == 0: return 0
+        return (
+            float(self.__total_fixations(pointpath)) / 
+            (self.__pp_duration(pointpath)/1000.0)
+        )
+    
+    def __distance_between_fixations(self, pointpath):
+        if len(pointpath) < 2: return 0
+        def dist(p1, p2):
+            return math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2)
+        dsum = 0
+        for i in range(1, len(pointpath)):
+            dsum += dist(pointpath[i-1], pointpath[i])
+        return float(dsum) / (len(pointpath)-1)
+    
+class FixationStats(object):
+    """A data structure containing stats about a pointpath"""
+    def __init__(self, 
+    presented = None, area = None, start_ms = 0, end_ms = 0, 
+    total_fixations = 0, time_fixating = 0, time_in = 0,  time_out = 0, 
+    fixations_per_second = 0, distance_between_fixations = 0
+    ):
+        super(FixationStats, self).__init__()
+        self.presented = presented
+        self.area = area
+        self.start_ms = start_ms
+        self.end_ms = end_ms
+        self.total_fixations = total_fixations
+        self.time_fixating = time_fixating
+        self.time_in = time_in
+        self.time_out = time_out
+        self.fixations_per_second = fixations_per_second
+        self.distance_between_fixations = distance_between_fixations

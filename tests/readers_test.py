@@ -10,6 +10,7 @@ from __future__ import with_statement
 from os import path
 from gazehound.readers import DelimitedReader, IViewScanpathReader, IViewFixationReader
 from testutils import *
+from nose.tools import *
 
 class TestDelimitedReader(object):
     """Exercises the DelmitedReader class"""
@@ -129,3 +130,9 @@ class TestIViewFixationReader(object):
         
         h = fr.header()
         eq_(h.get('subject'), '001')
+        
+    def test_calibration_size_parses_into_int_list(self):
+        ir = IViewFixationReader(self.fixation_lines)
+        h = ir.header()
+
+        eq_(h.get('calibration_size'), [800,600])

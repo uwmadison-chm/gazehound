@@ -5,13 +5,14 @@ ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 setup(
     name = "gazehound",
-    version = "0.0.2",
+    version = "0.1",
     package_dir = {'':'src'},
     packages = find_packages('src'),
     
     entry_points = {
         'console_scripts': [
-            'scanpath_stats = gazehound.runners.gaze_statistics:main'
+            'scanpath_stats = gazehound.runners.gaze_statistics:main',
+            'fixation_stats = gazehound.runners.fixation_statistics:main'
         ]
     },
 

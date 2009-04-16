@@ -117,12 +117,16 @@ class PointFactory(object):
         points = []
         for point_data in components:
             point = self.type_to_produce()
-            
-            for i in range(len(attribute_list)):
-                attr_name = attribute_list[i][0]
-                attr_type = attribute_list[i][1]
-                if attr_type is not None:
-                    setattr(point, attr_name, attr_type(point_data[i]))
+        
+            try:
+                for i in range(len(attribute_list)):
+                    attr_name = attribute_list[i][0]
+                    attr_type = attribute_list[i][1]
+                    if attr_type is not None:
+                        setattr(point, attr_name, attr_type(point_data[i]))
+            except ValueError:
+                err_str = "Could not parse %s with %s" % (point_data, attribute_list)
+                raise ValueError(err_str)
 
             points.append(point)
         return points

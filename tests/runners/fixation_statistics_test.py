@@ -7,6 +7,7 @@
 
 from __future__ import with_statement
 from gazehound.runners import fixation_statistics
+from gazehound import viewing
 from ..testutils import includes_
 from nose.tools import *
 from .. import mock_objects
@@ -96,55 +97,43 @@ class TestFixationStatisticsRunner(object):
         self.scan_file = os.path.join(self.example_path, 'fixations.txt')
         self.stim_file = os.path.join(self.example_path, 'presentation_tabs.txt')
 
-#    def test_runner_builds_timeline(self):
-#        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
-#        gsr = fixation_statistics.FixationStatsRunner(args)
-#        assert gsr.timeline is not None, "Timeline shouldn't be None"
-#        #eq_(len(gsr.timeline), 2)
-#    
-#    def test_runner_timeline_has_pointpaths(self):
-#        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
-#        gsr = gaze_statistics.FixationStatsRunner(args)
-#        assert all(pres.pointpath is not None for pres in gsr.timeline), \
-#            "All presentations should have gaze data"
-#        assert all(len(pres.pointpath) > 0 for pres in gsr.timeline)
-#
-#
-#class TestFixationStatisticsAnalyzer(object):
-#    def __init__(self):
-#        super(TestFixationStatisticsAnalyzer, self).__init__()
-#        
-#    
-#    def setup(self):
-#        self.pointpath = mock_objects.smi_pointpath_normal()
-#        self.timeline = mock_objects.tiny_viewings()
-#        self.gsa = gaze_statistics.FixationStatisticsAnalyzer(
-#            pointpath = self.pointpath,
-#            timeline = self.timeline
-#        )
-#        
-#    def test_gaze_stats_checker_returns_general_stats(self):
-#        stats = self.gsa.general_stats()
-#        assert stats is not None
-#    
-#    def test_gen_stats_counts_total_points(self):
-#        stats = self.gsa.general_stats()
-#        eq_(stats.total_points, len(self.pointpath))
-#        
-#    def test_gen_stats_knows_start_and_end_times(self):
-#        stats = self.gsa.general_stats()
-#        eq_(stats.start_ms, 0)
-#        eq_(stats.end_ms, 200)
-#        
-#    def test_gen_stats_detects_strict_invalid_points(self):
-#        stats = self.gsa.general_stats()
-#        # I know this from looking at the file.
-#        invalid_count = 8
-#        eq_(stats.valid_strict, stats.total_points - invalid_count)
-#
-#    def test_gen_stats_detects_lax_invalid_points(self):
-#        stats = self.gsa.general_stats()
-#        # I know this from looking at the file.
-#        invalid_count = 7
-#        eq_(stats.valid_lax, stats.total_points - invalid_count)
-#
+    def test_runner_builds_timeline(self):
+        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
+        gsr = fixation_statistics.FixationStatsRunner(args)
+        assert gsr.timeline is not None, "Timeline shouldn't be None"
+        eq_(len(gsr.timeline), 6)
+    
+    def test_runner_timeline_has_pointpaths(self):
+        args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
+        gsr = fixation_statistics.FixationStatsRunner(args)
+        assert all(pres.pointpath is not None for pres in gsr.timeline), \
+            "All presentations should have gaze data"
+
+
+class TestFixationStatisticsAnalyzer(object):
+
+    def setup(self):
+        self.pointpath = mock_objects.smi_fixation_points()
+        self.timeline = viewing.Combiner(
+            timeline = mock_objects.standard_timeline(), 
+            pointpath = self.pointpath
+        ).viewings()
+        
+        self.gsa = fixation_statistics.FixationStatisticsAnalyzer(
+            pointpath = self.pointpath,
+            timeline = self.timeline
+        )
+        
+    def test_gaze_stats_checker_returns_general_stats(self):
+        stats = self.gsa.general_stats()
+        assert stats is not None
+    
+    def test_gen_stats_counts_total_points(self):
+        stats = self.gsa.general_stats()
+        eq_(stats.total_fixations, len(self.pointpath))
+        
+    def test_gen_stats_knows_start_and_end_times(self):
+        stats = self.gsa.general_stats()
+        eq_(stats.start_ms, 18750)
+        eq_(stats.end_ms, 34717)
+        

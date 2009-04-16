@@ -54,6 +54,29 @@ class GazeStatsWriter(DelimitedWriter):
             GazeStatsWriter.mapper, out, delimiter
         )
 
+
+class FixationStatsWriter(DelimitedWriter):
+
+    mapper = [
+        ('Presented', lambda s: s.presented),
+        ('Area', lambda s: s.area),
+        ('Start', lambda s: "%.3f" % (s.start_ms/1000.0)),
+        ('End', lambda s: "%.3f" % (s.end_ms/1000.0)),
+        ('Total fixations', lambda s: s.total_fixations),
+        ('Time fixating', lambda s: (s.time_fixating/1000.0)),
+        ('Time in', lambda s: (s.time_in/1000.0)),
+        ('Time out', lambda s: (s.time_out/1000.0)),
+        ('Fixations/second', lambda s: ("%.3f" % s.fixations_per_second)),
+        ('Distance between fixations', lambda s: s.distance_between_fixations),
+    ]
+
+    """Writes gaze stats items into a delimited file"""
+    def __init__(self, out = sys.stdout, delimiter = "\t"):
+        super(FixationStatsWriter, self).__init__(
+            FixationStatsWriter.mapper, out, delimiter
+        )
+
+
 def dfnz(num1, num2):
     if num2 == 0:
         return 0

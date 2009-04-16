@@ -113,12 +113,6 @@ class IViewReader(DelimitedReader):
                 header_ret.update([cleaned_pair])
         return header_ret
 
-    def pointpath(self):
-        """Return a list of Points representing the scan path."""
-        fact = IViewPointFactory()
-        points = fact.from_component_list(self)
-        return PointPath(points = points)
-
     def __map_header_value(self, pair):
         """
         Return a tuple of the form (key, value), or None if 
@@ -147,6 +141,14 @@ class IViewScanpathReader(IViewReader):
             comment_char, opts_for_parser
         )
     
+
+    def pointpath(self):
+        """Return a list of Points representing the scan path."""
+        fact = IViewPointFactory()
+        points = fact.from_component_list(self)
+        return PointPath(points = points)
+
+
     
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
@@ -197,6 +199,14 @@ class IViewFixationReader(IViewReader):
             'Minimal Time': ('minimal_time', int),
             'Maximal Pixel': ('maximal_pixel', int)
         }
+
+    def pointpath(self):
+        """Return a list of Points representing the scan path."""
+        fact = IViewFixationFactory()
+        points = fact.from_component_list(self)
+        return PointPath(points = points)
+
+
        
 class TimelineReader(object):
     """ 
