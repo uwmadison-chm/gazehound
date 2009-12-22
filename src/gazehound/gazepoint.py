@@ -12,7 +12,7 @@ class Point(object):
     A point with x, y, and time coordinates -- one point in a scan path 
     """
     
-    def __init__(self, x = None, y = None, time = None, duration = 0):
+    def __init__(self, x = None, y = None, time = None, duration = 1.0):
         self.x = x
         self.y = y
         self.time = time
@@ -67,16 +67,16 @@ class PointPath(object):
     def mean(self):
         if len(self.points) == 0:
             return None
-        xtotal = 0.0
-        ytotal = 0.0
-        total_dur = 0.0
-        for p in self.points:
-            dur = float(max(p.duration, 1))
-            xtotal += dur*p.x
-            ytotal += dur*p.y
-            total_dur += dur
-            
-        return (xtotal/total_dur, ytotal/total_dur)
+
+        total_dur = self.total_duration
+        xtotal = sum((float(p.duration)*p.x for p in self.points))
+        ytotal = sum((float(p.duration)*p.y for p in self.points))
+
+        return (xtotal/total_dur, ytotal/total_dur) # Means!
+
+    @property
+    def total_duration(self):
+        return sum((p.duration for p in self.points))
 
     def recenter_by(self, x, y):
         points = copy.deepcopy(self.points)

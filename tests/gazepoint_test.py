@@ -203,6 +203,10 @@ class TestPointPath(object):
         def criterion(point):
             return (point.x > 0 and point.x < 800)
     
+    def test_pointpath_computes_total_length(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        eq_(float(len(self.points)), pointpath.total_duration)
+    
     def test_pointpath_computes_mean(self):
          pointpath = gazepoint.PointPath(points = self.points)
          x, y = pointpath.mean()
