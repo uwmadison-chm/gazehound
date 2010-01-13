@@ -78,10 +78,9 @@ class FixationStatsRunner(object):
         op = FixationStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        with open(op.fix_file) as ff:
-            ir = readers.IViewFixationReader(ff.readlines())
-            self.file_data = ir
-            self.pointpath = ir.pointpath()
+        ir = readers.IViewFixationReader(filename = op.fix_file)
+        self.file_data = ir
+        self.pointpath = ir.pointpath()
 
         self.timeline = None
 

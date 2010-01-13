@@ -75,11 +75,10 @@ class GazeStatsRunner(object):
         super(GazeStatsRunner, self).__init__()
         op = GazeStatisticsOptionParser(argv)
         # Read and parse the gazestream
-        
-        with open(op.gaze_file) as gf:
-            ir = readers.IViewScanpathReader(gf.readlines())
-            self.file_data = ir
-            self.pointpath = ir.pointpath()
+
+        ir = readers.IViewScanpathReader(filename = op.gaze_file)
+        self.file_data = ir
+        self.pointpath = ir.pointpath()
 
         self.timeline = None
         
