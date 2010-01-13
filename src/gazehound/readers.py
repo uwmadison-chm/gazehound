@@ -30,11 +30,8 @@ class DelimitedReader(object):
         self.file_data = file_data
         self.skip_comments = skip_comments
         self.comment_char = comment_char
-        self.opts_for_parser = opts_for_parser
-        for prop, val in self.__class__.STANDARD_DIALECT.iteritems():
-            if not self.opts_for_parser.has_key(prop):
-                self.opts_for_parser[prop] = val
-    
+        self.opts_for_parser = self.__class__.STANDARD_DIALECT.copy()
+        self.opts_for_parser.update(opts_for_parser)    
     
     def __len__(self):
         self.__setup_parser()
