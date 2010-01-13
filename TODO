@@ -1,0 +1,8 @@
+* Make slow operations use numpy instead of native python lists.
+  For the moment, this mainly entails view_plotter.
+  
+* Change from a view_matrix to a kernel we'll convolve with.
+
+* Break various utilities (blink interpolation, etc) into own programs
+
+* Create intermediate TSV file format
