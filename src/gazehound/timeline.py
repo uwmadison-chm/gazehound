@@ -5,7 +5,6 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-from __future__ import with_statement
 import copy
 
 from presentation import *
