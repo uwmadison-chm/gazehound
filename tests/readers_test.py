@@ -51,32 +51,32 @@ class TestDelimitedReader(object):
             skip_comments = True, comment_char = "#")
         dr.read_file(self.norm_file)
         
-        assert len(dr) == self.EXPECTED_LINES
+        eq_(len(dr), self.EXPECTED_LINES)
     
     def test_reader_can_take_filename_arg(self):
         dr = DelimitedReader(filename = self.norm_file)
         
-        assert len(dr) == self.EXPECTED_LINES
+        eq_(len(dr), self.EXPECTED_LINES)
     
     def test_reader_skips_comments_with_blanks(self):
         dr = DelimitedReader(self.blank_comment_lines,
             skip_comments = True, comment_char = "#")
             
-        assert len(dr) == self.EXPECTED_LINES
+        eq_(len(dr), self.EXPECTED_LINES)
         
     def test_reader_keeps_comment_lines_in_body(self):
         dr = DelimitedReader(self.comment_inbody,
             skip_comments = True, comment_char = "#")
 
-        assert len(dr) == self.EXPECTED_LINES
+        eq_(len(dr), self.EXPECTED_LINES)
 
     def test_reader_contains_lines_with_same_elements(self):
         dr = DelimitedReader(self.norm_lines)
         
         first_element = dr.next()
         for l in dr:
-            assert len(l) > 1
-            assert len(l) == len(first_element)
+            gt_(len(l), 1)
+            eq_(len(l), len(first_element))
     
     def test_reader_yields_comment_lines(self):
         dr = DelimitedReader(self.norm_lines,
@@ -102,12 +102,12 @@ class TestIViewScanpathReader(object):
     def test_reader_basically_works(self):
         ir = IViewScanpathReader(self.norm_lines)
         
-        assert len(ir) == self.EXPECTED_LINES
+        eq_(len(ir), self.EXPECTED_LINES)
         
     def test_reader_uses_read_file(self):
         ir = IViewScanpathReader(filename = self.norm_file)
         
-        assert len(ir) == self.EXPECTED_LINES
+        eq_(len(ir), self.EXPECTED_LINES)
         
     def test_reader_finds_comment_lines(self):
         ir = IViewScanpathReader(self.norm_lines)
