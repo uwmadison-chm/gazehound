@@ -1,11 +1,11 @@
 import ez_setup
 ez_setup.use_setuptools()
 
-
+from gazehound import version
 from setuptools import setup, find_packages
 setup(
     name = "gazehound",
-    version = "0.1",
+    version = version.version_str(),
     package_dir = {'':'src'},
     packages = find_packages('src'),
     
