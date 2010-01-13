@@ -18,13 +18,20 @@ class TestDelimitedReader(object):
     def setup(self):
         p = path.abspath(path.dirname(__file__))
         # All of these should generate the same number of lines...
-        with open(path.join(p, "examples/iview_normal.txt")) as f:
+        self.norm_file = path.join(
+            p, "examples/iview_normal.txt")
+        self.blank_comment_file = path.join(
+            p, "examples/iview_blank_comment.txt")
+        self.comment_inbody = path.join(
+            p, "examples/iview_comment_inbody.txt")
+            
+        with open(self.norm_file) as f:
             self.norm_lines = f.readlines()
         
-        with open(path.join(p, "examples/iview_blank_comment.txt")) as f:
+        with open(self.blank_comment_file) as f:
             self.blank_comment_lines = f.readlines()
         
-        with open(path.join(p, "examples/iview_comment_inbody.txt")) as f:
+        with open(self.comment_inbody) as f:
             self.comment_inbody = f.readlines()
         
         self.EXPECTED_LINES = 13
@@ -36,6 +43,18 @@ class TestDelimitedReader(object):
     def test_reader_skips_normal_comments(self):
         dr = DelimitedReader(self.norm_lines, 
             skip_comments = True, comment_char = "#")
+        
+        assert len(dr) == self.EXPECTED_LINES
+    
+    def test_reader_can_read_file(self):
+        dr = DelimitedReader(None, 
+            skip_comments = True, comment_char = "#")
+        dr.read_file(self.norm_file)
+        
+        assert len(dr) == self.EXPECTED_LINES
+    
+    def test_reader_can_take_filename_arg(self):
+        dr = DelimitedReader(filename = self.norm_file)
         
         assert len(dr) == self.EXPECTED_LINES
     
@@ -69,7 +88,8 @@ class TestIViewScanpathReader(object):
     """Exercise the IVIewScanpathReader class"""
     def setup(self):
         p = path.abspath(path.dirname(__file__))
-        with open(path.join(p, "examples/iview_normal.txt")) as f:
+        self.norm_file = path.join(p, "examples/iview_normal.txt")
+        with open(self.norm_file) as f:
             self.norm_lines = f.readlines()
 
         self.EXPECTED_LINES = 13
@@ -81,6 +101,11 @@ class TestIViewScanpathReader(object):
     
     def test_reader_basically_works(self):
         ir = IViewScanpathReader(self.norm_lines)
+        
+        assert len(ir) == self.EXPECTED_LINES
+        
+    def test_reader_uses_read_file(self):
+        ir = IViewScanpathReader(filename = self.norm_file)
         
         assert len(ir) == self.EXPECTED_LINES
         
@@ -115,15 +140,22 @@ class TestIViewFixationReader(object):
     """Exercise the IViewFixationReader"""
     def __init__(self):
         p = path.abspath(path.dirname(__file__))
-        with open(path.join(p, "examples/fixations.txt")) as f:
+        self.fix_file = path.join(p, "examples/fixations.txt")
+        with open(self.fix_file) as f:
             self.fixation_lines = f.readlines()
 
         self.EXPECTED_FIXATIONS = 8
         
     def test_reader_basically_works(self):
+        fr = IViewFixationReader(filename=self.fix_file)
+        
+        eq_(len(fr), self.EXPECTED_FIXATIONS)
+        
+    def test_reader_with_filename(self):
         fr = IViewFixationReader(self.fixation_lines)
         
         eq_(len(fr), self.EXPECTED_FIXATIONS)
+        
         
     def test_basic_header_parsing(self):
         fr = IViewFixationReader(self.fixation_lines)

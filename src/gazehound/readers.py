@@ -4,6 +4,8 @@
 #
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
+from __future__ import with_statement
+
 import csv
 import re
 from gazepoint import *
@@ -23,7 +25,7 @@ class DelimitedReader(object):
     }
     def __init__(self, 
         file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}
+        opts_for_parser = {}, filename = None
     ):
         self.__lines_cleaned = None
         self.parser = None
@@ -31,8 +33,20 @@ class DelimitedReader(object):
         self.skip_comments = skip_comments
         self.comment_char = comment_char
         self.opts_for_parser = self.__class__.STANDARD_DIALECT.copy()
-        self.opts_for_parser.update(opts_for_parser)    
+        self.opts_for_parser.update(opts_for_parser)
+        self.filename = filename
+        if file_data is None and filename is not None:
+            self.read_file(filename)
     
+
+    """ 
+    Convenience method. Reads a file into self.file_data. Generally uses
+    the 'rU' method, which is almost certainly what you want.
+    """
+    def read_file(self, filename, mode = 'rU'):
+        with open(filename, mode) as f:
+            self.file_data = f.readlines()
+            
     def __len__(self):
         self.__setup_parser()
         return len(self.__lines_cleaned)
@@ -79,15 +93,14 @@ class DelimitedReader(object):
         
         self.__lines_cleaned = self.file_data[i:]
     
-
 class IViewReader(DelimitedReader):
     """A reader for files produced by SMI's iView software"""
     def __init__(self, header_map,
         file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}):
+        opts_for_parser = {}, filename = None):
         
         super(IViewReader, self).__init__(
-            file_data, skip_comments, comment_char, opts_for_parser
+            file_data, skip_comments, comment_char, opts_for_parser, filename
         )
         self.header_map = header_map
 
@@ -131,11 +144,11 @@ class IViewScanpathReader(IViewReader):
     """A reader for files produced by SMI's iView software"""
     def __init__(self, 
         file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}):
+        opts_for_parser = {}, filename = None):
         
         super(IViewScanpathReader, self).__init__(
             self.__header_map(), file_data, skip_comments, 
-            comment_char, opts_for_parser
+            comment_char, opts_for_parser, filename
         )
     
 
@@ -171,11 +184,11 @@ class IViewFixationReader(IViewReader):
 
     def __init__(self, 
         file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}):
+        opts_for_parser = {}, filename = None):
         
         super(IViewFixationReader, self).__init__(
             self.__header_map(), file_data, skip_comments, 
-            comment_char, opts_for_parser
+            comment_char, opts_for_parser, filename
         )
     
     def __header_map(self):
@@ -210,7 +223,7 @@ class TimelineReader(object):
     Reads files of the format: stim_name \t onset \t offset and creates
     timelines from them.
     """
-    def __init__(self, stim_lines = None):
+    def __init__(self, stim_lines = None, filename = None):
         super(TimelineReader, self).__init__()
         self.stim_lines = stim_lines
         
