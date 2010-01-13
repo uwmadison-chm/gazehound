@@ -8,32 +8,30 @@
 # This module contains tools to convert pointpaths into images indicating
 # where a subject's gaze lingered.
 
-import array
-from ext import png
+import numpy as np
 
 class ScanpathPlotter(object):
     """Plots pointpath on a canvas"""
-    def __init__(self, canvas, pointpath, view_matrix):
+    def __init__(self, canvas, pointpath, draw_shape):
         super(ScanpathPlotter, self).__init__()
         self.canvas = canvas
         self.pointpath = pointpath
-        self.view_matrix = view_matrix
+        self.draw_shape = draw_shape
         
     
     def draw_pointpath(self):
+        scale_factor = 0.0
         for point in self.pointpath:
+            scale_factor = 1
             self.canvas.add_matrix(self.view_matrix, (point.x, point.y))
         
         
 
 class Canvas(object):
     """docstring for Canvas"""
-    def __init__(self, width, height, type_str = 'f', fill_value = 0.0):
+    def __init__(self, width, height, type = np.float, fill_value = 0.0):
         super(Canvas, self).__init__()
-        self.data = [
-            array.array(type_str, [fill_value]*height)
-            for e in range(0, width)
-        ]
+        # self.data = np.array()
 
     def __len__(self):
         return len(self.data)
