@@ -5,13 +5,12 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
-from __future__ import with_statement
 import sys
 import os.path
 import math
 from optparse import OptionParser
-from .. import readers, timeline, viewing, shapes
-from ..writers import delimited
+from gazehound import readers, timeline, viewing, shapes
+from gazehound.writers import delimited
 
 def main(argv = None):
     if argv is None:
@@ -117,16 +116,11 @@ class FixationStatsRunner(object):
 
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
-        timeline = None
-        with open(filename) as f:
-            lines = [l.strip() for l in f.readlines()]
-            tr = readers.TimelineReader(lines)
-            ttl = tr.timeline()
-            timeline = viewing.Combiner(
-                timeline = ttl, pointpath = self.pointpath
-            ).viewings()
-        return timeline
-
+        plain_timeline = readers.TimelineReader(filename = filename).timeline()
+        timeline_with_points = viewing.Combiner(
+            timeline = plain_timeline, pointpath = self.pointpath
+        ).viewings()
+        return timeline_with_points
 
 class FixationStatisticsAnalyzer(object):
 
