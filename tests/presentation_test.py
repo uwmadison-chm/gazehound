@@ -93,31 +93,3 @@ class TestPresentationFactory(object):
         )
         for i in range(0, len(stims)):
             assert stims[i].name == self.on_off_name_ary[i][2]
-     
-
-class TestDelimitedReader(object):
-    def setup(self):
-        
-        with open('tests/examples/presentation_tabs.txt') as f:
-            self.lines = f.readlines()
-
-        self.reader = presentation.DelimitedReader(self.lines)
-        self.reader.lines_to_skip = 1
-        
-    def teardown(self):
-        pass
-    
-    def test_make_presentations_should_be_empty_if_no_lines(self):
-        self.reader.lines = None
-        result = self.reader.make_presentations()
-        assert len(result) == 0
-        
-    def test_make_presentation_should_return_mapped_presentations(self):
-        result = self.reader.make_presentations()
-        assert len(result) == (len(self.lines) - 1)
-    
-    def test_lines_after_skip_should_be_short(self):
-        self.reader.lines_to_skip = 1
-        assert (
-            len(self.reader.lines_after_skip()) == 
-            (len(self.lines) - self.reader.lines_to_skip))

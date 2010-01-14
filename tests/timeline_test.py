@@ -6,20 +6,19 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 # Hooray for with / as blocks! I miss ruby though :(
-from __future__ import with_statement
 from os import path
 from gazehound import presentation, timeline
+from gazehound.readers import TimelineReader
 
 class TestTimeline(object):
     def setup(self):
         p = path.abspath(path.dirname(__file__))
         # All of these should generate the same number of lines...
-        with open(path.join(p, "examples/presentation_tabs.txt")) as f:
-            self.lines = f.readlines()
+        self.reader = TimelineReader(
+            filename = path.join(p, "examples/presentation_tabs.txt")
+        )
 
-        self.reader = presentation.DelimitedReader(self.lines)
-        self.reader.lines_to_skip = 1
-        self.presentations = self.reader.make_presentations()
+        self.presentations = self.reader.presentations
     
     def test_timeline_full_returns_list_with_blanks(self):
         t = timeline.Timeline(presentations = self.presentations)
