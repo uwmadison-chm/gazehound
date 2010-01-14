@@ -214,18 +214,23 @@ class IViewFixationReader(IViewReader):
 
 
        
-class TimelineReader(object):
+class TimelineReader(DelimitedReader):
     """ 
     Reads files of the format: stim_name \t onset \t offset and creates
     timelines from them.
     """
-    def __init__(self, stim_lines = None, filename = None):
-        super(TimelineReader, self).__init__()
-        self.stim_lines = stim_lines
+    def __init__(self, file_data = None, filename = None, skip_lines = 1):
+        super(TimelineReader, self).__init__(
+            file_data = file_data,
+            filename = filename,
+            skip_lines = skip_lines
+        )
+        self.components = self.__default_components()
         
     def timeline(self):
-        dr = presentation.DelimitedReader(
-            lines = self.stim_lines, lines_to_skip = 1
-        )
-        presentations = dr.make_presentations()
+        factory = presentation.PresentationFactory()
+        presentations = factory.from_component_list(self, self.components)
         return timeline.Timeline(presentations = presentations)
+    
+    def __default_components(self):
+        return [('name', str), ('start', int), ('end', int)]

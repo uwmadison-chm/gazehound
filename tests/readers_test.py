@@ -174,4 +174,18 @@ class TestTimelineReader(object):
     
     def __init__(self):
         p = path.abspath(path.dirname(__file__))
-        self.time_file = path.join(p, "examples/pres_tiny.txt")
+        self.pres_file = path.join(p, "examples/pres_tiny.txt")
+    
+        with open(self.pres_file) as f:
+            self.pres_lines = f.readlines()
+        
+        self.CONTENT_LINES = len(self.pres_lines) - 1
+    
+    def test_reader_reads(self):
+        tr = TimelineReader(self.pres_lines)
+        eq_(len(tr), self.CONTENT_LINES)
+    
+    def test_reader_read_convenience(self):
+        tr = TimelineReader(filename = self.pres_file)
+        eq_(len(tr), self.CONTENT_LINES)
+        
