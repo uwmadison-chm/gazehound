@@ -55,7 +55,7 @@ def tiny_timeline():
     with open(EX_PATH+"/pres_tiny.txt") as f:
         lines = [line.strip() for line in f.readlines()]
     tr = readers.TimelineReader(lines)
-    return tr.timeline()
+    return tr.timeline
     
 def tiny_viewings():
     pointpath = smi_pointpath_normal()

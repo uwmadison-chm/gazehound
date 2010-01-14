@@ -227,6 +227,7 @@ class TimelineReader(DelimitedReader):
         )
         self.components = self.__default_components()
         self.__presentations = []
+        self.__timeline = []
     
     def __make_presentations(self):
         if len(self.__presentations) > 0:
@@ -242,6 +243,9 @@ class TimelineReader(DelimitedReader):
         self.__make_presentations()
         return self.__presentations
     
+    @property
     def timeline(self):
-        return tl.Timeline(presentations = self.presentations)
+        if len(self.__timeline) == 0:
+            self.__timeline = tl.Timeline(presentations = self.presentations)
+        return self.__timeline
     

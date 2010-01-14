@@ -115,9 +115,8 @@ class GazeStatsRunner(object):
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
         reader = readers.TimelineReader(filename=filename)
-        plain_timeline = reader.timeline()
         timeline_with_points = viewing.Combiner(
-            timeline = plain_timeline, pointpath = self.pointpath
+            timeline = reader.timeline, pointpath = self.pointpath
         ).viewings()
         return timeline_with_points
         

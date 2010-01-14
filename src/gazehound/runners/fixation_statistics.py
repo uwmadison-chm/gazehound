@@ -116,9 +116,9 @@ class FixationStatsRunner(object):
 
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
-        plain_timeline = readers.TimelineReader(filename = filename).timeline()
+        reader = readers.TimelineReader(filename = filename)
         timeline_with_points = viewing.Combiner(
-            timeline = plain_timeline, pointpath = self.pointpath
+            timeline = reader.timeline, pointpath = self.pointpath
         ).viewings()
         return timeline_with_points
 
