@@ -76,12 +76,12 @@ class TestDelimitedReader(object):
         dr = DelimitedReader(self.norm_lines,
             skip_comments = True, comment_char = "#")
 
-        eq_(len(dr.comment_lines()), self.COMMENT_LINES)
+        eq_(len(dr.comment_lines), self.COMMENT_LINES)
     
     def test_reader_will_skip_lines(self):
         dr = DelimitedReader(self.norm_lines,
             skip_comments = True, comment_char = "#", skip_lines=1)
-        eq_(len(dr.comment_lines()), (self.COMMENT_LINES-1))
+        eq_(len(dr.comment_lines), (self.COMMENT_LINES-1))
         
         
 class TestIViewScanpathReader(object):
@@ -111,7 +111,7 @@ class TestIViewScanpathReader(object):
         
     def test_reader_finds_comment_lines(self):
         ir = IViewScanpathReader(self.norm_lines)
-        comment_lines = ir.comment_lines()
+        comment_lines = ir.comment_lines
         
         eq_(ir.comment_char, "#")
         eq_(len(comment_lines), self.COMMENT_LINES)

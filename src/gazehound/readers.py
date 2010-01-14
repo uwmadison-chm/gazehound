@@ -53,10 +53,12 @@ class DelimitedReader(object):
         self.__setup_parser()
         return len(self.__content_lines)
     
+    @property
     def comment_lines(self):
         self.__setup_parser()
         return self.__comment_lines
     
+    @property
     def content_lines(self):
         self.__setup_parser()
         return self.__content_lines
@@ -99,8 +101,8 @@ class IViewReader(DelimitedReader):
         self.header_map = header_map
 
     def header_pairs(self):
-        coms = self.comment_lines()
-        coms = [re.sub(("^%s" % self.comment_char), '', l).strip() for l in coms]
+        coms = [re.sub(("^%s" % self.comment_char), '', l).strip() 
+                for l in self.comment_lines]
         return [l.split(":\t", 1) for l in coms]
 
     def header(self):
