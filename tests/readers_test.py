@@ -8,7 +8,7 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.readers import DelimitedReader, IViewScanpathReader, IViewFixationReader
+from gazehound.readers import DelimitedReader, IViewScanpathReader, IViewFixationReader, TimelineReader
 from testutils import *
 from nose.tools import *
 
@@ -24,7 +24,7 @@ class TestDelimitedReader(object):
             p, "examples/iview_blank_comment.txt")
         self.comment_inbody = path.join(
             p, "examples/iview_comment_inbody.txt")
-            
+        
         with open(self.norm_file) as f:
             self.norm_lines = f.readlines()
         
@@ -64,12 +64,6 @@ class TestDelimitedReader(object):
             
         eq_(len(dr), self.EXPECTED_LINES)
         
-    def test_reader_keeps_comment_lines_in_body(self):
-        dr = DelimitedReader(self.comment_inbody,
-            skip_comments = True, comment_char = "#")
-
-        eq_(len(dr), self.EXPECTED_LINES)
-
     def test_reader_contains_lines_with_same_elements(self):
         dr = DelimitedReader(self.norm_lines)
         
@@ -83,6 +77,12 @@ class TestDelimitedReader(object):
             skip_comments = True, comment_char = "#")
 
         eq_(len(dr.comment_lines()), self.COMMENT_LINES)
+    
+    def test_reader_will_skip_lines(self):
+        dr = DelimitedReader(self.norm_lines,
+            skip_comments = True, comment_char = "#", skip_lines=1)
+        eq_(len(dr.comment_lines()), (self.COMMENT_LINES-1))
+        
         
 class TestIViewScanpathReader(object):
     """Exercise the IVIewScanpathReader class"""
@@ -168,3 +168,10 @@ class TestIViewFixationReader(object):
         h = ir.header()
 
         eq_(h.get('calibration_size'), [800,600])
+
+class TestTimelineReader(object):
+    """ Exercise the TimelineReader """
+    
+    def __init__(self):
+        p = path.abspath(path.dirname(__file__))
+        self.time_file = path.join(p, "examples/pres_tiny.txt")

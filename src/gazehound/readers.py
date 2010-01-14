@@ -25,15 +25,17 @@ class DelimitedReader(object):
     }
     def __init__(self, 
         file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}, filename = None
+        opts_for_parser = {}, filename = None, skip_lines = 0
     ):
-        self.__lines_cleaned = None
+        self.__comment_lines = []
+        self.__content_lines = []
         self.parser = None
         self.file_data = file_data
         self.skip_comments = skip_comments
         self.comment_char = comment_char
         self.opts_for_parser = self.__class__.STANDARD_DIALECT.copy()
         self.opts_for_parser.update(opts_for_parser)
+        self.skip_lines = skip_lines
         self.filename = filename
         if file_data is None and filename is not None:
             self.read_file(filename)
@@ -49,18 +51,15 @@ class DelimitedReader(object):
             
     def __len__(self):
         self.__setup_parser()
-        return len(self.__lines_cleaned)
+        return len(self.__content_lines)
     
     def comment_lines(self):
-        comment_lines = []
-        for line in self.file_data:
-            stripped = line.strip()
-            if (len(stripped) == 0 or
-                stripped.startswith(self.comment_char)):
-                comment_lines.append(line)
-            else:
-                break
-        return comment_lines
+        self.__setup_parser()
+        return self.__comment_lines
+    
+    def content_lines(self):
+        self.__setup_parser()
+        return self.__content_lines
     
     def __iter__(self):
         # We just need to implement next(self)
@@ -71,27 +70,22 @@ class DelimitedReader(object):
         return self.parser.next()
         
     def __setup_parser(self):
-        self.__set_lines_cleaned()
+        self.__partition_lines()
         if self.parser is None:
             self.parser = csv.reader(
-                self.__lines_cleaned, **self.opts_for_parser
+                self.__content_lines, **self.opts_for_parser
             )
         
-    def __set_lines_cleaned(self):
-        if self.__lines_cleaned is not None:
+    def __partition_lines(self):
+        if len(self.__content_lines) > 0:
             return
-            
-        if not self.skip_comments:
-            self.__lines_cleaned = self.file_data
-            return
-            
-        for i in range(len(self.file_data)):
-            stripped = self.file_data[i].strip()
-            if (len(stripped) > 0 and not
-                stripped.startswith(self.comment_char)):
-                break
-        
-        self.__lines_cleaned = self.file_data[i:]
+                
+        for line in self.file_data[self.skip_lines:]:
+            stripped = line.strip()
+            if self.skip_comments and stripped.startswith(self.comment_char):
+                self.__comment_lines.append(stripped)
+            elif len(stripped) > 0:
+                self.__content_lines.append(stripped)
     
 class IViewReader(DelimitedReader):
     """A reader for files produced by SMI's iView software"""
