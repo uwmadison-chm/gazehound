@@ -6,6 +6,7 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 import copy
+import numpy as np
 
 class Point(object):
     """ 
@@ -91,6 +92,19 @@ class PointPath(object):
             points = [p for p in plist if (p.x, p.y) in shape]
         )
     
+    def as_array(self, 
+            properties = ('x', 'y', 'time', 'duration'), 
+            dtype = np.float32):
+        """ Turns our list of points into a numpy ndarray. """
+        return np.array(
+            [
+                # Map the desired properties into a list
+                # for every point in our path.
+                [getattr(point, prop) for prop in properties]
+                for point in self.points
+            ],
+        dtype=dtype)
+        
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
 

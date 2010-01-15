@@ -6,9 +6,12 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from gazehound import gazepoint, shapes
+import numpy
+
 import mock_objects
 from nose.tools import eq_
 from testutils import gt_, lt_, gte_, lte_, includes_
+
 
 class TestPointFactory(object):
     
@@ -238,7 +241,18 @@ class TestPointPath(object):
         filtered = pointpath.points_within(rect)
         assert len(filtered) < len(pointpath)
         
-
+    def test_points_convert_to_numpy(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        npath = pointpath.as_array()
+        eq_(numpy.ndarray, type(npath))
+        eq_(len(pointpath), len(npath))
+        
+    def test_points_convert_limited_properties(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        props = ('x')
+        npath = pointpath.as_array(props)
+        eq_((len(pointpath), len(props)), npath.shape)
+    
 class TestPoint(object):
     def __init__(self):
         super(TestPoint, self).__init__()
