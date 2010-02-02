@@ -6,8 +6,8 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import csv
 
-class Presentation(object):
-    """ The generic stimulus presentation, providing start time, end time, and
+class Event(object):
+    """ The generic stimulus event, providing start time, end time, and
     name. Can also contain viewing data (Is this a good idea?)
     """
     
@@ -24,42 +24,42 @@ class Presentation(object):
             return False
 
 
-class Picture(Presentation):
+class Picture(Event):
     """ A picture-type stimulus. Generally also contains filename, type,
     width, and height.
     """    
     def __init__(self, start=None, end=None, name=None, path=None, type=None,
                 width=None, height=None):
-        Presentation.__init__(self, start, end, name)
+        Event.__init__(self, start, end, name)
         self.path = path
         self.type = type
         self.width = width
         self.height = height
 
-class Blank(Presentation):
+class Blank(Event):
     """ A 'nothing' type stimulus.
     """
     def __init__(self, *args, **keywords):
-        Presentation.__init__(self, *args, **keywords)
+        Event.__init__(self, *args, **keywords)
         
 
 
-class PresentationFactory(object):
-    """ A factory that generates lists of Presentations from enumerable
+class EventFactory(object):
+    """ A factory that generates lists of Events from enumerable
     things.
     """
-    def __init__(self, type_to_produce=Presentation):
+    def __init__(self, type_to_produce=Event):
         self.type_to_produce = type_to_produce
     
     def from_component_list(self, components, attribute_list):
         """ 
-        Build a list of Presentations from a set of components.
-        Presentations will be of the type specified at factory construction
+        Build a list of Events from a set of components.
+        Events will be of the type specified at factory construction
         time.
         
         Arguments:
         components -- A list of lists -- each item of the first list
-            containing one presentation, each item of the second containing
+            containing one event, each item of the second containing
             one attribute.
         
         attribute_list -- A list of tuples, containing (attribute_name, type). 
@@ -69,7 +69,7 @@ class PresentationFactory(object):
         your input.
         """
         
-        presentations = []
+        events = []
         expected_length = len(attribute_list)
         for data in components:
             pres = self.type_to_produce()
@@ -81,5 +81,5 @@ class PresentationFactory(object):
                 attr_type = mapping[1]
                 setattr(pres, attr, attr_type(data[i]))
             
-            presentations.append(pres)
-        return presentations
+            events.append(pres)
+        return events

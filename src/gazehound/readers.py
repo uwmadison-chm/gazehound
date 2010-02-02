@@ -10,7 +10,7 @@ import csv
 import re
 from gazepoint import *
 from gazehound import timeline as tl
-import presentation
+import event
 
 class DelimitedReader(object):
     
@@ -226,26 +226,26 @@ class TimelineReader(DelimitedReader):
             skip_lines = skip_lines
         )
         self.components = self.__default_components()
-        self.__presentations = []
+        self.__events = []
         self.__timeline = []
     
-    def __make_presentations(self):
-        if len(self.__presentations) > 0:
+    def __make_events(self):
+        if len(self.__events) > 0:
             return
-        factory = presentation.PresentationFactory()
-        self.__presentations=factory.from_component_list(self, self.components)
+        factory = event.EventFactory()
+        self.__events=factory.from_component_list(self, self.components)
 
     def __default_components(self):
         return [('name', str), ('start', int), ('end', int)]
 
     @property
-    def presentations(self):
-        self.__make_presentations()
-        return self.__presentations
+    def events(self):
+        self.__make_events()
+        return self.__events
     
     @property
     def timeline(self):
         if len(self.__timeline) == 0:
-            self.__timeline = tl.Timeline(presentations = self.presentations)
+            self.__timeline = tl.Timeline(events = self.events)
         return self.__timeline
     

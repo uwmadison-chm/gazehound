@@ -10,7 +10,7 @@ import timeline
 
     
 class Combiner(object):
-    """Combines timelines of presentations with pointpath data"""
+    """Combines timelines of eventss with pointpath data"""
     def __init__(self, timeline = None, pointpath = None):
         self.timeline = timeline
         self.pointpath = pointpath

@@ -6,29 +6,29 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 from __future__ import with_statement
 
-from gazehound import presentation
+from gazehound import event
 
-class TestPresentation(object):
+class TestEvent(object):
     def setup(self):
         pass
         
-    def test_presentations_with_normal_times_are_valid(self):
-        p = presentation.Presentation(start = 0, end = 10)
+    def test_events_with_normal_times_are_valid(self):
+        p = event.Event(start = 0, end = 10)
         assert p.valid()
         
-    def test_presentations_without_times_are_invalid(self):
-        p = presentation.Presentation(start = None, end = None)
+    def test_events_without_times_are_invalid(self):
+        p = event.Event(start = None, end = None)
         assert not p.valid()
         
-    def test_presentation_with_equal_start_and_end_is_invalid(self):
-        p = presentation.Presentation(start = 0, end = 0)
+    def test_event_with_equal_start_and_end_is_invalid(self):
+        p = event.Event(start = 0, end = 0)
         assert not p.valid()
         
-    def test_presentation_with_start_before_end_is_invalid(self):
-        p = presentation.Presentation(start = 10, end = 0)
+    def test_event_with_start_before_end_is_invalid(self):
+        p = event.Event(start = 10, end = 0)
         assert not p.valid()
 
-class TestPresentationFactory(object):
+class TestEventFactory(object):
     
     def setup(self):
         self.name_on_off_ary = [
@@ -55,8 +55,8 @@ class TestPresentationFactory(object):
             ('name', str)
         ]
         
-        self.generic_factory = presentation.PresentationFactory(
-            presentation.Presentation
+        self.generic_factory = event.EventFactory(
+            event.Event
         )
         
     

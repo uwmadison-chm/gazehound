@@ -7,7 +7,7 @@
 
 # Hooray for with / as blocks! I miss ruby though :(
 from os import path
-from gazehound import presentation, timeline
+from gazehound import event, timeline
 from gazehound.readers import TimelineReader
 
 class TestTimeline(object):
@@ -18,20 +18,20 @@ class TestTimeline(object):
             filename = path.join(p, "examples/presentation_tabs.txt")
         )
 
-        self.presentations = self.reader.presentations
+        self.events = self.reader.events
     
     def test_timeline_full_returns_list_with_blanks(self):
-        t = timeline.Timeline(presentations = self.presentations)
+        t = timeline.Timeline(events = self.events)
         list = t.filled_list()
         assert len(list) == 12
         
     def test_timeline_is_subescriptable(self):
-        t = timeline.Timeline(presentations = self.presentations)
+        t = timeline.Timeline(events = self.events)
         assert t[0] is not None
         
     def test_timeline_full_adds_blank_if_min_length_requires(self):
         t = timeline.Timeline(
-            presentations = self.presentations,
+            events = self.events,
             min_length = 75000)
             
         list = t.filled_list()
@@ -39,13 +39,13 @@ class TestTimeline(object):
     
     def test_timeline_valid_without_overlapping_times(self):
         t = timeline.Timeline(
-            presentations = self.presentations
+            events = self.events
         )
         assert t.valid()
     
     def test_timeline_not_valid_if_times_overlap(self):
-        p = self.presentations
+        p = self.events
         p[0].end = (p[1].start + 1)
         
-        t = timeline.Timeline(presentations = p)
+        t = timeline.Timeline(events = p)
         assert not t.valid()

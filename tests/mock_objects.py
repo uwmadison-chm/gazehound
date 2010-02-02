@@ -9,7 +9,7 @@
 # our tests
 
 from __future__ import with_statement
-from gazehound import gazepoint, presentation, timeline, readers, viewing, shapes
+from gazehound import gazepoint, event, timeline, readers, viewing, shapes
 from gazehound.runners import gaze_statistics
 from os import path
 
@@ -78,7 +78,7 @@ def standard_timeline():
         ['fixation', '60992', '61892'],
         ['9810', '62008', '73992'],
     ]
-    pres_fact = presentation.PresentationFactory()
+    pres_fact = event.EventFactory()
     return timeline.Timeline(
         pres_fact.from_component_list(
             data, [('name', str), ('start', int), ('end', int)]
@@ -91,11 +91,11 @@ def simple_timeline():
         ['1490', '1900', 'objects']
     ]
     
-    pres_fact = presentation.PresentationFactory()
-    presentations = pres_fact.from_component_list(
+    pres_fact = event.EventFactory()
+    events = pres_fact.from_component_list(
         data, [('start', int), ('end', int), ('name', str)]
     )
-    return timeline.Timeline(presentations)
+    return timeline.Timeline(events)
     
 def general_gaze_stats():
     return [

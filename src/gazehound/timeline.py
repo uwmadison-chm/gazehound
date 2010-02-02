@@ -7,37 +7,37 @@
 
 import copy
 
-from presentation import *
+from event import *
 
 class Timeline(object):
-    """A representation of a series of presentations."""
-    def __init__(self, presentations = None, min_length = 0):
-        self.presentations = presentations
+    """A reevent of a series of events."""
+    def __init__(self, events = None, min_length = 0):
+        self.events = events
         self.min_length = min_length
         
     
     def __len__(self):
-        return len(self.presentations)
+        return len(self.events)
     
     def __iter__(self):
-        return self.presentations.__iter__()
+        return self.events.__iter__()
         
 
     def __getitem__(self, i):
-        return self.presentations[i]
+        return self.events[i]
     
     def filled_list(self):
-        """Return a list of presentations with a presentation in every
-        millisecond. Gaps in self.presentations are filled with Blanks.
+        """Return a list of events with a event in every
+        millisecond. Gaps in self.events are filled with Blanks.
         """
         
-        if self.presentations is None or len(self.presentations) < 1:
+        if self.events is None or len(self.events) < 1:
             return []
         
         full_list = []
         time = 0
         cur_pres = Blank()
-        i = iter(self.presentations)
+        i = iter(self.events)
         next_pres = i.next()
         
         try:
@@ -61,7 +61,7 @@ class Timeline(object):
     def recenter_on(self, name, x_center, y_center, bounds = None):
         newtl = copy.deepcopy(self)
         x_offset, y_offset = 0, 0
-        for pres in newtl.presentations:
+        for pres in newtl.events:
             if hasattr(pres, 'pointpath'):
                 if pres.name == name:
                     x_offset, y_offset = self.__recenter_point(
@@ -86,22 +86,22 @@ class Timeline(object):
     
     def valid(self):
         """
-        Ensure every presentation is valid, that presentation start times
+        Ensure every event is valid, that event start times
         increase monotonically, and that no times overlap.
         """
         def valid_pres(pres):
             pres.valid()
             
-        invalids = filter(valid_pres, self.presentations)
+        invalids = filter(valid_pres, self.events)
         if len(invalids) > 0:
             return False
         
         # Handle the case where we won't be able to compare
-        if len(self.presentations) < 2:
+        if len(self.events) < 2:
             return True
         
-        prev_end = self.presentations[0].end
-        for p in self.presentations[1:]:
+        prev_end = self.events[0].end
+        for p in self.events[1:]:
             if p.start <= prev_end:
                 return False
             prev_end = p.end

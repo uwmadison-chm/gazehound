@@ -20,7 +20,7 @@ class TestTimelineScanpathCombiner(object):
     def teardown(self):
         pass
         
-    def test_combiner_returns_as_many_viewings_as_presentations(self):
+    def test_combiner_returns_as_many_viewings_as_events(self):
         combiner = viewing.Combiner(
             timeline = self.timeline,
             pointpath = self.pointpath
@@ -29,7 +29,7 @@ class TestTimelineScanpathCombiner(object):
         viewings = combiner.viewings()
         eq_(len(viewings), len(self.timeline))
         
-    def test_combiner_adds_pointpath_to_presentations(self):
+    def test_combiner_adds_pointpath_to_events(self):
         # This test assures we've got non-None pointpaths in each pres
         combiner = viewing.Combiner(
             timeline = self.timeline,
@@ -39,7 +39,7 @@ class TestTimelineScanpathCombiner(object):
         viewings = combiner.viewings()
         assert all(p.pointpath is not None for p in viewings)
 
-    def test_combiner_adds_gazepoints_to_presentations(self):
+    def test_combiner_adds_gazepoints_to_events(self):
         combiner = viewing.Combiner(
             timeline = self.timeline,
             pointpath = self.pointpath
@@ -49,7 +49,7 @@ class TestTimelineScanpathCombiner(object):
         assert all(len(p.pointpath) > 0 for p in viewings)
         
     def test_combiner_drops_out_of_bounds_points(self):
-        # Some gazepoints are outside of the presentation timeline...
+        # Some gazepoints are outside of the event timeline...
         combiner = viewing.Combiner(
             timeline = self.timeline,
             pointpath = self.pointpath
@@ -79,7 +79,7 @@ class TestTimelineScanpathCombiner(object):
         ).viewings()
         
         centered = viewings.recenter_on('stim1', 400, 300)
-        eq_(len(centered.presentations), len(viewings.presentations))
+        eq_(len(centered.events), len(viewings.events))
         assert centered[0].pointpath[0].x != viewings[0].pointpath[0].x
         
     def test_viewings_will_recenter_with_bounding_rect(self):
