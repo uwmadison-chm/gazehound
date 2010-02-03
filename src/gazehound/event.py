@@ -42,7 +42,10 @@ class Blank(Event):
     def __init__(self, *args, **keywords):
         Event.__init__(self, *args, **keywords)
         
-
+class Blink(Event):
+    """ An eyeblink. """
+    def __init__(self, start, end, name = None):
+        Event.__init__(self, start, end, name)
 
 class EventFactory(object):
     """ A factory that generates lists of Events from enumerable
