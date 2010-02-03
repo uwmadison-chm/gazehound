@@ -7,7 +7,7 @@
 
 import copy
 
-from event import *
+from gazehound.event import *
 
 class Timeline(object):
     """A reevent of a series of events."""

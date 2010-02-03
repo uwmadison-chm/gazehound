@@ -8,9 +8,8 @@ from __future__ import with_statement
 
 import csv
 import re
-from gazepoint import *
-from gazehound import timeline as tl
-import event
+from gazehound import timeline, event, gazepoint
+
 
 class DelimitedReader(object):
     
@@ -150,9 +149,9 @@ class IViewScanpathReader(IViewReader):
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
-        fact = IViewPointFactory()
+        fact = gazepoint.IViewPointFactory()
         points = fact.from_component_list(self)
-        return PointPath(points = points)
+        return gazepoint.PointPath(points = points)
 
 
     
@@ -208,9 +207,9 @@ class IViewFixationReader(IViewReader):
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
-        fact = IViewFixationFactory()
+        fact = gazepoint.IViewFixationFactory()
         points = fact.from_component_list(self)
-        return PointPath(points = points)
+        return gazepoint.PointPath(points = points)
 
 
        
@@ -246,6 +245,6 @@ class TimelineReader(DelimitedReader):
     @property
     def timeline(self):
         if len(self.__timeline) == 0:
-            self.__timeline = tl.Timeline(events = self.events)
+            self.__timeline = timeline.Timeline(events = self.events)
         return self.__timeline
     
