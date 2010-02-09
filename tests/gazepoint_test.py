@@ -274,3 +274,18 @@ class TestPoint(object):
         self.hundreds.time = 100
         self.hundreds.duration = 50
         eq_(self.hundreds.time_midpoint(), 125)
+
+    def test_has_interpolable_attributes(self):
+        for attr in gazepoint.Point.interp_attrs:
+            x = getattr(self.hundreds, attr)
+
+class TestIViewPoint(object):
+    def __init__(self):
+        super(TestIViewPoint, self).__init__()
+        
+    def setup(self):
+        self.pt = gazepoint.IViewPoint(x=100, y=100)
+    
+    def test_has_interpolable_attributes(self):
+        for attr in gazepoint.IViewPoint.interp_attrs:
+            x = getattr(self.pt, attr)
