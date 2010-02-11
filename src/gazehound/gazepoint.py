@@ -6,23 +6,29 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 import copy
+import numpy as np
 
 class Point(object):
     """ 
     A point with x, y, and time coordinates -- one point in a scan path 
     """
     
+    interp_attrs = ('x', 'y')
+    
     def __init__(self, x = None, y = None, time = None, duration = 1.0):
         self.x = x
         self.y = y
         self.time = time
         self.duration = duration
-    
+
     def valid(criteria):
         """ Evaluate criteria() for this point. critiera() should return
             True or False.
         """
         return critera(self)
+    
+    def standard_valid(self):
+        return (self.x > 0 and self.y > 0)
         
     def within(self, bounds):
         x1, y1, x2, y2 = bounds
@@ -33,12 +39,34 @@ class Point(object):
     
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
-
+    
     def __repr__(self):
         return (
             "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
             (self.x, self.y, self.time, self.duration)
         )
+
+class IViewPoint(Point):
+    """ A point from the iView system. """
+    
+    # All of the continuous measures that can be interpolated
+    interp_attrs = (
+        'x', 'y', 'pupil_h', 'pupil_v', 'corneal_reflex_h', 'corneal_reflex_v',
+        'diam_h', 'diam_v')
+    
+    def __init__(self, x = None, y = None, time = None, duration = 1.0,
+        set = "", 
+        pupil_h = 0, pupil_v = 0, 
+        corneal_reflex_h = 0, corneal_reflex_v = 0,
+        diam_h = 0, diam_v = 0):
+        super(IViewPoint, self).__init__(x, y, time, duration)
+        self.pupil_h = pupil_h
+        self.pupil_v = pupil_v
+        self.corneal_reflex_h = corneal_reflex_h
+        self.corneal_reflex_v = corneal_reflex_v
+        self.diam_h = diam_h
+        self.diam_v = diam_v
+    
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
     def __init__(self, points = []):
@@ -91,6 +119,19 @@ class PointPath(object):
             points = [p for p in plist if (p.x, p.y) in shape]
         )
     
+    def as_array(self, 
+            properties = ('x', 'y', 'time', 'duration'), 
+            dtype = np.float32):
+        """ Turns our list of points into a numpy ndarray. """
+        return np.array(
+            [
+                # Map the desired properties into a list
+                # for every point in our path.
+                [getattr(point, prop) for prop in properties]
+                for point in self.points
+            ],
+        dtype=dtype)
+        
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
 
@@ -138,7 +179,7 @@ class IViewPointFactory(PointFactory):
     """
 
         
-    def __init__(self, type_to_produce = Point):
+    def __init__(self, type_to_produce = IViewPoint):
         super(IViewPointFactory, self).__init__(type_to_produce)
         self.data_map = [
             ('time', int),

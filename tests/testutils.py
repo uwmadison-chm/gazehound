@@ -5,6 +5,10 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
+def neq_(a, b, msg = None):
+    """ Shorthand for assert a != b, "%r == %r" % (a, b)"""
+    assert a != b, "%r == %r" % (a, b)
+    
 def gt_(a, b, msg = None):
     """Shorthand for 'assert a > b, "%r != %r" % (a, b)
     """

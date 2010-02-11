@@ -9,7 +9,7 @@
 # our tests
 
 from __future__ import with_statement
-from gazehound import gazepoint, presentation, timeline, readers, viewing, shapes
+from gazehound import gazepoint, event, timeline, readers, viewing, shapes
 from gazehound.runners import gaze_statistics
 from os import path
 
@@ -24,6 +24,24 @@ def smi_ary_spreadout():
         ['1660', '0', '5017', '3595', '4691', '3367', '58', '986', '2368', '1824'],
         ['1830', '0', '4929', '3946', '4686', '3357', '518', '-56', '2144', '1184'],
     ])
+
+def iview_points_noisy():
+    return gazepoint.PointPath(gazepoint.IViewPointFactory().from_component_list([
+    ['0', '0', '5034', '3490', '4687', '3380', '358', '543', '2400', '2080'],
+    ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
+    ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+    ['50', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
+    ['67', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+    ['83', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+    ['100', '0', '5050', '3477', '4692', '3388', '357', '490', '2432', '2144'],
+    ['116', '0', '0', '0', '0', '0', '0', '0', '0', '0'], 
+    ['133', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+    ['150', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
+    ['167', '0', '5050', '3477', '4692', '3388', '357', '490', '2432', '2144'],
+    ['183', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
+    ['200', '0', '5017', '3595', '4691', '3367', '58', '490', '2368', '1824'],
+    ['216', '0', '4929', '3946', '4686', '3357', '518', '528', '2144', '1184'],
+    ]))
         
 def smi_pointpath_normal():
     lines = []
@@ -78,7 +96,7 @@ def standard_timeline():
         ['fixation', '60992', '61892'],
         ['9810', '62008', '73992'],
     ]
-    pres_fact = presentation.PresentationFactory()
+    pres_fact = event.EventFactory()
     return timeline.Timeline(
         pres_fact.from_component_list(
             data, [('name', str), ('start', int), ('end', int)]
@@ -91,11 +109,11 @@ def simple_timeline():
         ['1490', '1900', 'objects']
     ]
     
-    pres_fact = presentation.PresentationFactory()
-    presentations = pres_fact.from_component_list(
+    pres_fact = event.EventFactory()
+    events = pres_fact.from_component_list(
         data, [('start', int), ('end', int), ('name', str)]
     )
-    return timeline.Timeline(presentations)
+    return timeline.Timeline(events)
     
 def general_gaze_stats():
     return [

@@ -5,12 +5,11 @@
 # Written by Nathan Vack <njvack@wisc.edu> at the Waisman Laborotory
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 import copy
-import gazepoint
-import timeline
+from gazehound import timeline, gazepoint
 
     
 class Combiner(object):
-    """Combines timelines of presentations with pointpath data"""
+    """Combines timelines of eventss with pointpath data"""
     def __init__(self, timeline = None, pointpath = None):
         self.timeline = timeline
         self.pointpath = pointpath

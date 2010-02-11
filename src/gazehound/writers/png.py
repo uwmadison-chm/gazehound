@@ -9,7 +9,7 @@
 
 import array
 import struct
-from ..ext import png
+from gazehound.ext import png
 
 class CanvasWriter(object):
     def __init__(self, width, height, channels, bytes_per_sample = 1):
