@@ -28,7 +28,7 @@ class Point(object):
         return critera(self)
     
     def standard_valid(self):
-        return (self.x != 0 and self.y != 0)
+        return (self.x > 0 and self.y > 0)
         
     def within(self, bounds):
         x1, y1, x2, y2 = bounds
