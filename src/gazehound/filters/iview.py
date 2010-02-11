@@ -28,7 +28,6 @@ class Denoise(object):
     """
     def __init__(self, max_noise_samples=2):
         self.max_noise_samples = max_noise_samples
-        self.interp_samples = interp_samples
     
     def process(self, pointpath):
         """ 
@@ -37,6 +36,8 @@ class Denoise(object):
         """
         pp = deepcopy(pointpath)
         win = self.Window(pp, self.max_noise_samples)
+        for i in range(len(pp)):
+            win.apply(i)
         return pp
 
     class Window(object):
@@ -71,6 +72,7 @@ class Denoise(object):
             """ 
             Modifies self.pointpath, either interpolating at potision
             pos or doing nothing.
+            Return the next position 
             """
             needs_fixin = self.points_to_correct(pos)
             interps = self.interp_points(pos, len(needs_fixin))
