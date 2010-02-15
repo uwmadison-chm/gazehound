@@ -22,7 +22,10 @@ class Event(object):
             return self.start < self.end
         except:
             return False
-
+    
+    @property
+    def duration(self):
+        return (self.end - self.start)
 
 class Picture(Event):
     """ A picture-type stimulus. Generally also contains filename, type,
