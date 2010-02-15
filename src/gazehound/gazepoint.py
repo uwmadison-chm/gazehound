@@ -40,6 +40,10 @@ class Point(object):
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
     
+    @property
+    def computed_end(self):
+        return (self.time + self.duration)
+    
     def __repr__(self):
         return (
             "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
@@ -54,7 +58,7 @@ class IViewPoint(Point):
         'x', 'y', 'pupil_h', 'pupil_v', 'corneal_reflex_h', 'corneal_reflex_v',
         'diam_h', 'diam_v')
     
-    def __init__(self, x = None, y = None, time = None, duration = 1.0,
+    def __init__(self, x = None, y = None, time = None, duration = (1/60.0),
         set = "", 
         pupil_h = 0, pupil_v = 0, 
         corneal_reflex_h = 0, corneal_reflex_v = 0,
@@ -164,7 +168,11 @@ class PointFactory(object):
                     attr_name = attribute_list[i][0]
                     attr_type = attribute_list[i][1]
                     if attr_type is not None:
-                        setattr(point, attr_name, attr_type(point_data[i]))
+                        try:
+                            setattr(point, attr_name, attr_type(point_data[i]))
+                        except AttributeError:
+                            err_str = "Could not set %s" % attribute_list
+                            raise AttributeError(err_str)
             except ValueError:
                 err_str = "Could not parse %s with %s" % (point_data, attribute_list)
                 raise ValueError(err_str)
