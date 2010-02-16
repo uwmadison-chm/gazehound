@@ -253,6 +253,18 @@ class TestPointPath(object):
         npath = pointpath.as_array(props)
         eq_((len(pointpath), len(props)), npath.shape)
     
+    def test_time_index_finds_at_zero(self):
+        pp = gazepoint.PointPath(points = self.points)
+        eq_(0, pp.time_index(0))
+    
+    def test_time_index_finds_at_largish(self):
+        pp = gazepoint.PointPath(points = self.points)
+        eq_(2, pp.time_index(35))
+    
+    def test_time_index_gets_last_point_for_large_t(self):
+        pp = gazepoint.PointPath(points = self.points)
+        eq_(len(pp), pp.time_index(100000))
+    
 class TestPoint(object):
     def __init__(self):
         super(TestPoint, self).__init__()

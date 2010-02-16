@@ -135,6 +135,15 @@ class PointPath(object):
                 for point in self.points
             ],
         dtype=dtype)
+    
+    def time_index(self, time):
+        t1 = self.points[0].time
+        for i in xrange(len(self.points)):
+            t2 = self.points[i].time
+            if (t1 <= time and t2 > time):
+                return i-1
+            t1 = t2
+        return len(self.points) # It's the last point!
         
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
