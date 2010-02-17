@@ -11,6 +11,43 @@ from .. import mock_objects
 from nose.tools import eq_
 from ..testutils import neq_, gt_, lt_, gte_, lte_, includes_
 
+class TestDeblink(object):
+    def setup(self):
+        self.points = mock_objects.iview_points_blinky()
+        self.deblink = iview.Deblink(min_duration=50, max_duration=400)
+    
+    def test_find_all_candidates_does_so(self):
+        all_candidates = self.deblink.all_blink_candidates(self.points)
+        eq_(4, len(all_candidates)) # For now...
+
+    def test_filter_for_length_does_so(self):
+        all_candidates = self.deblink.all_blink_candidates(self.points)
+        filtered = self.deblink.filter_for_length(all_candidates)
+        eq_(1, len(filtered)) # For now!
+        
+    def test_expand_blink_forward(self):
+        blinks = self.deblink.all_blink_candidates(self.points)
+        b1 = blinks[0]
+        expanded = self.deblink.expand_blink_dir(b1, self.points, True)
+        eq_(150, expanded.end)
+        
+    def test_expand_blink_backward(self):
+        blinks = self.deblink.all_blink_candidates(self.points)
+        b = blinks[3]
+        expanded = self.deblink.expand_blink_dir(b, self.points, False)
+        eq_(233, expanded.start)
+    
+    def test_expand_blink_will_return_none(self):
+        blinks = self.deblink.all_blink_candidates(self.points)
+        b = blinks[0]
+        expanded = self.deblink.expand_blink_dir(b, self.points, False)
+        assert expanded is None
+    
+    def test_expand_blinks_works(self):
+        blinks = self.deblink.all_blink_candidates(self.points)
+        exp = self.deblink.expand_blinks(blinks, self.points)
+        eq_(1, len(exp))
+        
 class TestDenoiseWindow(object):
     def setup(self):
         self.points = mock_objects.iview_points_noisy()

@@ -6,20 +6,124 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from gazehound.event import Blink
+from gazehound.timeline import Timeline
 
 from copy import deepcopy
 
 class Deblink(object):
-    
-    def __init__(self, min_duration = 200, max_duration = 1000):
-        self.min_duratioin = min_duration
+    # Literature suggests we're unlikely to se blinks less than 50ms or more
+    # than 400ms. Paging through data suggests the same.
+    def __init__(self, min_duration = 50, max_duration = 400, dy_threshold=20):
+        self.min_duration = min_duration
         self.max_duration = max_duration
+        self.dy_threshold = dy_threshold
     
     def blinks(self, pointpath):
         """
         Return a Timeline of Blinks.
         """
+        candidates = self.all_blink_candidates(pointpath)
         
+
+        
+    def all_blink_candidates(self, pointpath):
+        candidates = []
+        current = None
+        for i in range(len(pointpath)):
+            point = pointpath[i]
+            if point.x == 0 and point.y == 0:
+                # It's blank!
+                if current is None:
+                    current = Blink(
+                        start=point.time, end=point.computed_end,
+                        name = "blink_%s" % (point.time))
+                    current.start_index = i
+                    current.end_index = i
+                else:
+                    # Add to the current blink
+                    current.end = point.computed_end
+                    current.end_index = i
+            else:
+                if current is not None:
+                    candidates.append(current)
+                    current = None
+        return Timeline(events=candidates)
+    
+    def deduplicate(self, timeliine):
+        new_blinks = []
+        for blink in timeline:
+            if len(new_blinks) == 0:
+                new_blinks.append(blink)
+            else:
+                if new_blinks[-1].start != blink.start:
+                    new_blinks.append(blink)
+        return Timeline(events=new_blinks)
+    
+    def expand_blinks(self, blinks, pointpath):
+        fx = [
+            blink for blink in [
+                self.expand_blink_dir(b, pointpath, True) for b in blinks ]
+            if blink is not None]
+        
+        exp = [
+            blink for blink in [
+                self.expand_blink_dir(b, pointpath, False) for b in fx ]
+            if blink is not None]
+        
+        return Timeline(events = exp)
+
+    def expand_blink_dir(self, blink, pointpath, forward=True):
+        """ 
+        Return a new Blink with end time (and indexes) set to
+        next area of pointpath with a stable y value.
+        If no such area exists, return None
+        """
+        b = deepcopy(blink)
+        if forward:
+            idx = b.end_index
+        else:
+            idx = b.start_index
+            
+        next_idx = self.__stable_yval_idx(pointpath, idx, forward)
+        if next_idx is None:
+            b = None
+        else:
+            b.end_index = next_idx
+            b.end = pointpath[next_idx].time
+        return b
+        
+    def __stable_yval_idx(self, pointpath, start_index, forward=True):
+        i1 = start_index
+        i2 = i1
+        if forward:
+            step = 1
+        else:
+            step = -1
+        i2 += step
+        while i2 >= 0 and i2 < len(pointpath):
+            p1 = pointpath[i1]
+            p2 = pointpath[i2]
+            dy = abs(p1.y - p2.y)
+            # print("%s %s %s %s" % (p1.time, p1.y, p2.y, dy))
+            if (dy <= self.dy_threshold and p1.y != 0 and p2.y != 0):
+                if forward:
+                    return i1 - 1 # This feels hacky
+                else:
+                    return i1
+            i1 = i2
+            i2 += step
+        # If we're here, we ran off the end of pointpath
+        return None
+        
+    
+    def filter_for_length(self, timeline):
+        """ Does not alter timeline, returns a copy. """
+        return Timeline(events = [
+            ev for ev in timeline if (
+                ev.duration >= self.min_duration and
+                ev.duration <= self.max_duration
+            )
+        ])
         
 class Denoise(object):
     """ 
