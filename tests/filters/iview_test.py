@@ -27,9 +27,13 @@ class TestDeblink(object):
         
     def test_expand_blink_forward(self):
         blinks = self.deblink.all_blink_candidates(self.points)
-        b1 = blinks[0]
-        expanded = self.deblink.expand_blink_dir(b1, self.points, True)
+        b = blinks[0]
+        expanded = self.deblink.expand_blink_dir(b, self.points, True)
         eq_(150, expanded.end)
+        
+        b = blinks[3]
+        expanded = self.deblink.expand_blink_dir(b, self.points, True)
+        eq_(350, expanded.end)
         
     def test_expand_blink_backward(self):
         blinks = self.deblink.all_blink_candidates(self.points)
@@ -43,10 +47,24 @@ class TestDeblink(object):
         expanded = self.deblink.expand_blink_dir(b, self.points, False)
         assert expanded is None
     
+    def test_expand_blink_bidir_works(self):
+        blinks = self.deblink.all_blink_candidates(self.points)
+        b = blinks[3]
+        expanded = self.deblink.expand_blink_bidir(b, self.points)
+        eq_(233, expanded.start)
+        eq_(350, expanded.end)
+    
     def test_expand_blinks_works(self):
         blinks = self.deblink.all_blink_candidates(self.points)
         exp = self.deblink.expand_blinks(blinks, self.points)
         eq_(1, len(exp))
+        
+    def test_blinks_works(self):
+        blinks = self.deblink.blinks(self.points)
+        eq_(1, len(blinks))
+        b = blinks[0]
+        eq_(233, b.start)
+        eq_(350, b.end)
         
 class TestDenoiseWindow(object):
     def setup(self):

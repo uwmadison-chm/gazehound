@@ -20,10 +20,19 @@ class Deblink(object):
     
     def blinks(self, pointpath):
         """
-        Return a Timeline of Blinks.
+        Return a Timeline of Blinks. Each blink will have a start_index
+        and end_index field, which point to the first and last indices in
+        pointpath of a blink event.
+        In other words, the point before start_index and the point after
+        end_index are guaranteed to have good, interpolable data.
+        Currently, the "guaranteed valid data" window is actually one point
+        wider -- but that may not remain true in future versions.
         """
         candidates = self.all_blink_candidates(pointpath)
-        
+        expanded = self.expand_blinks(candidates, pointpath)
+        filtered = self.filter_for_length(expanded)
+        deduped = self.deduplicate(filtered)
+        return deduped
 
         
     def all_blink_candidates(self, pointpath):
@@ -49,7 +58,7 @@ class Deblink(object):
                     current = None
         return Timeline(events=candidates)
     
-    def deduplicate(self, timeliine):
+    def deduplicate(self, timeline):
         new_blinks = []
         for blink in timeline:
             if len(new_blinks) == 0:
@@ -60,17 +69,10 @@ class Deblink(object):
         return Timeline(events=new_blinks)
     
     def expand_blinks(self, blinks, pointpath):
-        fx = [
-            blink for blink in [
-                self.expand_blink_dir(b, pointpath, True) for b in blinks ]
-            if blink is not None]
+        expanded = [ self.expand_blink_bidir(b, pointpath) for b in blinks ]
+        expanded = [ b for b in expanded if b is not None ]
         
-        exp = [
-            blink for blink in [
-                self.expand_blink_dir(b, pointpath, False) for b in fx ]
-            if blink is not None]
-        
-        return Timeline(events = exp)
+        return Timeline(events = expanded)
 
     def expand_blink_dir(self, blink, pointpath, forward=True):
         """ 
@@ -91,6 +93,12 @@ class Deblink(object):
             b.end_index = next_idx
             b.end = pointpath[next_idx].time
         return b
+        
+    def expand_blink_bidir(self, blink, pointpath):
+        bf = self.expand_blink_dir(blink, pointpath, False)
+        if bf is not None:
+            bf = self.expand_blink_dir(blink, pointpath, True)
+        return bf
         
     def __stable_yval_idx(self, pointpath, start_index, forward=True):
         i1 = start_index
