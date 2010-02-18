@@ -44,6 +44,20 @@ class Point(object):
     def computed_end(self):
         return (self.time + self.duration)
     
+    @property
+    def interp_dict(self):
+        vals = {}
+        for attr in type(self).interp_attrs:
+            vals[attr] = getattr(self, attr)
+        return vals
+    
+    def merge_dict(self, attr_dict):
+        for attr, val in attr_dict.items():
+            setattr(self, attr, val)
+    
+    def interpolate_from(self, f):
+        self.merge_dict(f.interp_dict)
+    
     def __repr__(self):
         return (
             "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %

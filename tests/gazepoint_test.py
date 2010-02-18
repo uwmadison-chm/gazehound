@@ -290,14 +290,32 @@ class TestPoint(object):
     def test_has_interpolable_attributes(self):
         for attr in gazepoint.Point.interp_attrs:
             x = getattr(self.hundreds, attr)
+    
+    def test_interpolates(self):
+        p = gazepoint.Point(50,50)
+        p.time = 50
+        p.interpolate_from(self.hundreds)
+        eq_(100, p.x)
+        eq_(100, p.y)
+        eq_(50, p.time)
 
 class TestIViewPoint(object):
     def __init__(self):
         super(TestIViewPoint, self).__init__()
         
     def setup(self):
-        self.pt = gazepoint.IViewPoint(x=100, y=100)
+        self.pt = gazepoint.IViewPoint(x=100, y=100, diam_h=100)
     
     def test_has_interpolable_attributes(self):
         for attr in gazepoint.IViewPoint.interp_attrs:
             x = getattr(self.pt, attr)
+    
+    def test_interpolates(self):
+        p = gazepoint.IViewPoint(x=50, y=50, diam_h=50)
+        p.time = 50
+        p.interpolate_from(self.pt)
+        eq_(100, p.x)
+        eq_(100, p.y)
+        eq_(100, p.diam_h)
+        eq_(50, p.time)
+        
