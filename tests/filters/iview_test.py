@@ -65,6 +65,14 @@ class TestDeblink(object):
         b = blinks[0]
         eq_(233, b.start)
         eq_(350, b.end)
+    
+    def test_deblink_interpolates(self):
+        deblinked = self.deblink.deblink(self.points)
+        pt = deblinked[13]
+        eq_(216, pt.time) # For reference
+        eq_(pt.x, deblinked[14].x)
+        eq_(pt.x, deblinked[19].x)
+        neq_(pt.x, deblinked[22].x) # After the blink!
         
 class TestDenoiseWindow(object):
     def setup(self):

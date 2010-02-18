@@ -17,6 +17,26 @@ class Deblink(object):
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.dy_threshold = dy_threshold
+
+    def deblink(self, pointpath):
+        """ 
+        Interpolates blinks out of pointpath.
+        
+        Interpolation is done by taking the point immediately before the blink
+        and using its interpolable values for the rest of the points during
+        the blink. Not using any averaging -- saccades during blinks are
+        common, and averaging-type methods seem wrong to me here.
+        """
+        blinks = self.blinks(pointpath)
+        pc = deepcopy(pointpath)
+        for b in blinks:
+            # Interpolate from the point before start_index -- no averaging.
+            if b.start_index > 0:
+                prev_pt = pc[b.start_index-1]
+                for point in pc[(b.start_index) : (b.end_index+1)]:
+                    # +1 needed to get last point of blink
+                    point.interpolate_from(prev_pt)        
+        return pc
     
     def blinks(self, pointpath):
         """
