@@ -11,6 +11,7 @@ class Event(object):
     """ The generic stimulus event, providing start time, end time, and
     name. Can also contain viewing data (Is this a good idea?)
     """
+
     def __init__(self, start=None, end=None, name=None, pointpath=None):
         self.start = start
         self.end = end
@@ -32,6 +33,7 @@ class Picture(Event):
     """ A picture-type stimulus. Generally also contains filename, type,
     width, and height.
     """
+
     def __init__(self, start=None, end=None, name=None, path=None, type=None,
                 width=None, height=None):
         Event.__init__(self, start, end, name)
@@ -44,12 +46,14 @@ class Picture(Event):
 class Blank(Event):
     """ A 'nothing' type stimulus.
     """
+
     def __init__(self, *args, **keywords):
         Event.__init__(self, *args, **keywords)
 
 
 class Blink(Event):
     """ An eyeblink. """
+
     def __init__(self, start, end, name=None):
         Event.__init__(self, start, end, name)
 
@@ -58,6 +62,7 @@ class EventFactory(object):
     """ A factory that generates lists of Events from enumerable
     things.
     """
+
     def __init__(self, type_to_produce=Event):
         self.type_to_produce = type_to_produce
 
@@ -72,7 +77,7 @@ class EventFactory(object):
             containing one event, each item of the second containing
             one attribute.
 
-        attribute_list -- A list of tuples, containing (attribute_name, type). 
+        attribute_list -- A list of tuples, containing (attribute_name, type).
 
         Components containing a different number of elements than the
         attribute_list will cause problems -- make sure you've filtered
@@ -83,13 +88,13 @@ class EventFactory(object):
         expected_length = len(attribute_list)
         for data in components:
             pres = self.type_to_produce()
-            
+
             # Map the listed attributes to their proper homes
             for i in range(0, expected_length):
                 mapping = attribute_list[i]
                 attr = mapping[0]
                 attr_type = mapping[1]
                 setattr(pres, attr, attr_type(data[i]))
-            
+
             events.append(pres)
         return events

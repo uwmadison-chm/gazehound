@@ -159,11 +159,11 @@ class IViewScanpathReader(IViewReader):
             'Description': ('description', str),
             '# of Pts Recorded': ('recorded_points', int),
             'Offset Of Calibration Area': (
-                'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
-            ),
+                'calibration_offset',
+                lambda x: [int(e) for e in x.split("\t")]),
             'Size Of Calibration Area': (
-                'calibration_size', lambda x: [int(e) for e in x.split("\t")]
-            ),
+                'calibration_size',
+                lambda x: [int(e) for e in x.split("\t")]),
             'Sample Rate': ('sample_rate', int)}
 
 
@@ -187,11 +187,11 @@ class IViewFixationReader(IViewReader):
             '# Of Fixations': ('recorded_fixations', int),
             'Sample Rate': ('sample_rate', int),
             'Offset Of Calibration Area': (
-                'calibration_offset', lambda x: [int(e) for e in x.split("\t")]
-            ),
+                'calibration_offset',
+                lambda x: [int(e) for e in x.split("\t")]),
             'Size Of Calibration Area': (
-                'calibration_size', lambda x: [int(e) for e in x.split("\t")]
-            ),
+                'calibration_size',
+                lambda x: [int(e) for e in x.split("\t")]),
             'Minimal Time': ('minimal_time', int),
             'Maximal Pixel': ('maximal_pixel', int)}
 
@@ -202,18 +202,17 @@ class IViewFixationReader(IViewReader):
         return gazepoint.PointPath(points = points)
 
 
-
 class TimelineReader(DelimitedReader):
     """
     Reads files of the format: stim_name \t onset \t offset and creates
     timelines from them.
     """
+
     def __init__(self, file_data = None, filename = None, skip_lines = 1):
         super(TimelineReader, self).__init__(
             file_data = file_data,
             filename = filename,
-            skip_lines = skip_lines
-        )
+            skip_lines = skip_lines)
         self.components = self.__default_components()
         self.__events = []
         self.__timeline = []

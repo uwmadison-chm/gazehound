@@ -10,12 +10,12 @@ import numpy as np
 
 
 class Point(object):
-    """ 
-    A point with x, y, and time coordinates -- one point in a scan path 
     """
-    
+    A point with x, y, and time coordinates -- one point in a scan path
+    """
+
     interp_attrs = ('x', 'y')
-    
+
     def __init__(self, x=None, y=None, time=None, duration=1.0):
         self.x = x
         self.y = y
@@ -27,37 +27,37 @@ class Point(object):
             True or False.
         """
         return critera(self)
-    
+
     def standard_valid(self):
         return (self.x > 0 and self.y > 0)
-        
+
     def within(self, bounds):
         x1, y1, x2, y2 = bounds
         return (
             (self.x >= x1 and self.x <= x2) and
             (self.y >= y1 and self.y <= y2))
-    
+
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
-    
+
     @property
     def computed_end(self):
         return (self.time + self.duration)
-    
+
     @property
     def interp_dict(self):
         vals = {}
         for attr in type(self).interp_attrs:
             vals[attr] = getattr(self, attr)
         return vals
-    
+
     def merge_dict(self, attr_dict):
         for attr, val in attr_dict.items():
             setattr(self, attr, val)
-    
+
     def interpolate_from(self, f):
         self.merge_dict(f.interp_dict)
-    
+
     def __repr__(self):
         return (
         "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
@@ -66,12 +66,12 @@ class Point(object):
 
 class IViewPoint(Point):
     """ A point from the iView system. """
-    
+
     # All of the continuous measures that can be interpolated
     interp_attrs = (
         'x', 'y', 'pupil_h', 'pupil_v', 'corneal_reflex_h', 'corneal_reflex_v',
         'diam_h', 'diam_v')
-    
+
     def __init__(self, x=None, y=None, time=None, duration=(1 / 60.0),
         set="", pupil_h=0, pupil_v=0, corneal_reflex_h=0, corneal_reflex_v=0,
         diam_h=0, diam_v=0):
@@ -82,32 +82,33 @@ class IViewPoint(Point):
         self.corneal_reflex_v = corneal_reflex_v
         self.diam_h = diam_h
         self.diam_v = diam_v
-    
+
 
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
+
     def __init__(self, points=[]):
         self.points = points
-        
+
     def __len__(self):
         return self.points.__len__()
-        
+
     def __iter__(self):
         return self.points.__iter__()
-    
+
     def __getitem__(self, i):
         return self.points[i]
-        
+
     def __getslice__(self, i, j):
         return PointPath(self.points[i:j])
-        
+
     def extend(self, sp):
         self.points.extend(sp.points)
-    
+
     def valid_points(self, criterion):
         return PointPath(
             [point for point in self.points if criterion(point)])
-    
+
     def mean(self):
         if len(self.points) == 0:
             return None
@@ -127,13 +128,13 @@ class PointPath(object):
             point.x += x
             point.y += y
         return PointPath(points=points)
-    
+
     def points_within(self, shape):
         plist = copy.deepcopy(self.points)
         return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
-    
-    def as_array(self, 
-            properties=('x', 'y', 'time', 'duration'), 
+
+    def as_array(self,
+            properties=('x', 'y', 'time', 'duration'),
             dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
         return np.array(
@@ -142,7 +143,7 @@ class PointPath(object):
                 # for every point in our path.
                 [getattr(point, prop) for prop in properties]
                 for point in self.points], dtype=dtype)
-    
+
     def time_index(self, time):
         t1 = self.points[0].time
         for i in xrange(len(self.points)):
@@ -151,7 +152,7 @@ class PointPath(object):
                 return i - 1
             t1 = t2
         return len(self.points)  # It's the last point!
-        
+
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
@@ -163,22 +164,22 @@ class PointFactory(object):
         """
         Produces and returns a list of points from a list of component parts
         and an attribute mapping.
-        
+
         Arguments:
         components: A list of lists -- each item of the outer list
             containing one gaze point's data
-        
+
         attribute_list: A list of tuples containing (attribute_name, type)
-        
+
         This method will happily raise an IndexException if you have
         more elements in attribute_list than in any of the elements in
         component_list.
         """
-            
+
         points = []
         for point_data in components:
             point = self.type_to_produce()
-        
+
             try:
                 for i in range(len(attribute_list)):
                     attr_name = attribute_list[i][0]
@@ -190,7 +191,7 @@ class PointFactory(object):
                             err_str = "Could not set %s" % attribute_list
                             raise AttributeError(err_str)
             except ValueError:
-                err_str = ("Could not parse %s with %s" % 
+                err_str = ("Could not parse %s with %s" %
                     (point_data, attribute_list))
                 raise ValueError(err_str)
 
@@ -217,7 +218,7 @@ class IViewPointFactory(PointFactory):
             ('y', int),
             ('diam_h', int),
             ('diam_v', int)]
-        
+
     def from_component_list(self, components):
         return super(IViewPointFactory, self).from_component_list(
             components, self.data_map)
@@ -227,10 +228,10 @@ class IViewPointNumpyArrayFactory(IViewPointFactory):
     """
     Maps gazepoint data into a numpy array.
     """
-    
+
     def __init__(self):
         super(IViewPointFactory, self).__init__()
-        
+
 
 class IViewFixationFactory(PointFactory):
     """
@@ -248,7 +249,7 @@ class IViewFixationFactory(PointFactory):
             ('y', int),
             ('object', str),
             ('duration', int)]
-    
+
     def from_component_list(self, components):
         return super(IViewFixationFactory, self).from_component_list(
             components, self.data_map)
