@@ -8,6 +8,7 @@
 import copy
 import numpy as np
 
+
 class Point(object):
     """ 
     A point with x, y, and time coordinates -- one point in a scan path 
@@ -15,7 +16,7 @@ class Point(object):
     
     interp_attrs = ('x', 'y')
     
-    def __init__(self, x = None, y = None, time = None, duration = 1.0):
+    def __init__(self, x=None, y=None, time=None, duration=1.0):
         self.x = x
         self.y = y
         self.time = time
@@ -34,8 +35,7 @@ class Point(object):
         x1, y1, x2, y2 = bounds
         return (
             (self.x >= x1 and self.x <= x2) and
-            (self.y >= y1 and self.y <= y2)
-        )
+            (self.y >= y1 and self.y <= y2))
     
     def time_midpoint(self):
         return (self.time + (self.duration / 2))
@@ -60,9 +60,9 @@ class Point(object):
     
     def __repr__(self):
         return (
-            "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
-            (self.x, self.y, self.time, self.duration)
-        )
+        "<gazehound.gazepoint.Point(x: %s, y: %s, time: %s, duration: %s)" %
+        (self.x, self.y, self.time, self.duration))
+
 
 class IViewPoint(Point):
     """ A point from the iView system. """
@@ -72,11 +72,9 @@ class IViewPoint(Point):
         'x', 'y', 'pupil_h', 'pupil_v', 'corneal_reflex_h', 'corneal_reflex_v',
         'diam_h', 'diam_v')
     
-    def __init__(self, x = None, y = None, time = None, duration = (1/60.0),
-        set = "", 
-        pupil_h = 0, pupil_v = 0, 
-        corneal_reflex_h = 0, corneal_reflex_v = 0,
-        diam_h = 0, diam_v = 0):
+    def __init__(self, x=None, y=None, time=None, duration=(1 / 60.0),
+        set="", pupil_h=0, pupil_v=0, corneal_reflex_h=0, corneal_reflex_v=0,
+        diam_h=0, diam_v=0):
         super(IViewPoint, self).__init__(x, y, time, duration)
         self.pupil_h = pupil_h
         self.pupil_v = pupil_v
@@ -85,9 +83,10 @@ class IViewPoint(Point):
         self.diam_h = diam_h
         self.diam_v = diam_v
     
+
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
-    def __init__(self, points = []):
+    def __init__(self, points=[]):
         self.points = points
         
     def __len__(self):
@@ -107,18 +106,16 @@ class PointPath(object):
     
     def valid_points(self, criterion):
         return PointPath(
-            [point for point in self.points if criterion(point)]
-        )
+            [point for point in self.points if criterion(point)])
     
     def mean(self):
         if len(self.points) == 0:
             return None
 
         total_dur = self.total_duration
-        xtotal = sum((float(p.duration)*p.x for p in self.points))
-        ytotal = sum((float(p.duration)*p.y for p in self.points))
-
-        return (xtotal/total_dur, ytotal/total_dur) # Means!
+        xtotal = sum((float(p.duration) * p.x for p in self.points))
+        ytotal = sum((float(p.duration) * p.y for p in self.points))
+        return (xtotal / total_dur, ytotal / total_dur)  # Means!
 
     @property
     def total_duration(self):
@@ -129,42 +126,38 @@ class PointPath(object):
         for point in points:
             point.x += x
             point.y += y
-        return PointPath(points = points)
+        return PointPath(points=points)
     
     def points_within(self, shape):
         plist = copy.deepcopy(self.points)
-        return PointPath(
-            points = [p for p in plist if (p.x, p.y) in shape]
-        )
+        return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
     
     def as_array(self, 
-            properties = ('x', 'y', 'time', 'duration'), 
-            dtype = np.float32):
+            properties=('x', 'y', 'time', 'duration'), 
+            dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
         return np.array(
             [
                 # Map the desired properties into a list
                 # for every point in our path.
                 [getattr(point, prop) for prop in properties]
-                for point in self.points
-            ],
-        dtype=dtype)
+                for point in self.points], dtype=dtype)
     
     def time_index(self, time):
         t1 = self.points[0].time
         for i in xrange(len(self.points)):
             t2 = self.points[i].time
             if (t1 <= time and t2 > time):
-                return i-1
+                return i - 1
             t1 = t2
-        return len(self.points) # It's the last point!
+        return len(self.points)  # It's the last point!
         
+
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
 
-    def __init__(self, type_to_produce = Point):
+    def __init__(self, type_to_produce=Point):
         self.type_to_produce = type_to_produce
-    
 
     def from_component_list(self, components, attribute_list):
         """
@@ -197,11 +190,13 @@ class PointFactory(object):
                             err_str = "Could not set %s" % attribute_list
                             raise AttributeError(err_str)
             except ValueError:
-                err_str = "Could not parse %s with %s" % (point_data, attribute_list)
+                err_str = ("Could not parse %s with %s" % 
+                    (point_data, attribute_list))
                 raise ValueError(err_str)
 
             points.append(point)
         return points
+
 
 class IViewPointFactory(PointFactory):
     """
@@ -209,8 +204,7 @@ class IViewPointFactory(PointFactory):
     data scheme.
     """
 
-        
-    def __init__(self, type_to_produce = IViewPoint):
+    def __init__(self, type_to_produce=IViewPoint):
         super(IViewPointFactory, self).__init__(type_to_produce)
         self.data_map = [
             ('time', int),
@@ -222,13 +216,12 @@ class IViewPointFactory(PointFactory):
             ('x', int),
             ('y', int),
             ('diam_h', int),
-            ('diam_v', int)
-        ]
+            ('diam_v', int)]
         
     def from_component_list(self, components):
         return super(IViewPointFactory, self).from_component_list(
-            components, self.data_map
-        )
+            components, self.data_map)
+
 
 class IViewPointNumpyArrayFactory(IViewPointFactory):
     """
@@ -243,8 +236,8 @@ class IViewFixationFactory(PointFactory):
     """
     Maps a list of fixations into a list of Points.
     """
-    
-    def __init__(self, type_to_produce = Point):
+
+    def __init__(self, type_to_produce=Point):
         super(IViewFixationFactory, self).__init__(type_to_produce)
         self.data_map = [
             ('start_num', int),
@@ -254,10 +247,8 @@ class IViewFixationFactory(PointFactory):
             ('x', int),
             ('y', int),
             ('object', str),
-            ('duration', int)
-        ]
+            ('duration', int)]
     
     def from_component_list(self, components):
         return super(IViewFixationFactory, self).from_component_list(
-            components, self.data_map
-        )
+            components, self.data_map)

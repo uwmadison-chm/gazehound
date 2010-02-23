@@ -12,20 +12,18 @@ from gazehound import timeline, event, gazepoint
 
 
 class DelimitedReader(object):
-    
+
     """
     Converts files (or other enumerations of strings) into lists of lists.
     Optionally skips leading lines starting with some comment character
     (by defult the #)
     """
 
-    STANDARD_DIALECT = {
-        'delimiter': "\t"
-    }
-    def __init__(self, 
-        file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}, filename = None, skip_lines = 0
-    ):
+    STANDARD_DIALECT = {'delimiter': "\t"}
+
+    def __init__(self,
+        file_data=None, skip_comments=True, comment_char="#",
+        opts_for_parser={}, filename=None, skip_lines=0):
         self.__comment_lines = []
         self.__content_lines = []
         self.parser = None
@@ -38,69 +36,68 @@ class DelimitedReader(object):
         self.filename = filename
         if file_data is None and filename is not None:
             self.read_file(filename)
-    
 
-    """ 
-    Convenience method. Reads a file into self.file_data. Generally uses
-    the 'rU' method, which is almost certainly what you want.
-    """
     def read_file(self, filename, mode = 'rU'):
+        """
+        Convenience method. Reads a file into self.file_data. Generally uses
+        the 'rU' method, which is almost certainly what you want.
+        """
         with open(filename, mode) as f:
             self.file_data = f.readlines()
-            
+
     def __len__(self):
         self.__setup_parser()
         return len(self.__content_lines)
-    
+
     @property
     def comment_lines(self):
         self.__setup_parser()
         return self.__comment_lines
-    
+
     @property
     def content_lines(self):
         self.__setup_parser()
         return self.__content_lines
-    
+
     def __iter__(self):
         # We just need to implement next(self)
         return self
-    
+
     def next(self):
         self.__setup_parser()
         return self.parser.next()
-        
+
     def __setup_parser(self):
         self.__partition_lines()
         if self.parser is None:
             self.parser = csv.reader(
-                self.__content_lines, **self.opts_for_parser
-            )
-        
+                self.__content_lines, **self.opts_for_parser)
+
     def __partition_lines(self):
         if len(self.__content_lines) > 0:
             return
-                
+
         for line in self.file_data[self.skip_lines:]:
             stripped = line.strip()
             if self.skip_comments and stripped.startswith(self.comment_char):
                 self.__comment_lines.append(stripped)
             elif len(stripped) > 0:
                 self.__content_lines.append(stripped)
-    
+
+
 class IViewReader(DelimitedReader):
     """A reader for files produced by SMI's iView software"""
+
     def __init__(self, header_map,
         file_data = None, skip_comments = True, comment_char = "#",
         opts_for_parser = {}, filename = None):
-        
+
         super(IViewReader, self).__init__(
-            file_data, skip_comments, comment_char, opts_for_parser, filename
-        )
+            file_data, skip_comments, comment_char, opts_for_parser, filename)
         self.header_map = header_map
 
     def header_pairs(self):
-        coms = [re.sub(("^%s" % self.comment_char), '', l).strip() 
+        coms = [re.sub(("^%s" % self.comment_char), '', l).strip()
                 for l in self.comment_lines]
         return [l.split(":\t", 1) for l in coms]
 
@@ -120,7 +117,7 @@ class IViewReader(DelimitedReader):
 
     def __map_header_value(self, pair):
         """
-        Return a tuple of the form (key, value), or None if 
+        Return a tuple of the form (key, value), or None if
         pair[0] isn't in HEADER_MAP
         """
         raw_key, raw_val = pair
@@ -133,19 +130,17 @@ class IViewReader(DelimitedReader):
         cleaned_val = converter(raw_val)
         return (cleaned_key, cleaned_val)
 
-        
-class IViewScanpathReader(IViewReader):
 
+class IViewScanpathReader(IViewReader):
     """A reader for files produced by SMI's iView software"""
-    def __init__(self, 
-        file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}, filename = None):
-        
+
+    def __init__(self,
+        file_data=None, skip_comments=True, comment_char="#",
+        opts_for_parser={}, filename=None):
+
         super(IViewScanpathReader, self).__init__(
-            self.__header_map(), file_data, skip_comments, 
-            comment_char, opts_for_parser, filename
-        )
-    
+            self.__header_map(), file_data, skip_comments,
+            comment_char, opts_for_parser, filename)
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
@@ -153,8 +148,6 @@ class IViewScanpathReader(IViewReader):
         points = fact.from_component_list(self)
         return gazepoint.PointPath(points = points)
 
-
-    
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
         # that converts the value to its expected format.
@@ -171,21 +164,19 @@ class IViewScanpathReader(IViewReader):
             'Size Of Calibration Area': (
                 'calibration_size', lambda x: [int(e) for e in x.split("\t")]
             ),
-            'Sample Rate': ('sample_rate', int)
-        }
-    
+            'Sample Rate': ('sample_rate', int)}
+
 
 class IViewFixationReader(IViewReader):
 
-    def __init__(self, 
-        file_data = None, skip_comments = True, comment_char = "#",
-        opts_for_parser = {}, filename = None):
-        
+    def __init__(self,
+        file_data=None, skip_comments=True, comment_char="#",
+        opts_for_parser={}, filename=None):
+
         super(IViewFixationReader, self).__init__(
-            self.__header_map(), file_data, skip_comments, 
-            comment_char, opts_for_parser, filename
-        )
-    
+            self.__header_map(), file_data, skip_comments,
+            comment_char, opts_for_parser, filename)
+
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
         # that converts the value to its expected format.
@@ -202,8 +193,7 @@ class IViewFixationReader(IViewReader):
                 'calibration_size', lambda x: [int(e) for e in x.split("\t")]
             ),
             'Minimal Time': ('minimal_time', int),
-            'Maximal Pixel': ('maximal_pixel', int)
-        }
+            'Maximal Pixel': ('maximal_pixel', int)}
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
@@ -212,9 +202,9 @@ class IViewFixationReader(IViewReader):
         return gazepoint.PointPath(points = points)
 
 
-       
+
 class TimelineReader(DelimitedReader):
-    """ 
+    """
     Reads files of the format: stim_name \t onset \t offset and creates
     timelines from them.
     """
@@ -227,7 +217,7 @@ class TimelineReader(DelimitedReader):
         self.components = self.__default_components()
         self.__events = []
         self.__timeline = []
-    
+
     def __make_events(self):
         if len(self.__events) > 0:
             return
@@ -241,10 +231,9 @@ class TimelineReader(DelimitedReader):
     def events(self):
         self.__make_events()
         return self.__events
-    
+
     @property
     def timeline(self):
         if len(self.__timeline) == 0:
             self.__timeline = timeline.Timeline(events = self.events)
         return self.__timeline
-    
