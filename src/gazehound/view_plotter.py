@@ -28,11 +28,9 @@ class ScanpathPlotter(object):
 
 
 class Canvas(object):
-    """docstring for Canvas"""
 
     def __init__(self, width, height, type=np.float, fill_value=0.0):
         super(Canvas, self).__init__()
-        # self.data = np.array()
 
     def __len__(self):
         return len(self.data)

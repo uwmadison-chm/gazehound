@@ -8,8 +8,10 @@
 import sys
 import csv
 
+
 class DelimitedWriter(object):
     """Writes iterable things into text files"""
+
     def __init__(self, mapping, out = sys.stdout, delimiter = "\t"):
         """ Creates a new delimited writer."""
         super(DelimitedWriter, self).__init__()
@@ -17,19 +19,20 @@ class DelimitedWriter(object):
         self.out = out
         self.writer = csv.writer(out, delimiter=delimiter)
         self.delimiter = delimiter
-        
+
     def write_header(self):
-        headers = [ elem[0] for elem in self.mapping ]
+        headers = [elem[0] for elem in self.mapping]
         self.writer.writerow(headers)
-    
+
     def write(self, data):
         for row in data:
-            row_mapped = [ elem[1](row) for elem in self.mapping ]
+            row_mapped = [elem[1](row) for elem in self.mapping]
             self.writer.writerow(row_mapped)
-    
-    
+
+
 class GazeStatsWriter(DelimitedWriter):
-        
+    """Writes gaze stats items into a delimited file"""
+
     mapper = [
         ('Presented', lambda s: s.presented),
         ('Area', lambda s: s.area),
@@ -41,20 +44,18 @@ class GazeStatsWriter(DelimitedWriter):
         ('Valid strict', lambda s: s.valid_strict),
         ('Valid lax', lambda s: s.valid_lax),
         ('% in', lambda s: '%.1f' % (100*dfnz(s.points_in, s.total_points))),
-        ('% valid strict', 
+        ('% valid strict',
             lambda s: '%.1f' % (100*dfnz(s.valid_strict, s.total_points))),
-        ('% valid lax', 
-            lambda s: '%.1f' % (100*dfnz(s.valid_lax,s.total_points)))
-    ]
-    
-    """Writes gaze stats items into a delimited file"""
+        ('% valid lax',
+            lambda s: '%.1f' % (100*dfnz(s.valid_lax, s.total_points)))]
+
     def __init__(self, out = sys.stdout, delimiter = "\t"):
         super(GazeStatsWriter, self).__init__(
-            GazeStatsWriter.mapper, out, delimiter
-        )
+            GazeStatsWriter.mapper, out, delimiter)
 
 
 class FixationStatsWriter(DelimitedWriter):
+    """Writes gaze stats items into a delimited file"""
 
     mapper = [
         ('Presented', lambda s: s.presented),
@@ -69,11 +70,9 @@ class FixationStatsWriter(DelimitedWriter):
         ('Distance between fixations', lambda s: s.distance_between_fixations),
     ]
 
-    """Writes gaze stats items into a delimited file"""
     def __init__(self, out = sys.stdout, delimiter = "\t"):
         super(FixationStatsWriter, self).__init__(
-            FixationStatsWriter.mapper, out, delimiter
-        )
+            FixationStatsWriter.mapper, out, delimiter)
 
 
 def dfnz(num1, num2):

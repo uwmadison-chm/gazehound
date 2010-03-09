@@ -12,9 +12,9 @@ from copy import deepcopy
 
 
 class Deblink(object):
+
     # Literature suggests we're unlikely to se blinks less than 50ms or more
     # than 400ms. Paging through data suggests the same.
-
     def __init__(self, min_duration=50, max_duration=400, dy_threshold=20):
         self.min_duration = min_duration
         self.max_duration = max_duration
