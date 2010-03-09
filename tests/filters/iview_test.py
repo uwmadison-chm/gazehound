@@ -73,6 +73,27 @@ class TestDeblink(object):
         eq_(pt.x, deblinked[14].x)
         eq_(pt.x, deblinked[19].x)
         neq_(pt.x, deblinked[22].x) # After the blink!
+    
+    def test_problem_candidates(self):
+        pp = mock_objects.iview_problem_blink()
+        all_candidates = self.deblink.all_blink_candidates(pp)
+        eq_(1, len(all_candidates))
+        b = all_candidates[0]
+        eq_(6450, all_candidates[0].start)
+        b_exp = self.deblink.expand_blink_dir(b, pp, False)
+        eq_(6434, b_exp.start)
+        b_exp = self.deblink.expand_blink_bidir(b, pp)
+        eq_(6434, b_exp.start)
+        
+        
+    def test_problem_deblink(self):
+        pp = mock_objects.iview_problem_blink()
+        deblinked = self.deblink.deblink(pp)
+        blinks = self.deblink.blinks(pp)
+        eq_(1, len(blinks))
+        eq_(6434, blinks[0].start)
+        tr = deblinked[4] # Target reference
+        eq_(tr.x, deblinked[5].x)
         
 class TestDenoiseWindow(object):
     def setup(self):

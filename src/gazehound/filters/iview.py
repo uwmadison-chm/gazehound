@@ -110,15 +110,21 @@ class Deblink(object):
         next_idx = self.__stable_yval_idx(pointpath, idx, forward)
         if next_idx is None:
             b = None
-        else:
+        elif forward:
+            next_idx -= 1
             b.end_index = next_idx
             b.end = pointpath[next_idx].time
+        else:
+            next_idx += 1
+            b.start_index = next_idx
+            b.start = pointpath[next_idx].time
+            
         return b
 
     def expand_blink_bidir(self, blink, pointpath):
         bf = self.expand_blink_dir(blink, pointpath, False)
         if bf is not None:
-            bf = self.expand_blink_dir(blink, pointpath, True)
+            bf = self.expand_blink_dir(bf, pointpath, True)
         return bf
 
     def __stable_yval_idx(self, pointpath, start_index, forward=True):
@@ -133,12 +139,9 @@ class Deblink(object):
             p1 = pointpath[i1]
             p2 = pointpath[i2]
             dy = abs(p1.y - p2.y)
-            # print("%s %s %s %s" % (p1.time, p1.y, p2.y, dy))
             if (dy <= self.dy_threshold and p1.y != 0 and p2.y != 0):
-                if forward:
-                    return i1 - 1 # This feels hacky
-                else:
-                    return i1
+                # print("%s %s %s %s %s" % (p1.time, p1.y, p2.y, dy, forward))
+                return i1 
             i1 = i2
             i2 += step
         # If we're here, we ran off the end of pointpath
