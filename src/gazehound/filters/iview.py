@@ -15,10 +15,12 @@ class Deblink(object):
 
     # Literature suggests we're unlikely to se blinks less than 50ms or more
     # than 400ms. Paging through data suggests the same.
-    def __init__(self, min_duration=50, max_duration=400, dy_threshold=20):
+    def __init__(self, min_duration=50, max_duration=400, 
+        start_dy_threshold=15, end_dy_threshold=5):
         self.min_duration = min_duration
         self.max_duration = max_duration
-        self.dy_threshold = dy_threshold
+        self.start_dy_threshold = start_dy_threshold
+        self.end_dy_threshold = end_dy_threshold
 
     def deblink(self, pointpath):
         """
@@ -132,14 +134,17 @@ class Deblink(object):
         i2 = i1
         if forward:
             step = 1
+            dy_thresh = self.end_dy_threshold
         else:
             step = -1
+            dy_thresh = self.start_dy_threshold
         i2 += step
+        
         while i2 >= 0 and i2 < len(pointpath):
             p1 = pointpath[i1]
             p2 = pointpath[i2]
             dy = abs(p1.y - p2.y)
-            if (dy <= self.dy_threshold and p1.y != 0 and p2.y != 0):
+            if (dy <= dy_thresh and p1.y != 0 and p2.y != 0):
                 # print("%s %s %s %s %s" % (p1.time, p1.y, p2.y, dy, forward))
                 return i1 
             i1 = i2
