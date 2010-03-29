@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+  <title>Viewer test</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script type="text/javascript" src="js/prototype.js"></script>
+  <script type="text/javascript" src="js/view_gaze.js"></script>
+  <script type="text/javascript" src="js_data/pointdata_orig.js"></script>
+</head>
+<body>
+  <div id="wrap">
+    <div id="viewer_pane">
+      <div id="viewport">
+        <img src="stim_images/lt1.png" width="800" height="600" id="stimulus"/>
+        <canvas width="800" height="600" id="data_canvas"> </canvas>
+      </div>
+      <div id="controls">
+        <div id="toprow" class="clearfix">
+          <div class="control">
+            <button id="play_button">Play</button>
+          </div>
+          <div class="control">
+            <div id="progress_slider"></div>
+          </div>
+          <div class="control">
+            <div id="time_text">
+              <span class="first">0.000 </span>
+              / 
+              <span class="second">0.000</span>
+            </div>
+          </div>
+          <div class="control">
+            <select id="playback_speed_select">
+              <option value="0.25">1/4x</option>
+              <option value="0.33">1/3x</option>
+              <option value="0.5">1/2x</option>
+              <option value="1" selected="selected">1x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+        </div>
+        <div class="bottomrow">
+          <p>Subject groups and such go here</p>
+        </div>
+      </div>
+    </div>
+    <div id="nav_pane">
+      <ul id="event_list">
+        <li>Event!</li>
+      </ul>
+    </div>
+    <br class="clearer">
+  </div>
+  <script type="text/javascript">
+  var ctx = $('data_canvas').getContext('2d');
+  var er = eyetrack_renderer({'canvas': 'data_canvas'});
+  var gv = gaze_viewer({
+    'canvas':           'data_canvas', 
+    'view_data':        EyeData,
+    'stim_element':     'stimulus',
+    'nav_container':    'event_list',
+    'stim_img_prefix':  'stim_images',
+    'thumb_prefix':     'stim_thumbs',
+    'pp_button':        'play_button',
+    'fps':              60,
+    'time_container':   'time_text',
+    'speed_control':    'playback_speed_select',
+  });
+  </script>
+</body>
+</html>

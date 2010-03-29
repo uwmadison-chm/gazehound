@@ -1,0 +1,103 @@
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  background-color: #F2EFE6;
+}
+
+#wrap {
+  width: 1010px;
+  border: 1px solid #ccc;
+  background-color: #FCFAF5;
+  margin: 4px auto;
+  padding: 4px;
+}
+
+#viewer_pane {
+  float: left;
+  width: 802px;
+}
+
+#nav_pane {
+  float: left;
+  width: 200px;
+  padding-left: 8px;
+}
+
+#event_list li {
+  padding: 4px;
+  clear: both;
+  cursor: pointer;
+}
+
+#event_list img {
+  float: left;
+  padding-right: 4px;
+}
+
+#event_list .selected {
+  background-color: #cec;
+}
+
+#viewport {
+  position: relative;
+  border: 1px solid #AAA;
+  height: 600px;
+  background-color: #000;
+}
+
+#stimulus {
+  background: white;
+}
+
+#stimulus, #data_canvas {
+  position: absolute;
+  width: 800px;
+  height: 600px;
+}
+
+#controls {
+  position: relative;
+  width: 792px;
+  height: 48px;
+  background-color: #ccc;
+  padding: 4px;
+  border: 1px solid #AAA;
+  }
+
+div.control {
+  float: left;
+  outline: 1px solid green;
+  padding: 0 2px;
+}
+
+#progress_slider {
+  position: relative;
+  top: 10px;
+  margin: 0 16px;
+  float: left;
+  width: 400px;
+  height: 8px;
+  background-color: #aaa;
+}
+
+#time_text {
+  width: 100px;
+  font-size: 75%;
+}
+
+.clearer {
+  clear: both;
+}
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.clearfix { display: inline-block;}
+/*\*/
+* html .clearfix { height: 1%;}
+.clearfix { display:block;}
+/**/
