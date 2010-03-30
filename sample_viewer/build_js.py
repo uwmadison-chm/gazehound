@@ -26,6 +26,10 @@ SUBJECTS = [
     {'name': '010', 'group': 'light_fix'},
 ]
 
+subj_hash = {}
+for idx in range(len(SUBJECTS)):
+    subj_hash[SUBJECTS[idx]['name']] = idx;
+
 viewer_groups = ['light_fix', 'dark_fix']
 
 all_events = {}
@@ -56,6 +60,7 @@ names = all_events.keys()
 names.sort()
 output_wrapper['stims'] = names
 output_wrapper['viewers'] = SUBJECTS
+output_wrapper['viewer_directory'] = subj_hash;
 output_wrapper['viewer_groups'] = viewer_groups
 output_wrapper['stim_images'] = stim_images
 output_wrapper['viewdata'] = all_events
