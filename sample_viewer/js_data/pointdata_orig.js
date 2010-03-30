@@ -1,4 +1,11 @@
 EyeData = {
+  "viewer_directory": {
+    "010": 4, 
+    "009": 3, 
+    "008": 2, 
+    "007": 1, 
+    "006": 0
+  }, 
   "stims": [
     "fix_D", 
     "fix_S", 

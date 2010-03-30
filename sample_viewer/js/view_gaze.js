@@ -18,13 +18,14 @@ var gaze_viewer = function(spec) {
   my.pp_button = $(spec.pp_button);
   my.fps = spec.fps;
   my.time_container = $(spec.time_container);
-  my.prog_element = my.time_container.down(".first");
-  my.len_element = my.time_container.down(".second");
+  my.prog_element = my.time_container.down('.first');
+  my.len_element = my.time_container.down('.second');
   my.schedule_ms = (1000/my.fps);
   my.playback_speed = 1;
   my.speed_control = $(spec.speed_control);
   my.point_index_offset = 0;
-  
+  my.color_scheme = spec.color_scheme;
+    
   var play = function(from_start) {
     my.play_started_at = new Date();
     my.rendered_count = 0;
@@ -41,9 +42,10 @@ var gaze_viewer = function(spec) {
   pub.pause = pause;
   
   var set_stim_image = function(stim_name) {
-    var pfx = my.stim_img_prefix+"/";
+    var pfx = my.stim_img_prefix+'/';
     my.stim_element.src = pfx+my.view_data.stim_images[stim_name];
   }
+
 
   var set_stim_index = function(idx) {
     my.stim_index = idx;
@@ -53,6 +55,7 @@ var gaze_viewer = function(spec) {
     my.renderer.clear();
     my.stim_data = my.view_data.viewdata[my.stim_name];
     my.point_index = 0;
+    my.point_index_offset = 0;
     my.gaze_len = gaze_len();
     update_time_len();
   }
@@ -61,11 +64,11 @@ var gaze_viewer = function(spec) {
   // Todo, if we need this a lot: memoize!
   var gaze_len = function() {
     var max = 0;
-    for (sname in my.stim_data) {
-      var view_arrays = my.stim_data[sname];
+    for (viewer_name in my.stim_data) {
+      var view_arrays = my.stim_data[viewer_name];
       for (var i = 0; i < view_arrays.length; i++) {
         if (view_arrays[i].length > max) {
-          max = view_arrays[i].length
+          max = view_arrays[i].length;
         }
       }
     }
@@ -126,12 +129,18 @@ var gaze_viewer = function(spec) {
   // Draws a point for each viewing of each subject, for our current
   // point_index.
   var draw_current_points = function() {
-    for (sname in my.stim_data) {
-      var view_arrays = my.stim_data[sname];
+    for (viewer_name in my.stim_data) {
+      var viewer_data = my.view_data.viewers[
+        my.view_data.viewer_directory[viewer_name]];
+      var style_data = my.group_styles[viewer_data.group];
+      var view_arrays = my.stim_data[viewer_name];
       for (var i = 0; i < view_arrays.length; i++) {
         var p = view_arrays[i][my.point_index];
         if (p) {
-          my.renderer.circle({cx:p[0], cy:p[1], r:1});
+          my.renderer.circle(
+            {cx:p[0], cy:p[1], r:2}, 
+            style_data.fill_style, 
+            style_data.stroke_style);
         }
       }
     }
@@ -140,7 +149,7 @@ var gaze_viewer = function(spec) {
   var build_nav = function() {
     // Hold on to these, so we can select an element in set_stim_index()
     my.nav_array = new Array(); 
-    my.nav_container.update("");
+    my.nav_container.update('');
     for (var i = 0; i < my.view_data.stims.length; i++) {
       var li = nav_li(i);
       my.nav_array[i] = li;
@@ -149,17 +158,17 @@ var gaze_viewer = function(spec) {
   }
   
   var select_nav_element = function(elt) {
-    elt.adjacent(".selected").invoke("removeClassName", "selected");
-    elt.addClassName("selected");
+    elt.adjacent('.selected').invoke('removeClassName', 'selected');
+    elt.addClassName('selected');
   }
   
   // Creates a <li> for the navigation, and makes it watch for clicks.
   var nav_li = function(stim_idx) {
     var stim_name = my.view_data.stims[stim_idx]
-    var li = new Element("li", {"class": "clearfix"});
-    var thumb_path = my.thumb_prefix+"/"+my.view_data.stim_images[stim_name];
-    li.insert(new Element("img", {"src": thumb_path}));
-    li.insert(new Element("div").update(my.view_data.stims[stim_idx]));
+    var li = new Element('li', {'class': 'clearfix'});
+    var thumb_path = my.thumb_prefix+'/'+my.view_data.stim_images[stim_name];
+    li.insert(new Element('img', {'src': thumb_path}));
+    li.insert(new Element('div').update(my.view_data.stims[stim_idx]));
     li.observe('click', function(idx) {
       return function(event) {
         set_stim_index(idx);
@@ -170,9 +179,22 @@ var gaze_viewer = function(spec) {
   
   var set_play_pause = function() {
     if (my.playing) {
-      my.pp_button.update("Pause");
+      my.pp_button.update('Pause');
     } else {
-      my.pp_button.update("Play");
+      my.pp_button.update('Play');
+    }
+  }
+  
+  var set_group_styles = function() {
+    my.group_styles = {};
+    var groups = my.view_data.viewer_groups;
+    for (var i = 0; i < groups.length; i++) {
+      var gname = groups[i];
+      var scheme = my.color_scheme['group_'+(i%2)];
+      my.group_styles[gname] = {
+        'stroke_style':'rgb('+scheme+')',
+        'fill_style':'rgb('+scheme+')',
+      };
     }
   }
   
@@ -184,7 +206,7 @@ var gaze_viewer = function(spec) {
       play();
     }
   }
-  my.pp_button.observe("click", handle_play_pause_click);
+  my.pp_button.observe('click', handle_play_pause_click);
   
   var handle_speed_change = function(event) {
     my.playback_speed = parseFloat($(this).getValue());
@@ -193,16 +215,15 @@ var gaze_viewer = function(spec) {
   
   build_nav();
   set_stim_index(0);
+  set_group_styles();
   
   var debug = function() {
     return my;
   }
   pub.debug = debug;
   
-  console.log(my);
+  console.log(debug());
   return pub;
-  
-  
 }
 
 var eyetrack_renderer = function(spec) {
@@ -213,9 +234,14 @@ var eyetrack_renderer = function(spec) {
   my.canvas = $(spec.canvas);
   my.context = my.canvas.getContext('2d');
   
-  var ellipse = function(shape_data, fill_style, stroke_style) {
+  var ellipse = function(shape_data, fill_style, stroke_style, stroke_width) {
+    fill_style = fill_style || '#FFFFFF';
+    stroke_style = stroke_style || '#000000';
+    stroke_width = stroke_width || 0;
     var ctx = my.context; // shorthand
     ctx.save();
+    ctx.fillStyle = fill_style;
+    ctx.strokeStyle = stroke_style;
     ctx.save();
     ctx.translate(shape_data.cx, shape_data.cy);
     ctx.scale(shape_data.rx, shape_data.ry);
@@ -223,7 +249,7 @@ var eyetrack_renderer = function(spec) {
     ctx.arc(0, 0, 1, 0, 2*Math.PI, false);
     ctx.fill();
     ctx.restore();
-    ctx.lineWidth=2;
+    ctx.lineWidth = stroke_width;
     ctx.stroke();
     ctx.restore();
   };
@@ -242,4 +268,33 @@ var eyetrack_renderer = function(spec) {
   pub.clear = clear;
 
   return pub;
+};
+
+// Colors from www.ColorBrewer.org by Cynthia A. Brewer, Geography, 
+// Pennsylvania State University.
+// 
+// These are organized by:
+// Name : [two arrays of three colors each in rgb format]
+// Each array is arranged from darkest to lightest.
+var color_schemes = {
+  'pu_or': {
+    'group_0': '241, 163, 64',
+    'group_1': '152, 142, 195',
+    'aoi': '166, 219, 160',
+    'highlight': '179, 88, 6',
+  },
+    
+  'category_1' : {
+    'group_0': '228, 26, 28',
+    'group_1': '55, 126, 184',
+    'aoi': '152, 78, 163',
+    'highlight': '77, 175, 74',
+  },
+  
+  'category_2' : {
+    'group_0': '31, 120, 180',
+    'group_1': '51, 160, 44',
+    'aoi': '253, 191, 111',
+    'highlight': '227, 26, 28',
+  }
 };
