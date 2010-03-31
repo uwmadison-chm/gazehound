@@ -12,12 +12,15 @@ var gaze_viewer = function(spec) {
   my.renderer = eyetrack_renderer({'canvas': my.canvas});
   my.controls_conatiner = $(spec.control_element);
   my.nav_container = $(spec.nav_container);
+  my.viewer_groups_element = $(spec.viewer_groups_element);
   my.stim_element = $(spec.stim_element);
   my.stim_img_prefix = spec.stim_img_prefix || '';
   my.thumb_prefix = spec.thumb_prefix || '';
   my.pp_button = $(spec.pp_button);
   my.fps = spec.fps;
   my.time_container = $(spec.time_container);
+  my.progress_slider_element = $(spec.progress_slider_element);
+  my.elapsed_bar = $(spec.elapsed_bar);
   my.prog_element = my.time_container.down('.first');
   my.len_element = my.time_container.down('.second');
   my.schedule_ms = (1000/my.fps);
@@ -58,6 +61,7 @@ var gaze_viewer = function(spec) {
     my.point_index_offset = 0;
     my.gaze_len = gaze_len();
     update_time_len();
+    update_time_progress();
   }
   pub.set_stim_index = set_stim_index;
   
@@ -116,6 +120,9 @@ var gaze_viewer = function(spec) {
   var update_time_progress = function() {
     var cur_sec = (my.point_index / my.view_data.samples_per_second);
     my.prog_element.update(cur_sec.toFixed(3));
+    var w = 100*my.point_index/(my.gaze_len-1);
+    my.elapsed_bar.style.width = w.toFixed(2)+"%";
+    my.progress_slider.setValue(w);
   }
   
   // Clears the canvas and draws all points on it.
@@ -208,11 +215,26 @@ var gaze_viewer = function(spec) {
   }
   my.pp_button.observe('click', handle_play_pause_click);
   
+  var set_speed_from_control = function(elt) {
+    my.playback_speed = parseFloat($(elt).getValue());
+  }
+  
   var handle_speed_change = function(event) {
-    my.playback_speed = parseFloat($(this).getValue());
+    set_speed_from_control(this);
   }
   my.speed_control.observe('change', handle_speed_change);
   
+  var build_progress_slider = function() {
+    my.progress_slider = new Control.Slider(
+      my.progress_slider_element.down('.handle'),
+      my.progress_slider_element,
+      {
+        'range': $R(0,100),
+      }
+    );
+  }
+  
+  build_progress_slider();
   build_nav();
   set_stim_index(0);
   set_group_styles();
@@ -233,6 +255,11 @@ var eyetrack_renderer = function(spec) {
 
   my.canvas = $(spec.canvas);
   my.context = my.canvas.getContext('2d');
+  
+  var rectangle = function(shape_data, fill_style, stroke_style, 
+                            stroke_width) {
+    // Doesn't work yet.
+  }
   
   var ellipse = function(shape_data, fill_style, stroke_style, stroke_width) {
     fill_style = fill_style || '#FFFFFF';
@@ -255,10 +282,10 @@ var eyetrack_renderer = function(spec) {
   };
   pub.ellipse = ellipse;
   
-  var circle = function(shape_data, fill_style, stroke_style) {
+  var circle = function(shape_data, fill_style, stroke_style, stroke_width) {
     var edata = {
       cx:shape_data.cx, cy:shape_data.cy, rx:shape_data.r, ry:shape_data.r};
-    return ellipse(edata,fill_style, stroke_style);
+    return ellipse(edata,fill_style, stroke_style, stroke_width);
   };
   pub.circle = circle;
 

@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="css/reset.css" />
   <link rel="stylesheet" href="css/main.css" />
   <script type="text/javascript" src="js/prototype.js"></script>
+  <script type="text/javascript" src="js/scriptaculous.js"></script>
   <script type="text/javascript" src="js/view_gaze.js"></script>
   <script type="text/javascript" src="js_data/pointdata_orig.js"></script>
 </head>
@@ -18,11 +19,14 @@
       </div>
       <div id="controls">
         <div id="toprow" class="clearfix">
-          <div class="control">
+          <div class="control" id="pp_container">
             <button id="play_button">Play</button>
           </div>
           <div class="control">
-            <div id="progress_slider"></div>
+            <div id="progress_slider">
+              <div id="progress_elapsed"> </div>
+              <div class="handle"><img src="images/round_drag_20.png"></div>
+            </div>
           </div>
           <div class="control">
             <div id="time_text">
@@ -31,7 +35,8 @@
               <span class="second">0.000</span>
             </div>
           </div>
-          <div class="control">
+          <div class="control" id="playback_speed">
+            Speed:
             <select id="playback_speed_select">
               <option value="0.25">1/4x</option>
               <option value="0.33">1/3x</option>
@@ -42,7 +47,7 @@
           </div>
         </div>
         <div class="bottomrow">
-          <p>Subject groups and such go here</p>
+          <div id="viewer_groups"></div>
         </div>
       </div>
     </div>
@@ -61,12 +66,15 @@
     'view_data':        EyeData,
     'stim_element':     'stimulus',
     'nav_container':    'event_list',
+    'viewer_groups_element': 'viewer_groups',
     'stim_img_prefix':  'stim_images',
     'thumb_prefix':     'stim_thumbs',
     'pp_button':        'play_button',
     'fps':              60,
     'time_container':   'time_text',
     'speed_control':    'playback_speed_select',
+    'progress_slider_element':   'progress_slider',
+    'elapsed_bar':      'progress_elapsed',
     'color_scheme':     color_schemes['category_1'],
   });
   </script>
