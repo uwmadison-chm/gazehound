@@ -5,7 +5,8 @@
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <link rel="stylesheet" href="css/reset.css" />
   <link rel="stylesheet" href="css/main.css" />
-  <script type="text/javascript" src="js_libs/prototype.js"></script>
+  <script type="text/javascript" src="js_libs/jquery-1.4.2.js"></script>
+  <script type="text/javascript" src="js_libs/jquery-ui-1.8.custom.min.js"></script>
   <script type="text/javascript" src="js_libs/scriptaculous.js"></script>
   <script type="text/javascript" src="js/view_gaze.js"></script>
   <script type="text/javascript" src="js_data/pointdata_orig.js"></script>
@@ -25,7 +26,6 @@
           <div class="control">
             <div id="progress_slider">
               <div id="progress_elapsed"> </div>
-              <div class="handle"><img src="images/round_drag_20.png"></div>
             </div>
           </div>
           <div class="control">
@@ -59,23 +59,24 @@
     <br class="clearer">
   </div>
   <script type="text/javascript">
-  var ctx = $('data_canvas').getContext('2d');
-  var er = eyetrack_renderer({'canvas': 'data_canvas'});
-  var gv = gaze_viewer({
-    'canvas':           'data_canvas', 
-    'view_data':        EyeData,
-    'stim_element':     'stimulus',
-    'nav_container':    'event_list',
-    'viewer_groups_element': 'viewer_groups',
-    'stim_img_prefix':  'stim_images',
-    'thumb_prefix':     'stim_thumbs',
-    'pp_button':        'play_button',
-    'fps':              60,
-    'time_container':   'time_text',
-    'speed_control':    'playback_speed_select',
-    'progress_slider_element':   'progress_slider',
-    'elapsed_bar':      'progress_elapsed',
-    'color_scheme':     color_schemes['category_1'],
+  $(document).ready(function() {
+    var er = eyetrack_renderer({'canvas': '#data_canvas'});
+    var gv = gaze_viewer({
+      'canvas':           '#data_canvas', 
+      'view_data':        EyeData,
+      'stim_element':     '#stimulus',
+      'nav_container':    '#event_list',
+      'viewer_groups_element': '#viewer_groups',
+      'stim_img_prefix':  'stim_images',
+      'thumb_prefix':     'stim_thumbs',
+      'pp_button':        '#play_button',
+      'fps':              60,
+      'time_container':   '#time_text',
+      'speed_control':    '#playback_speed_select',
+      'progress_slider_element':   '#progress_slider',
+      'elapsed_bar':      '#progress_elapsed',
+      'color_scheme':     color_schemes['category_1'],
+    });
   });
   </script>
 </body>

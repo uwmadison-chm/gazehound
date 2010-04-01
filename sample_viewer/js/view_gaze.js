@@ -5,9 +5,9 @@ var gaze_viewer = function(spec) {
   spec = spec || {};
   
   my.point_index = 0;
-  my.playing = false;
+  my.state = 'paused';
   my.view_data = spec.view_data;
-  my.canvas = $(spec.canvas);
+  my.canvas = $(spec.canvas).get(0);
   my.context = my.canvas.getContext('2d');
   my.renderer = eyetrack_renderer({'canvas': my.canvas});
   my.controls_conatiner = $(spec.control_element);
@@ -21,14 +21,22 @@ var gaze_viewer = function(spec) {
   my.time_container = $(spec.time_container);
   my.progress_slider_element = $(spec.progress_slider_element);
   my.elapsed_bar = $(spec.elapsed_bar);
-  my.prog_element = my.time_container.down('.first');
-  my.len_element = my.time_container.down('.second');
+  my.prog_element = my.time_container.children('.first');
+  my.len_element = my.time_container.children('.second');
   my.schedule_ms = (1000/my.fps);
   my.playback_speed = 1;
   my.speed_control = $(spec.speed_control);
   my.point_index_offset = 0;
   my.color_scheme = spec.color_scheme;
-    
+  
+  var toggle_play_pause = function() {
+    if (my.state == 'paused') {
+      my.state = 'playing';
+    } else if (my.state == 'playing') {
+      my.state = 'paused';
+    }
+  }
+  
   var play = function(from_start) {
     my.play_started_at = new Date();
     my.rendered_count = 0;
@@ -37,7 +45,7 @@ var gaze_viewer = function(spec) {
       my.point_index = 0;
       my.point_index_offset = 0;
     }
-    my.playing = true;
+    my.state = 'playing';
     render_and_schedule();
   };
   pub.play = play;
@@ -46,9 +54,8 @@ var gaze_viewer = function(spec) {
   
   var set_stim_image = function(stim_name) {
     var pfx = my.stim_img_prefix+'/';
-    my.stim_element.src = pfx+my.view_data.stim_images[stim_name];
+    my.stim_element.attr('src',pfx+my.view_data.stim_images[stim_name]);
   }
-
 
   var set_stim_index = function(idx) {
     my.stim_index = idx;
@@ -89,9 +96,9 @@ var gaze_viewer = function(spec) {
     );
     if (next_index >= my.gaze_len) {
       next_index = my.gaze_len-1;
-      my.playing = false;
+      my.state = 'paused';
     }
-    if (my.playing) {
+    if (my.state == 'playing') {
       window.setTimeout(render_and_schedule, my.schedule_ms);
     } else {
       set_play_pause();
@@ -101,6 +108,13 @@ var gaze_viewer = function(spec) {
     }
     draw_current_frame();
     my.point_index = next_index;
+  }
+  
+  var progress_percent = function(pct) {
+    if (pct) {
+      my.point_index = Math.round((pct/100)*(my.gaze_len-1));
+    }
+    return 100*(my.point_index/(my.gaze_len-1));
   }
   
   var overdraw_all_frames = function() {
@@ -114,15 +128,16 @@ var gaze_viewer = function(spec) {
   
   var update_time_len = function() {
     var len_sec = ((my.gaze_len - 1) / my.view_data.samples_per_second);
-    my.len_element.update(len_sec.toFixed(3));
+    my.len_element.text(len_sec.toFixed(3));
   }
   
   var update_time_progress = function() {
     var cur_sec = (my.point_index / my.view_data.samples_per_second);
-    my.prog_element.update(cur_sec.toFixed(3));
-    var w = 100*my.point_index/(my.gaze_len-1);
-    my.elapsed_bar.style.width = w.toFixed(2)+"%";
-    my.progress_slider.setValue(w);
+    my.prog_element.text(cur_sec.toFixed(3));
+    var w = progress_percent();
+    my.elapsed_bar.width(w.toFixed(2)+'%');
+    // Slider ranges from 0-1000, for better resolution...
+    my.progress_slider.slider('value', Math.round(w*10));
   }
   
   // Clears the canvas and draws all points on it.
@@ -156,39 +171,39 @@ var gaze_viewer = function(spec) {
   var build_nav = function() {
     // Hold on to these, so we can select an element in set_stim_index()
     my.nav_array = new Array(); 
-    my.nav_container.update('');
+    my.nav_container.html('');
     for (var i = 0; i < my.view_data.stims.length; i++) {
       var li = nav_li(i);
       my.nav_array[i] = li;
-      my.nav_container.insert(li);
+      my.nav_container.append(li);
     }
   }
   
   var select_nav_element = function(elt) {
-    elt.adjacent('.selected').invoke('removeClassName', 'selected');
-    elt.addClassName('selected');
+    elt.siblings('.selected').removeClass('selected');
+    elt.addClass('selected');
   }
   
   // Creates a <li> for the navigation, and makes it watch for clicks.
   var nav_li = function(stim_idx) {
     var stim_name = my.view_data.stims[stim_idx]
-    var li = new Element('li', {'class': 'clearfix'});
+    var li = new $('<li>').addClass('clearfix');
     var thumb_path = my.thumb_prefix+'/'+my.view_data.stim_images[stim_name];
-    li.insert(new Element('img', {'src': thumb_path}));
-    li.insert(new Element('div').update(my.view_data.stims[stim_idx]));
-    li.observe('click', function(idx) {
-      return function(event) {
-        set_stim_index(idx);
-      };
-    }(stim_idx));
+    li.append($('<img/>').attr('src', thumb_path))
+      .append($('<div>').html(my.view_data.stims[stim_idx]))
+      .click(function(idx) {
+        return function(event) {
+          set_stim_index(idx);
+        };
+      }(stim_idx));
     return li;
   }
   
   var set_play_pause = function() {
-    if (my.playing) {
-      my.pp_button.update('Pause');
-    } else {
-      my.pp_button.update('Play');
+    if (my.state == 'playing') {
+      my.pp_button.text('Pause');
+    } else if (my.state == 'paused'){
+      my.pp_button.text('Play');
     }
   }
   
@@ -207,31 +222,47 @@ var gaze_viewer = function(spec) {
   
   // Event-handling functions
   var handle_play_pause_click = function(event) {
-    my.playing = !my.playing;
+    toggle_play_pause();
     set_play_pause();
-    if (my.playing) {
+    if (my.state == 'playing') {
       play();
     }
   }
-  my.pp_button.observe('click', handle_play_pause_click);
+  my.pp_button.click(handle_play_pause_click);
   
   var set_speed_from_control = function(elt) {
-    my.playback_speed = parseFloat($(elt).getValue());
+    my.playback_speed = parseFloat($(elt).val());
   }
   
   var handle_speed_change = function(event) {
     set_speed_from_control(this);
   }
-  my.speed_control.observe('change', handle_speed_change);
+  my.speed_control.change(handle_speed_change);
   
   var build_progress_slider = function() {
-    my.progress_slider = new Control.Slider(
-      my.progress_slider_element.down('.handle'),
-      my.progress_slider_element,
-      {
-        'range': $R(0,100),
+    my.progress_slider = my.progress_slider_element.slider({
+      'min': 0,
+      'max': 1000,
+      'start': function(evt, ui) {
+        // Suspend playback
+        my.state = "slide-"+my.state;
+      },
+      'stop': function(evt, ui) {
+        // Return playback state to what it was
+        my.state = my.state.replace("slide-", "");
+        // keep track of where we stopped...
+        my.point_index_offset = my.point_index;
+        if (my.state == 'playing') {
+          play();
+        }
+      },
+      'slide': function(evt, ui) {
+        // Wish the slider could have decimal values. Oh well.
+        var pct = ui.value/10;
+        pct = progress_percent(pct); // Some clipping happens here.
+        draw_current_frame();
       }
-    );
+    });
   }
   
   build_progress_slider();
@@ -253,7 +284,7 @@ var eyetrack_renderer = function(spec) {
   var my = {};      // private things
   spec = spec || {};
 
-  my.canvas = $(spec.canvas);
+  my.canvas = $(spec.canvas).get(0);
   my.context = my.canvas.getContext('2d');
   
   var rectangle = function(shape_data, fill_style, stroke_style, 

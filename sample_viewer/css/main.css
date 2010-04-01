@@ -88,13 +88,16 @@ div.control {
   background-color: #aaa;
 }
 
-#progress_slider .handle {
+.ui-slider-handle {
   position: absolute;
-  overflow: visible;
-  width: 0px;
+}
+
+#progress_slider .ui-slider-handle {
+  background-image: url('../images/round_drag_20.png');
+  width: 20px;
   height: 20px;
   margin-top: -7px;
-  margin-left: -7px;
+  margin-left: -10px;
 }
 
 #progress_elapsed {
