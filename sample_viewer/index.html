@@ -9,7 +9,7 @@
   <script type="text/javascript" src="js_libs/jquery-ui-1.8.custom.min.js"></script>
   <script type="text/javascript" src="js_libs/scriptaculous.js"></script>
   <script type="text/javascript" src="js/view_gaze.js"></script>
-  <script type="text/javascript" src="js_data/pointdata_orig.js"></script>
+  <script type="text/javascript" src="js_data/pointdata_cleantest.js"></script>
 </head>
 <body>
   <div id="wrap">
@@ -61,7 +61,7 @@
   <script type="text/javascript">
   $(document).ready(function() {
     var er = eyetrack_renderer({'canvas': '#data_canvas'});
-    var gv = gaze_viewer({
+    gv = gaze_viewer({
       'canvas':           '#data_canvas', 
       'view_data':        EyeData,
       'stim_element':     '#stimulus',
@@ -75,7 +75,7 @@
       'speed_control':    '#playback_speed_select',
       'progress_slider_element':   '#progress_slider',
       'elapsed_bar':      '#progress_elapsed',
-      'color_scheme':     color_schemes['category_1'],
+      'color_scheme':     color_schemes['category_2'],
     });
   });
   </script>

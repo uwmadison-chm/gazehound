@@ -212,7 +212,7 @@ var gaze_viewer = function(spec) {
     var groups = my.view_data.viewer_groups;
     for (var i = 0; i < groups.length; i++) {
       var gname = groups[i];
-      var scheme = my.color_scheme['group_'+(i%2)];
+      var scheme = my.color_scheme['group_'+i];
       my.group_styles[gname] = {
         'stroke_style':'rgb('+scheme+')',
         'fill_style':'rgb('+scheme+')',
@@ -338,6 +338,7 @@ var color_schemes = {
   'pu_or': {
     'group_0': '241, 163, 64',
     'group_1': '152, 142, 195',
+    'group_2': '166, 219, 160',
     'aoi': '166, 219, 160',
     'highlight': '179, 88, 6',
   },
@@ -345,6 +346,7 @@ var color_schemes = {
   'category_1' : {
     'group_0': '228, 26, 28',
     'group_1': '55, 126, 184',
+    'group_2': '152, 78, 163',
     'aoi': '152, 78, 163',
     'highlight': '77, 175, 74',
   },
@@ -352,6 +354,7 @@ var color_schemes = {
   'category_2' : {
     'group_0': '31, 120, 180',
     'group_1': '51, 160, 44',
+    'group_2': '253, 191, 111',
     'aoi': '253, 191, 111',
     'highlight': '227, 26, 28',
   }
