@@ -29,8 +29,10 @@ class ScanpathPlotter(object):
 
 class Canvas(object):
 
-    def __init__(self, width, height, type=np.float, fill_value=0.0):
+    def __init__(self, width, height, dtype=np.float, fill_value=0.0):
         super(Canvas, self).__init__()
+        self.data = np.zeros((width, height), dtype=dtype)
+        self.data += fill_value
 
     def __len__(self):
         return len(self.data)
@@ -39,10 +41,10 @@ class Canvas(object):
         return self.data[i]
 
     def width(self):
-        return len(self.data)
+        return self.data.shape[1]
 
     def height(self):
-        return len(self.data[0])
+        return self.data.shape[0]
 
     def add_matrix(self, source, target_point):
         # Correct for target_point indicating center
