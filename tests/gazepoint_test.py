@@ -215,7 +215,7 @@ class TestPointPath(object):
          x, y = pointpath.mean()
          eq_(int(x), 334)
          eq_(int(y), 494)
-    
+        
     def tets_mean_returns_none_for_zero_length(self):
         sp = gazepoint.PointPath(points = [])
         p = pointpath.mean()
@@ -235,6 +235,20 @@ class TestPointPath(object):
             eq_(op.x-10, np.x)
             eq_(op.y-20, np.y)
     
+    def test_pointpath_constrains(self):
+        pointpath = gazepoint.PointPath(points = self.points)
+        pp = pointpath.constrain_to(
+            (60,0),
+            (10,1),
+            (400,400),
+            (90,90)
+        )
+        p_ar = pp.as_array()
+        eq_(min(p_ar[:,0]), 0)
+        eq_(max(p_ar[:,0]), 400)
+        eq_(min(p_ar[:,1]), 1)
+        eq_(max(p_ar[:,1]), 90)
+
     def test_points_in_filters(self):
         pointpath = gazepoint.PointPath(points = self.points)
         rect = shapes.Rectangle(300,500,360,600)

@@ -128,6 +128,19 @@ class PointPath(object):
             point.x += x
             point.y += y
         return PointPath(points=points)
+    
+    def constrain_to(self, 
+        min_x_const = (0,0),
+        min_y_const = (0,0),
+        max_x_const = (1000,1000),
+        max_y_const = (1000,1000)):
+        plist = copy.deepcopy(self)
+        for p in plist:
+            if p.x < min_x_const[0]: p.x = min_x_const[1]
+            if p.x > max_x_const[0]: p.x = max_x_const[1]
+            if p.y < min_y_const[0]: p.y = min_y_const[1]
+            if p.y > max_y_const[0]: p.y = max_y_const[1]
+        return plist
 
     def points_within(self, shape):
         plist = copy.deepcopy(self.points)
@@ -137,12 +150,12 @@ class PointPath(object):
             properties=('x', 'y', 'time', 'duration'),
             dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
-        return np.array(
-            [
-                # Map the desired properties into a list
-                # for every point in our path.
-                [getattr(point, prop) for prop in properties]
+        # Map the desired properties into a list
+        # for every point in our path.
+        return np.array([
+            [getattr(point, prop) for prop in properties]
                 for point in self.points], dtype=dtype)
+                
 
     def time_index(self, time):
         t1 = self.points[0].time
