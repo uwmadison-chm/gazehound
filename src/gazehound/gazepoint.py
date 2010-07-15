@@ -111,13 +111,7 @@ class PointPath(object):
             [point for point in self.points if criterion(point)])
 
     def mean(self):
-        if len(self.points) == 0:
-            return None
-
-        total_dur = self.total_duration
-        xtotal = sum((float(p.duration) * p.x for p in self.points))
-        ytotal = sum((float(p.duration) * p.y for p in self.points))
-        return (xtotal / total_dur, ytotal / total_dur)  # Means!
+        return np.apply_along_axis(np.mean, 0, self.as_array(('x', 'y')))
 
     @property
     def total_duration(self):
