@@ -1,3 +1,4 @@
+# coding: utf8
 # Part of the gazehound package for analzying eyetracking data
 #
 # Copyright (c) 2008 Board of Regents of the University of Wisconsin System
