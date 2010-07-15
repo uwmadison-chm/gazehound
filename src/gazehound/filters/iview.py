@@ -10,7 +10,6 @@ from gazehound.timeline import Timeline
 
 from copy import deepcopy
 
-
 class Deblink(object):
 
     # Literature suggests we're unlikely to se blinks less than 50ms or more
