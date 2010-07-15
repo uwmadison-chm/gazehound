@@ -112,6 +112,9 @@ class PointPath(object):
 
     def mean(self):
         return np.apply_along_axis(np.mean, 0, self.as_array(('x', 'y')))
+    
+    def median(self):
+        return np.apply_along_axis(np.median, 0, self.as_array(('x', 'y')))
 
     @property
     def total_duration(self):

@@ -221,6 +221,11 @@ class TestPointPath(object):
         sp = gazepoint.PointPath(points = [])
         p = pointpath.mean()
         assert p is None
+        
+    def test_pointpath_computes_median(self):
+        sp = gazepoint.PointPath(points = self.points)
+        x, y = sp.median()
+        eq_((x,y), (357.5, 509.0))
 
     def test_recenter_duplicates_pointpath(self):
         pointpath = gazepoint.PointPath(points = self.points)
