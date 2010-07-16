@@ -106,7 +106,7 @@ def smi_pointpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
-    ir = readers.IViewScanpathReader(lines)
+    ir = readers.iview.IViewScanpathReader(lines)
     return ir.pointpath()
 
 def smi_fixation_ary():
@@ -131,7 +131,7 @@ def tiny_timeline():
     lines = []
     with open(EX_PATH+"/pres_tiny.txt") as f:
         lines = [line.strip() for line in f.readlines()]
-    tr = readers.TimelineReader(lines)
+    tr = readers.timeline.TimelineReader(lines)
     return tr.timeline
     
 def tiny_viewings():

@@ -9,7 +9,7 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from os import path
 from gazehound import event, timeline
-from gazehound.readers import TimelineReader
+from gazehound.readers.timeline import TimelineReader
 
 class TestTimeline(object):
     def setup(self):

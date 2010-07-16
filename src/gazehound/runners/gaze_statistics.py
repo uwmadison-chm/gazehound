@@ -76,7 +76,7 @@ class GazeStatsRunner(object):
         op = GazeStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        ir = readers.IViewScanpathReader(filename = op.gaze_file)
+        ir = readers.iview.IViewScanpathReader(filename = op.gaze_file)
         self.file_data = ir
         self.pointpath = ir.pointpath()
 
@@ -115,7 +115,7 @@ class GazeStatsRunner(object):
     
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
-        reader = readers.TimelineReader(filename=filename)
+        reader = readers.timeline.TimelineReader(filename=filename)
         timeline_with_points = viewing.Combiner(
             timeline = reader.timeline, pointpath = self.pointpath
         ).viewings()

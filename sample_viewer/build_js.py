@@ -14,7 +14,8 @@ import json
 # Try a deblinked version!
 
 import gazehound
-from gazehound.readers import IViewScanpathReader, TimelineReader
+from gazehound.readers.iview import IViewScanpathReader
+from gazehound.readers.timeline import TimelineReader
 from gazehound.viewing import Combiner
 
 

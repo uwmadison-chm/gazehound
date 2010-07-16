@@ -9,7 +9,9 @@
 # Hooray for with / as blocks! I miss ruby though :(
 from __future__ import with_statement
 from os import path
-from gazehound.readers import DelimitedReader, IViewScanpathReader, IViewFixationReader, TimelineReader
+from gazehound.readers.delimited import DelimitedReader
+from gazehound.readers.iview import IViewScanpathReader, IViewFixationReader
+from gazehound.readers.timeline import TimelineReader
 from testutils import *
 from nose.tools import *
 

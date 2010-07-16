@@ -77,7 +77,7 @@ class FixationStatsRunner(object):
         op = FixationStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        ir = readers.IViewFixationReader(filename=op.fix_file)
+        ir = readers.iview.IViewFixationReader(filename=op.fix_file)
         self.file_data = ir
         self.pointpath = ir.pointpath()
 
@@ -113,7 +113,7 @@ class FixationStatsRunner(object):
 
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
-        reader = readers.TimelineReader(filename=filename)
+        reader = readers.timeline.TimelineReader(filename=filename)
         timeline_with_points = viewing.Combiner(
             timeline=reader.timeline, pointpath=self.pointpath).viewings()
         return timeline_with_points
