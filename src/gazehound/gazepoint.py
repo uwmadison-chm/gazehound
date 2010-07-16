@@ -87,9 +87,12 @@ class IViewPoint(Point):
 
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
+    measures = ('x', 'y', 'time', 'duration')
+    uniformely_sampled = False # Subclass to make this true.
 
-    def __init__(self, points=[]):
+    def __init__(self, points=[], headers = {}):
         self.points = points
+        self.headers = headers
 
     def __len__(self):
         return self.points.__len__()
@@ -124,7 +127,7 @@ class PointPath(object):
         points = copy.deepcopy(self.points)
         for point in points:
             point.x += x
-            point.y += y
+            point.y += y    
         return PointPath(points=points)
     
     def constrain_to(self, 
@@ -145,7 +148,7 @@ class PointPath(object):
         return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
 
     def as_array(self,
-            properties=('x', 'y', 'time', 'duration'),
+            properties=measures,
             dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
         # Map the desired properties into a list
@@ -164,6 +167,20 @@ class PointPath(object):
             t1 = t2
         return len(self.points)  # It's the last point!
 
+class UniformelySampledPointPath(PointPath):
+    uniformely_sampled = True
+    
+    def __init__(self, samples_per_second, *args):
+        self.samples_per_second = samples_per_second
+        super(UniformelySampledPointPath, self).__init__(*args)
+
+class IViewPointPath(UniformelySampledPointPath):
+    
+    measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v', 
+        'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
+    
+    def __init__(self, *args):
+        super(IViewPointPath, self).__init__(*args)
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """

@@ -10,7 +10,7 @@ from gazehound import gazepoint, shapes
 import numpy
 
 import mock_objects
-from nose.tools import eq_
+from nose.tools import *
 from testutils import gt_, lt_, gte_, lte_, includes_
 
 
@@ -284,6 +284,17 @@ class TestPointPath(object):
     def test_time_index_gets_last_point_for_large_t(self):
         pp = gazepoint.PointPath(points = self.points)
         eq_(len(pp), pp.time_index(100000))
+
+class TestIViewPointPath(object):
+    def __init__(self):
+        super(TestIViewPointPath, self).__init__()
+        
+    def setup(self):
+        self.points = mock_objects.iview_noisy_point_list()
+    
+    @raises(TypeError)
+    def test_iview_timeline_requires_samples_per_second(self):
+        pp = gazepoint.IViewPointPath()
     
 class TestPoint(object):
     def __init__(self):
