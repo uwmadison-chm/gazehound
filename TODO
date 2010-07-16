@@ -7,9 +7,6 @@
 ** Deblinking
 ** Denoising
 
-* Create separate classes for different kinds of pointpaths, and allow 
-  conversion to and from numpy arrays
-
 * Work with new version SMI IView files
 
 * Work with Tobii files
