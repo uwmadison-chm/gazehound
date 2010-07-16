@@ -291,10 +291,17 @@ class TestIViewPointPath(object):
         
     def setup(self):
         self.points = mock_objects.iview_noisy_point_list()
-    
+        self.path = gazepoint.IViewPointPath(
+            samples_per_second=60, points=self.points)
+        
     @raises(TypeError)
-    def test_iview_timeline_requires_samples_per_second(self):
-        pp = gazepoint.IViewPointPath()
+    def test_iview_pointpath_requires_samples_per_second(self):
+        gazepoint.IViewPointPath()
+    
+    def test_to_array_is_proper_shape(self):
+        arr = self.path.as_array()
+        eq_(len(self.path), arr.shape[0])
+        eq_(len(self.path.measures), arr.shape[1])
     
 class TestPoint(object):
     def __init__(self):

@@ -87,10 +87,11 @@ class IViewPoint(Point):
 
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
-    measures = ('x', 'y', 'time', 'duration')
     uniformely_sampled = False # Subclass to make this true.
 
     def __init__(self, points=[], headers = {}):
+        self.measures = ('x', 'y', 'time', 'duration')
+        
         self.points = points
         self.headers = headers
 
@@ -148,13 +149,14 @@ class PointPath(object):
         return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
 
     def as_array(self,
-            properties=measures,
+            measures=None,
             dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
         # Map the desired properties into a list
         # for every point in our path.
+        if measures is None: measures = self.measures
         return np.array([
-            [getattr(point, prop) for prop in properties]
+            [getattr(point, m) for m in measures]
                 for point in self.points], dtype=dtype)
                 
 
@@ -170,17 +172,16 @@ class PointPath(object):
 class UniformelySampledPointPath(PointPath):
     uniformely_sampled = True
     
-    def __init__(self, samples_per_second, *args):
+    def __init__(self, samples_per_second, *args, **kwargs):
         self.samples_per_second = samples_per_second
-        super(UniformelySampledPointPath, self).__init__(*args)
+        super(UniformelySampledPointPath, self).__init__(*args, **kwargs)
 
 class IViewPointPath(UniformelySampledPointPath):
     
-    measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v', 
-        'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
-    
-    def __init__(self, *args):
-        super(IViewPointPath, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v', 
+            'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
+        super(IViewPointPath, self).__init__(*args, **kwargs)
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
