@@ -87,9 +87,13 @@ class IViewPoint(Point):
 
 class PointPath(object):
     """ A set of Points arranged sequentially in time """
+    uniformely_sampled = False # Subclass to make this true.
 
-    def __init__(self, points=[]):
+    def __init__(self, points=[], headers = {}):
+        self.measures = ('x', 'y', 'time', 'duration')
+        
         self.points = points
+        self.headers = headers
 
     def __len__(self):
         return self.points.__len__()
@@ -124,7 +128,7 @@ class PointPath(object):
         points = copy.deepcopy(self.points)
         for point in points:
             point.x += x
-            point.y += y
+            point.y += y    
         return PointPath(points=points)
     
     def constrain_to(self, 
@@ -145,13 +149,14 @@ class PointPath(object):
         return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
 
     def as_array(self,
-            properties=('x', 'y', 'time', 'duration'),
+            measures=None,
             dtype=np.float32):
         """ Turns our list of points into a numpy ndarray. """
         # Map the desired properties into a list
         # for every point in our path.
+        if measures is None: measures = self.measures
         return np.array([
-            [getattr(point, prop) for prop in properties]
+            [getattr(point, m) for m in measures]
                 for point in self.points], dtype=dtype)
                 
 
@@ -164,6 +169,19 @@ class PointPath(object):
             t1 = t2
         return len(self.points)  # It's the last point!
 
+class UniformelySampledPointPath(PointPath):
+    uniformely_sampled = True
+    
+    def __init__(self, samples_per_second, *args, **kwargs):
+        self.samples_per_second = samples_per_second
+        super(UniformelySampledPointPath, self).__init__(*args, **kwargs)
+
+class IViewPointPath(UniformelySampledPointPath):
+    
+    def __init__(self, *args, **kwargs):
+        self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v', 
+            'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
+        super(IViewPointPath, self).__init__(*args, **kwargs)
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
