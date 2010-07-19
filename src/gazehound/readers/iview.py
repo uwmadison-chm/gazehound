@@ -69,7 +69,7 @@ class IView2ScanpathReader(IViewReader):
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
-        fact = gazepoint.IViewPointFactory()
+        fact = gazepoint.IView2PointFactory()
         points = fact.from_component_list(self)
         return gazepoint.PointPath(points = points)
 

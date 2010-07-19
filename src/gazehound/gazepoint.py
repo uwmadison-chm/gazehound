@@ -228,14 +228,14 @@ class PointFactory(object):
         return points
 
 
-class IViewPointFactory(PointFactory):
+class IView2PointFactory(PointFactory):
     """
     Maps a list of gaze point data to a list of Points, using SMI's iView
     data scheme.
     """
 
     def __init__(self, type_to_produce=IViewPoint):
-        super(IViewPointFactory, self).__init__(type_to_produce)
+        super(IView2PointFactory, self).__init__(type_to_produce)
         self.data_map = [
             ('time', int),
             ('set', str),
@@ -249,17 +249,17 @@ class IViewPointFactory(PointFactory):
             ('diam_v', int)]
 
     def from_component_list(self, components):
-        return super(IViewPointFactory, self).from_component_list(
+        return super(IView2PointFactory, self).from_component_list(
             components, self.data_map)
 
 
-class IViewPointNumpyArrayFactory(IViewPointFactory):
+class IViewPointNumpyArrayFactory(IView2PointFactory):
     """
     Maps gazepoint data into a numpy array.
     """
 
     def __init__(self):
-        super(IViewPointFactory, self).__init__()
+        super(IView2PointFactory, self).__init__()
 
 
 class IViewFixationFactory(PointFactory):
