@@ -23,8 +23,8 @@ class DelimitedReader(object):
     def __init__(self,
         file_data=None, skip_comments=True, comment_char="#",
         opts_for_parser={}, filename=None, skip_lines=0):
-        self.__comment_lines = []
-        self.__content_lines = []
+        self._comment_lines = []
+        self._content_lines = []
         self.parser = None
         self.file_data = file_data
         self.skip_comments = skip_comments
@@ -45,42 +45,42 @@ class DelimitedReader(object):
             self.file_data = f.readlines()
 
     def __len__(self):
-        self.__setup_parser()
-        return len(self.__content_lines)
+        self._setup_parser()
+        return len(self._content_lines)
 
     @property
     def comment_lines(self):
-        self.__setup_parser()
-        return self.__comment_lines
+        self._setup_parser()
+        return self._comment_lines
 
     @property
     def content_lines(self):
-        self.__setup_parser()
-        return self.__content_lines
+        self._setup_parser()
+        return self._content_lines
 
     def __iter__(self):
         # We just need to implement next(self)
         return self
 
     def next(self):
-        self.__setup_parser()
+        self._setup_parser()
         return self.parser.next()
 
-    def __setup_parser(self):
-        self.__partition_lines()
+    def _setup_parser(self):
+        self._partition_lines()
         if self.parser is None:
             self.parser = csv.reader(
-                self.__content_lines, **self.opts_for_parser)
+                self._content_lines, **self.opts_for_parser)
 
-    def __partition_lines(self):
-        if len(self.__content_lines) > 0:
+    def _partition_lines(self):
+        if len(self._content_lines) > 0:
             return
 
         for line in self.file_data[self.skip_lines:]:
             stripped = line.strip()
             if self.skip_comments and stripped.startswith(self.comment_char):
-                self.__comment_lines.append(stripped)
+                self._comment_lines.append(stripped)
             elif len(stripped) > 0:
-                self.__content_lines.append(stripped)
+                self._content_lines.append(stripped)
 
 
