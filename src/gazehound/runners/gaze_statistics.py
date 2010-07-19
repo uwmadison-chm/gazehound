@@ -11,6 +11,7 @@ import os.path
 from optparse import OptionParser
 from gazehound import readers, timeline, viewing, shapes
 from gazehound.writers import delimited
+from gazehound.readers import iview
 
 def main(argv = None):
     if argv is None:

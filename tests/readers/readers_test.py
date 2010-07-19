@@ -13,7 +13,7 @@ from gazehound.readers.delimited import DelimitedReader
 from gazehound.readers.iview import IView2ScanpathReader, IViewFixationReader
 from gazehound.readers.iview import IView3PointPathReader
 from gazehound.readers.timeline import TimelineReader
-from testutils import *
+from ..testutils import *
 from nose.tools import *
 
 class TestDelimitedReader(object):
@@ -23,11 +23,11 @@ class TestDelimitedReader(object):
         p = path.abspath(path.dirname(__file__))
         # All of these should generate the same number of lines...
         self.norm_file = path.join(
-            p, "examples/iview_normal.txt")
+            p, "../examples/iview_normal.txt")
         self.blank_comment_file = path.join(
-            p, "examples/iview_blank_comment.txt")
+            p, "../examples/iview_blank_comment.txt")
         self.comment_inbody = path.join(
-            p, "examples/iview_comment_inbody.txt")
+            p, "../examples/iview_comment_inbody.txt")
         
         with open(self.norm_file) as f:
             self.norm_lines = f.readlines()
@@ -92,7 +92,7 @@ class TestIView2ScanpathReader(object):
     """Exercise the IVIewScanpathReader class"""
     def setup(self):
         p = path.abspath(path.dirname(__file__))
-        self.norm_file = path.join(p, "examples/iview_normal.txt")
+        self.norm_file = path.join(p, "../examples/iview_normal.txt")
         with open(self.norm_file) as f:
             self.norm_lines = f.readlines()
 
@@ -147,7 +147,7 @@ class TestIView3PointPathReader(object):
     
     def setup(self):
         p = path.abspath(path.dirname(__file__))
-        self.point_file = path.join(p, "examples/iview_3_small.txt")
+        self.point_file = path.join(p, "../examples/iview_3_small.txt")
         with open(self.point_file, 'rU') as f:
             self.point_lines = f.readlines()
     
@@ -177,7 +177,7 @@ class TestIViewFixationReader(object):
     """Exercise the IViewFixationReader"""
     def __init__(self):
         p = path.abspath(path.dirname(__file__))
-        self.fix_file = path.join(p, "examples/fixations.txt")
+        self.fix_file = path.join(p, "../examples/fixations.txt")
         with open(self.fix_file) as f:
             self.fixation_lines = f.readlines()
 
@@ -211,7 +211,7 @@ class TestTimelineReader(object):
     
     def __init__(self):
         p = path.abspath(path.dirname(__file__))
-        self.pres_file = path.join(p, "examples/pres_tiny.txt")
+        self.pres_file = path.join(p, "../examples/pres_tiny.txt")
     
         with open(self.pres_file) as f:
             self.pres_lines = f.readlines()
