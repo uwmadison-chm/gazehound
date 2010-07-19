@@ -1,14 +1,19 @@
+* Autodetect eyetracking file types
+
 * Finish saccade detection API, test.
 
-* Change recentering algorithm to use 
+* Change recentering algorithm to use median instead of mean
+
+* Change many methods into @properties
 
 * Speed data processing -- in particular:
 ** Joining events and eye data
 ** Deblinking
 ** Denoising
 
-* Work with new version SMI IView files
+* Split gazepoint into sub-packages
+
+* Put shape reading utils in readers
 
 * Work with Tobii files
 
-* Autodetect eyetracking file types
