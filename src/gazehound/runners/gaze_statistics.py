@@ -76,7 +76,7 @@ class GazeStatsRunner(object):
         op = GazeStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        ir = readers.iview.IViewScanpathReader(filename = op.gaze_file)
+        ir = readers.iview.IView2ScanpathReader(filename = op.gaze_file)
         self.file_data = ir
         self.pointpath = ir.pointpath()
 

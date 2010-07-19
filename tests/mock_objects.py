@@ -106,7 +106,7 @@ def smi_pointpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
-    ir = readers.iview.IViewScanpathReader(lines)
+    ir = readers.iview.IView2ScanpathReader(lines)
     return ir.pointpath()
 
 def smi_fixation_ary():
