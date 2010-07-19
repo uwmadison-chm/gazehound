@@ -56,22 +56,23 @@ class IViewReader(DelimitedReader):
         return (cleaned_key, cleaned_val)
 
 
-class IViewScanpathReader(IViewReader):
+class IView2ScanpathReader(IViewReader):
     """A reader for files produced by SMI's iView software"""
 
     def __init__(self,
         file_data=None, skip_comments=True, comment_char="#",
         opts_for_parser={}, filename=None):
 
-        super(IViewScanpathReader, self).__init__(
+        super(IView2ScanpathReader, self).__init__(
             self.__header_map(), file_data, skip_comments,
             comment_char, opts_for_parser, filename)
 
     def pointpath(self):
         """Return a list of Points representing the scan path."""
-        fact = gazepoint.IViewPointFactory()
+        fact = gazepoint.IView2PointFactory()
         points = fact.from_component_list(self)
-        return gazepoint.PointPath(points = points)
+        return gazepoint.IViewPointPath(
+            points=points, samples_per_second=self.header()['sample_rate'])
 
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
@@ -90,6 +91,48 @@ class IViewScanpathReader(IViewReader):
                 'calibration_size',
                 lambda x: [int(e) for e in x.split("\t")]),
             'Sample Rate': ('sample_rate', int)}
+
+
+class IView3PointPathReader(IViewReader):
+    def __init__(self, file_data=None, skip_comments=True, comment_char="##",
+        opts_for_parser={}, filename=None):
+        
+        super(IView3PointPathReader, self).__init__(
+            self.__header_map, file_data, skip_comments, comment_char, 
+            opts_for_parser, filename)
+    
+    def pointpath(self):
+        fact = gazepoint.IView3PointFactory()
+        points = fact.from_component_list(self)
+        return gazepoint.IViewPointPath(
+            points=points, samples_per_second=self.header()['sample_rate'])
+    
+    def _partition_lines(self):
+        super(IView3PointPathReader, self)._partition_lines()
+        self._content_lines = self._content_lines[1:]
+    
+    @property
+    def __header_map(self):
+        # The second parameter is a function, taking one string argument,
+        # that converts the value to its expected format.
+        return {
+            'Version': ('file_version', str),
+            'Format': ('file_format', str),
+            'Subject': ('subject', str),
+            'Date': ('date_string', str),
+            'Description': ('description', str),
+            'Number of Samples': ('recorded_points', int),
+            'Calibration Area': (
+                'calibration_size',
+                lambda x: [int(e) for e in x.split("\t")]),
+            'Sample Rate': ('sample_rate', int),
+            'Calibration Type' : ('calibration_type', str),
+            'Stimulus Dimension [mm]' : ('stimulus_dimension', 
+                lambda x: [int(e) for e in x.split("\t")] + ['mm']),
+            'Head Distance [mm]' : ('head_distance',
+                lambda x : [x, 'mm']),
+            'Reversed' : ('reversed', str)
+        }
 
 
 class IViewFixationReader(IViewReader):

@@ -17,7 +17,7 @@ from os import path
 EX_PATH = path.abspath(path.dirname(__file__))+"/examples"
 
 def iview_noisy_point_list():
-    return gazepoint.IViewPointFactory().from_component_list([
+    return gazepoint.IView2PointFactory().from_component_list([
     ['0', '0', '5034', '3490', '4687', '3380', '358', '543', '2400', '2080'],
     ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
     ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -48,7 +48,7 @@ def iview_points_noisy():
     return gazepoint.PointPath(iview_noisy_point_list())
 
 def iview_points_blinky():
-    return gazepoint.PointPath(gazepoint.IViewPointFactory().from_component_list([
+    return gazepoint.PointPath(gazepoint.IView2PointFactory().from_component_list([
     ['0', '0', '5034', '3490', '4687', '3380', '358', '577', '2400', '2080'],
     ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
     ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -82,7 +82,7 @@ def iview_points_blinky():
     ]))
 
 def iview_problem_blink():
-    return gazepoint.PointPath(gazepoint.IViewPointFactory().from_component_list(
+    return gazepoint.PointPath(gazepoint.IView2PointFactory().from_component_list(
         [[6350, 0, 6061, 3610, 5408, 3672, 536, 247, 1697, 1814],
         [6367, 0, 6055, 3608, 5404, 3670, 538, 246, 1717, 1819],
         [6384, 0, 6058, 3606, 5406, 3669, 537, 245, 1688, 1821],
@@ -106,7 +106,7 @@ def smi_pointpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
-    ir = readers.iview.IViewScanpathReader(lines)
+    ir = readers.iview.IView2ScanpathReader(lines)
     return ir.pointpath()
 
 def smi_fixation_ary():
@@ -142,7 +142,7 @@ def tiny_viewings():
     ).viewings()
 
 def smi_pointpath_spreadout():
-    ivf = gazepoint.IViewPointFactory()
+    ivf = gazepoint.IView2PointFactory()
     return gazepoint.PointPath(ivf.from_component_list(smi_ary_spreadout()))
     
 

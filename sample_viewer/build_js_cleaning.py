@@ -14,7 +14,7 @@ import json
 # Try a deblinked version!
 
 import gazehound
-from gazehound.readers.iview import IViewScanpathReader
+from gazehound.readers.iview import IView2ScanpathReader
 from gazehound.readers.timeline import TimelineReader
 from gazehound.viewing import Combiner
 from gazehound.filters import iview
@@ -42,7 +42,7 @@ for snum in SUBJECTS:
     
     pointpaths = {}
     
-    spath = IViewScanpathReader(filename=spfile).pointpath()
+    spath = IView2ScanpathReader(filename=spfile).pointpath()
     # print("tl: %s, sp: %s" % (len(tline), len(spath)))
     pointpaths['raw'] = Combiner(timeline=tline, pointpath=spath).viewings()
     

@@ -98,10 +98,10 @@ class TestPointFactory(object):
             for mapping in nones:
                 assert not hasattr(point, mapping[0])
                 
-class TestIViewPointFactory(object):
+class TestIView2PointFactory(object):
     def setup(self):
         self.point_ary = mock_objects.smi_ary_spreadout()
-        self.iview_fact = gazepoint.IViewPointFactory()
+        self.iview_fact = gazepoint.IView2PointFactory()
         
     def test_get_components_returns_proper_number_of_elements(self):
         points = self.iview_fact.from_component_list(self.point_ary)

@@ -14,7 +14,7 @@ import json
 # Try a deblinked version!
 
 import gazehound
-from gazehound.readers.iview import IViewScanpathReader
+from gazehound.readers.iview import IView2ScanpathReader
 from gazehound.readers.timeline import TimelineReader
 from gazehound.viewing import Combiner
 
@@ -45,7 +45,7 @@ for snum in [s['name'] for s in SUBJECTS]:
     spfile = "scanpaths/scanpath_%s.txt" % snum
     tlfile = "stim_timings/stims_%s.txt" % snum
     tline = TimelineReader(filename=tlfile).timeline
-    spath = IViewScanpathReader(filename=spfile).pointpath()
+    spath = IView2ScanpathReader(filename=spfile).pointpath()
     # print("tl: %s, sp: %s" % (len(tline), len(spath)))
     decorated = Combiner(timeline=tline, pointpath=spath).viewings()
     

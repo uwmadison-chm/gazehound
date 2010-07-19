@@ -10,7 +10,8 @@
 from __future__ import with_statement
 from os import path
 from gazehound.readers.delimited import DelimitedReader
-from gazehound.readers.iview import IViewScanpathReader, IViewFixationReader
+from gazehound.readers.iview import IView2ScanpathReader, IViewFixationReader
+from gazehound.readers.iview import IView3PointPathReader
 from gazehound.readers.timeline import TimelineReader
 from testutils import *
 from nose.tools import *
@@ -87,7 +88,7 @@ class TestDelimitedReader(object):
         eq_(len(dr.comment_lines), (self.COMMENT_LINES-1))
         
         
-class TestIViewScanpathReader(object):
+class TestIView2ScanpathReader(object):
     """Exercise the IVIewScanpathReader class"""
     def setup(self):
         p = path.abspath(path.dirname(__file__))
@@ -99,45 +100,78 @@ class TestIViewScanpathReader(object):
         self.COMMENT_LINES = 11
     
     def test_header_map_lives_on(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         includes_(ir.header_map, "FileVersion")
     
     def test_reader_basically_works(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         
         eq_(len(ir), self.EXPECTED_LINES)
         
     def test_reader_uses_read_file(self):
-        ir = IViewScanpathReader(filename = self.norm_file)
+        ir = IView2ScanpathReader(filename = self.norm_file)
         
         eq_(len(ir), self.EXPECTED_LINES)
         
     def test_reader_finds_comment_lines(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         comment_lines = ir.comment_lines
         
         eq_(ir.comment_char, "#")
         eq_(len(comment_lines), self.COMMENT_LINES)
     
     def test_basic_header_parsing(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         h = ir.header()
         assert h is not None
         includes_(h, 'file_version')
         eq_(h.get('file_version'), '2')
         
     def test_calibration_size_parses_into_int_list(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         h = ir.header()
         
         eq_(h.get('calibration_size'), [800,600])
     
     def test_pointpath_returns_expected_points(self):
-        ir = IViewScanpathReader(self.norm_lines)
+        ir = IView2ScanpathReader(self.norm_lines)
         
         pointpath = ir.pointpath()
         eq_(len(pointpath), self.EXPECTED_LINES)
+
+class TestIView3PointPathReader(object):
+    """ Test out the reader for Version 3 of the iview files """
+    def __init__(self):
+        self.EXPECTED_POINTS=15
+        self.EXPECTED_COMMENTS=20
     
+    def setup(self):
+        p = path.abspath(path.dirname(__file__))
+        self.point_file = path.join(p, "examples/iview_3_small.txt")
+        with open(self.point_file, 'rU') as f:
+            self.point_lines = f.readlines()
+    
+    def test_comment_lines(self):
+        ir = IView3PointPathReader(self.point_lines)
+        eq_("##", ir.comment_char)
+        eq_(self.EXPECTED_COMMENTS, len(ir.comment_lines))
+    
+    def test_content_len(self):
+        ir = IView3PointPathReader(self.point_lines)
+        eq_(self.EXPECTED_POINTS, len(ir.content_lines))
+    
+    def test_header_map(self):
+        ir = IView3PointPathReader(self.point_lines)
+        h = ir.header()
+        includes_(h, 'file_version')
+        eq_(h['file_version'], 'IDF Converter 3.0.9')
+        
+    def test_pointpath(self):
+        ir = IView3PointPathReader(self.point_lines)
+        pp = ir.pointpath()
+        eq_(60, pp.samples_per_second)
+        eq_(self.EXPECTED_POINTS, len(pp))
+        
 
 class TestIViewFixationReader(object):
     """Exercise the IViewFixationReader"""
