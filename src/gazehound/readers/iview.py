@@ -71,7 +71,8 @@ class IView2ScanpathReader(IViewReader):
         """Return a list of Points representing the scan path."""
         fact = gazepoint.IView2PointFactory()
         points = fact.from_component_list(self)
-        return gazepoint.PointPath(points = points)
+        return gazepoint.IViewPointPath(
+            points=points, samples_per_second=self.header()['sample_rate'])
 
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
