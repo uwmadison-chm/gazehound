@@ -253,6 +253,39 @@ class IView2PointFactory(PointFactory):
             components, self.data_map)
 
 
+class IView3PointFactory(PointFactory):
+    """
+    I know this is not general enough, but it'll do for us, for now.
+    
+    Time	Type	Trial	R Raw X [px]	R Raw Y [px]	R Dia X [px]	
+    R Dia Y [px]	R CR1 X [px]	R CR1 Y [px]	R CR2 X [px]	
+    R CR2 Y [px]	R POR X [px]	R POR Y [px]	Frame
+    
+    """
+
+    def __init__(self, type_to_produce=IViewPoint):
+        super(IView3PointFactory, self).__init__(type_to_produce)
+        self.data_map = [
+            ('time', int),
+            ('type', str),
+            ('trial', int),
+            ('pupil_h', float),
+            ('pupil_v', float),
+            ('diam_h', float),
+            ('diam_v', float),
+            ('corneal_reflex_1_h', float),
+            ('corneal_reflex_1_v', float),
+            ('corneal_reflex_2_h', float),
+            ('corneal_reflex_2_v', float),
+            ('x', float),
+            ('y', float),
+        ]
+
+    def from_component_list(self, components):
+        return super(IView3PointFactory, self).from_component_list(
+            components, self.data_map)
+
+
 class IViewPointNumpyArrayFactory(IView2PointFactory):
     """
     Maps gazepoint data into a numpy array.

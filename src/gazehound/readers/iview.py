@@ -100,6 +100,12 @@ class IView3PointPathReader(IViewReader):
             self.__header_map, file_data, skip_comments, comment_char, 
             opts_for_parser, filename)
     
+    def pointpath(self):
+        fact = gazepoint.IView3PointFactory()
+        points = fact.from_component_list(self)
+        return gazepoint.IViewPointPath(
+            points=points, samples_per_second=self.header()['sample_rate'])
+    
     def _partition_lines(self):
         super(IView3PointPathReader, self)._partition_lines()
         self._content_lines = self._content_lines[1:]

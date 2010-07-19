@@ -166,6 +166,11 @@ class TestIView3PointPathReader(object):
         includes_(h, 'file_version')
         eq_(h['file_version'], 'IDF Converter 3.0.9')
         
+    def test_pointpath(self):
+        ir = IView3PointPathReader(self.point_lines)
+        pp = ir.pointpath()
+        eq_(60, pp.samples_per_second)
+        eq_(self.EXPECTED_POINTS, len(pp))
         
 
 class TestIViewFixationReader(object):
