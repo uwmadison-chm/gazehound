@@ -97,6 +97,7 @@ class TestGazeStatisticsRunner(object):
         self.example_path = self.path_base+'/examples/'
         self.scan_file = os.path.join(self.example_path, 'iview_normal.txt')
         self.stim_file = os.path.join(self.example_path, 'pres_tiny.txt')
+        self.iv3_file = os.path.join(self.example_path, 'iview_3_small.txt')
 
     def test_runner_builds_timeline(self):
         args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
@@ -110,6 +111,17 @@ class TestGazeStatisticsRunner(object):
         assert all(pres.pointpath is not None for pres in gsr.timeline), \
             "All presentations should have gaze data"
         assert all(len(pres.pointpath) > 0 for pres in gsr.timeline)
+    
+    def test_runner_reads_iview_3_files(self):
+        args = [__file__, self.iv3_file]
+        gsr = gaze_statistics.GazeStatsRunner(args)
+        assert gsr.pointpath is not None
+    
+    def test_runner_combines_iview_3_files(self):
+        args = [__file__, "--stimuli="+self.stim_file, self.iv3_file]
+        gsr = gaze_statistics.GazeStatsRunner(args)
+        assert all(pres.pointpath is not None for pres in gsr.timeline), \
+            "All presentations should have gaze data"
 
 
 class TestGazeStatisticsAnalyzer(object):

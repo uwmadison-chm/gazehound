@@ -9,9 +9,10 @@
 import sys
 import os.path
 from optparse import OptionParser
-from gazehound import readers, timeline, viewing, shapes
+from gazehound import timeline, viewing, shapes
 from gazehound.writers import delimited
-from gazehound.readers import iview
+from gazehound.readers.auto_pointpath import AutoPointpathReader
+from gazehound.readers.timeline import TimelineReader
 
 def main(argv = None):
     if argv is None:
@@ -77,9 +78,8 @@ class GazeStatsRunner(object):
         op = GazeStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        ir = readers.iview.IView2ScanpathReader(filename = op.gaze_file)
-        self.file_data = ir
-        self.pointpath = ir.pointpath()
+        ar = AutoPointpathReader()
+        self.pointpath = ar.read_pointpath(filename=op.gaze_file)
 
         self.timeline = None
         
@@ -116,7 +116,7 @@ class GazeStatsRunner(object):
     
     def __build_timeline(self, filename):
         """Build the timeline from a file."""
-        reader = readers.timeline.TimelineReader(filename=filename)
+        reader = TimelineReader(filename=filename)
         timeline_with_points = viewing.Combiner(
             timeline = reader.timeline, pointpath = self.pointpath
         ).viewings()
