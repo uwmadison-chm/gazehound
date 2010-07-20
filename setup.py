@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import ez_setup
 ez_setup.use_setuptools()
 
@@ -8,6 +9,10 @@ setup(
     version = version.version_str(),
     package_dir = {'':'src'},
     packages = find_packages('src'),
+    install_requires = [
+        "numpy",
+        "scipy"
+    ],
     
     entry_points = {
         'console_scripts': [
@@ -26,7 +31,7 @@ setup(
         "eyetracking) data"),
     license = "GPL 2.0",
     keywords = "gazetracking eyetracking psychology science research",
-    url = "http://code.google.com/p/gazehound",
+    url = "http://github.com/njvack/gazehound",
     classifiers = (
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
