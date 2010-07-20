@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+  <title>Viewer test</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script type="text/javascript" src="js_libs/jquery-1.4.2.js"></script>
+  <script type="text/javascript" src="js_libs/jquery-ui-1.8.custom.min.js"></script>
+</head>
+<body>
+  <div id="wrap">
+    <div id="controls">
+      <div id="toprow" class="clearfix">
+        <div class="control" id="pp_container">
+          <button id="play_button">Play</button>
+        </div>
+        <div class="control">
+          <div id="progress_slider">
+            <div id="progress_elapsed"> </div>
+          </div>
+        </div>
+        <div class="control">
+          <span id="v1">fo</span>
+          <span id="v2">ob</span>
+          <span id="v3">ar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+  $(document).ready(function() {
+    $('#progress_slider').slider({
+      min: 0,
+      max: 1000,
+      values: [0, 500, 1000],
+      slide: function(evt, ui) {
+        var s = $('#progress_slider');
+        $('#v1').text(ui.values[0]);
+        $('#v2').text(ui.values[1]);
+        $('#v3').text(ui.values[2]);
+        
+        if (ui.values[1] < ui.values[0]) {
+          // Move current to min
+          s.slider('values', [ui.values[0], ui.values[0], ui.values[2]]);
+        }
+        if (ui.values[1] > ui.values[2]) {
+          // move current to max
+          s.slider('values', [ui.values[0], ui.values[2], ui.values[2]]);
+        }
+
+        if (ui.value < ui.values[0] || ui.value > ui.values[2]) {
+          // Disallow 
+          return false;
+        }
+      }
+    });
+    $('#progress_slider .ui-slider-handle:first').addClass('first');
+    $('#progress_slider .ui-slider-handle:last').addClass('last');
+  });
+  </script>
+</body>
+</html>
