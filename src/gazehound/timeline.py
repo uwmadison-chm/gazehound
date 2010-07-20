@@ -76,7 +76,7 @@ class Timeline(object):
         sp = pres.pointpath
         if bounds is not None:
             sp = sp.points_within(bounds)
-        m = sp.mean()
+        m = sp.median()
         if m is not None:
             xoff, yoff = int(cx-m[0]), int(cy-m[1])
         return (xoff, yoff)
