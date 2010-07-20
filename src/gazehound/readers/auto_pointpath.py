@@ -30,7 +30,7 @@ class AutoPointpathReader(object):
                 if pp is not None:
                     self.success_class = klass
                     return pp
-            except Exception as exc:
+            except Exception, exc:
                 self.failures.append((klass, exc))
         
     
