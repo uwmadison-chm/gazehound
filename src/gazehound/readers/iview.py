@@ -94,22 +94,70 @@ class IView2ScanpathReader(IViewReader):
 
 
 class IView3PointPathReader(IViewReader):
+    # A list of 4-tuples:
+    # measure_name,
+    # measure_column(s),
+    # conversion_from_string_function
+    standard_column_mapping = [
+        ('timestamp', 'Time', int),
+        ('x', ['R POR X [px]', 'L POR X [px]'], float),
+        ('y', ['R POR Y [px]', 'L POR Y [px]'], float),
+        ('pupil_h', ['R Raw X [px]', 'L Raw X [px]'], float),
+        ('pupil_v', ['R Raw Y [px]', 'L Raw Y [px]'], float),
+        ('corneal_reflex_1_h', ['R CR1 X [px]', 'L CR1 X [px]'], float),
+        ('corneal_reflex_1_v', ['R CR1 Y [px]', 'L CR1 Y [px]'], float),
+        ('corneal_reflex_2_h', ['R CR2 X [px]', 'L CR2 X [px]'], float),
+        ('corneal_reflex_2_v', ['R CR2 Y [px]', 'L CR2 Y [px]'], float),
+        ('diam_h', ['R Dia X [px]', 'L Dia X [px]'], float),
+        ('diam_v', ['R Dia Y [px]', 'L Dia Y [px]'], float),
+    ]
+    
     def __init__(self, file_data=None, skip_comments=True, comment_char="##",
-        opts_for_parser={}, filename=None):
+        opts_for_parser={}, filename=None, 
+        column_mapping=standard_column_mapping):
         
         super(IView3PointPathReader, self).__init__(
             self.__header_map, file_data, skip_comments, comment_char, 
             opts_for_parser, filename)
-    
+        self.column_mapping = column_mapping
+        
     def pointpath(self):
-        fact = gazepoint.IView3PointFactory()
+        fact = gazepoint.IView3PointFactory(self.measure_mapping)
         points = fact.from_component_list(self)
-        return gazepoint.IViewPointPath(
+        return gazepoint.IView3Pointpath(
             points=points, samples_per_second=self.header()['sample_rate'])
     
+    @property
+    def measure_mapping(self):
+        self._setup_parser()
+        return self._meas_map
+    
+    @property
+    def column_headers(self):
+        self._setup_parser()
+        return self._column_headers
+    
     def _partition_lines(self):
+        if len(self._content_lines) > 0:
+            return
         super(IView3PointPathReader, self)._partition_lines()
+        self._column_header_line = self._content_lines[0]
+        self._column_headers = self._column_header_line.split("\t")
         self._content_lines = self._content_lines[1:]
+        self._build_measure_map()
+        
+        
+    def _build_measure_map(self):
+        self._meas_map = {}
+        for measure_name, cols, fx in self.column_mapping:
+            self._meas_map[measure_name] = (self._col_index(cols), fx)
+    
+    def _col_index(self, cols):
+        if type(cols) == str:
+            cols = [cols]
+        
+        return [self._column_headers.index(c) for c in cols 
+                if c in self._column_headers][0]
     
     @property
     def __header_map(self):

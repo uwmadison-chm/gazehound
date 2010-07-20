@@ -91,7 +91,7 @@ class PointPath(object):
 
     def __init__(self, points=[], headers = {}):
         self.measures = ('x', 'y', 'time', 'duration')
-        
+
         self.points = points
         self.headers = headers
 
@@ -116,7 +116,7 @@ class PointPath(object):
 
     def mean(self):
         return np.apply_along_axis(np.mean, 0, self.as_array(('x', 'y')))
-    
+
     def median(self):
         return np.apply_along_axis(np.median, 0, self.as_array(('x', 'y')))
 
@@ -128,10 +128,10 @@ class PointPath(object):
         points = copy.deepcopy(self.points)
         for point in points:
             point.x += x
-            point.y += y    
+            point.y += y
         return PointPath(points=points)
-    
-    def constrain_to(self, 
+
+    def constrain_to(self,
         min_x_const = (0,0),
         min_y_const = (0,0),
         max_x_const = (1000,1000),
@@ -158,7 +158,7 @@ class PointPath(object):
         return np.array([
             [getattr(point, m) for m in measures]
                 for point in self.points], dtype=dtype)
-                
+
 
     def time_index(self, time):
         t1 = self.points[0].time
@@ -171,17 +171,38 @@ class PointPath(object):
 
 class UniformelySampledPointPath(PointPath):
     uniformely_sampled = True
-    
+
     def __init__(self, samples_per_second, *args, **kwargs):
         self.samples_per_second = samples_per_second
         super(UniformelySampledPointPath, self).__init__(*args, **kwargs)
 
 class IViewPointPath(UniformelySampledPointPath):
-    
+
     def __init__(self, *args, **kwargs):
-        self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v', 
+        self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v',
             'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
         super(IViewPointPath, self).__init__(*args, **kwargs)
+
+
+class IView3Pointpath(IViewPointPath):
+
+    def __init__(self, *args, **kwargs):
+        self.measures = ('x', 'y', 'time', 'timestamp', 'duration', 'pupil_h',
+            'pupil_v', 'corneal_reflex_1_h', 'corneal_reflex_1_v',
+            'corneal_reflex_2_h', 'corneal_reflex_2_v', 'diam_h', 'diam_v' )
+
+        super(IView3Pointpath, self).__init__(*args, **kwargs)
+        self.compute_times()
+
+    def compute_times(self):
+        # Frustratingly, times are in microsecond timestamps in v3
+        if len(self.points) == 0:
+            return
+        first_p = self.points[0]
+        for p in self.points:
+            diff = p.timestamp - first_p.timestamp
+            p.time = diff/1000.0
+
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
@@ -256,44 +277,28 @@ class IView2PointFactory(PointFactory):
 class IView3PointFactory(PointFactory):
     """
     I know this is not general enough, but it'll do for us, for now.
-    
-    Time	Type	Trial	R Raw X [px]	R Raw Y [px]	R Dia X [px]	
-    R Dia Y [px]	R CR1 X [px]	R CR1 Y [px]	R CR2 X [px]	
-    R CR2 Y [px]	R POR X [px]	R POR Y [px]	Frame
-    
+
+    Time        Type    Trial   R Raw X [px]    R Raw Y [px]    R Dia X [px]
+    R Dia Y [px]        R CR1 X [px]    R CR1 Y [px]    R CR2 X [px]
+    R CR2 Y [px]        R POR X [px]    R POR Y [px]    Frame
+
     """
 
-    def __init__(self, type_to_produce=IViewPoint):
+    def __init__(self, measure_map, type_to_produce=IViewPoint):
         super(IView3PointFactory, self).__init__(type_to_produce)
-        self.data_map = [
-            ('time', int),
-            ('type', str),
-            ('trial', int),
-            ('pupil_h', float),
-            ('pupil_v', float),
-            ('diam_h', float),
-            ('diam_v', float),
-            ('corneal_reflex_1_h', float),
-            ('corneal_reflex_1_v', float),
-            ('corneal_reflex_2_h', float),
-            ('corneal_reflex_2_v', float),
-            ('x', float),
-            ('y', float),
-        ]
+        self.measure_map = measure_map
 
     def from_component_list(self, components):
-        return super(IView3PointFactory, self).from_component_list(
-            components, self.data_map)
-
-
-class IViewPointNumpyArrayFactory(IView2PointFactory):
-    """
-    Maps gazepoint data into a numpy array.
-    """
-
-    def __init__(self):
-        super(IView2PointFactory, self).__init__()
-
+        #return super(IView3PointFactory, self).from_component_list(
+        #    components, self.data_map)
+        points = []
+        for val_list in components:
+            p = self.type_to_produce()
+            for measure_name, xfm in self.measure_map.iteritems():
+                idx, fx = xfm
+                setattr(p, measure_name, fx(val_list[idx]))
+            points.append(p)
+        return points
 
 class IViewFixationFactory(PointFactory):
     """
