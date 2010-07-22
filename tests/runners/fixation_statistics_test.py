@@ -104,24 +104,24 @@ class TestFixationStatisticsRunner(object):
         assert gsr.timeline is not None, "Timeline shouldn't be None"
         eq_(len(gsr.timeline), 6)
     
-    def test_runner_timeline_has_pointpaths(self):
+    def test_runner_timeline_has_scanpaths(self):
         args = [__file__, "--stimuli="+self.stim_file, self.scan_file]
         gsr = fixation_statistics.FixationStatsRunner(args)
-        assert all(pres.pointpath is not None for pres in gsr.timeline), \
+        assert all(pres.scanpath is not None for pres in gsr.timeline), \
             "All presentations should have gaze data"
 
 
 class TestFixationStatisticsAnalyzer(object):
 
     def setup(self):
-        self.pointpath = mock_objects.smi_fixation_points()
+        self.scanpath = mock_objects.smi_fixation_points()
         self.timeline = viewing.Combiner(
             timeline = mock_objects.standard_timeline(), 
-            pointpath = self.pointpath
+            scanpath = self.scanpath
         ).viewings()
         
         self.gsa = fixation_statistics.FixationStatisticsAnalyzer(
-            pointpath = self.pointpath,
+            scanpath = self.scanpath,
             timeline = self.timeline
         )
         
@@ -131,7 +131,7 @@ class TestFixationStatisticsAnalyzer(object):
     
     def test_gen_stats_counts_total_points(self):
         stats = self.gsa.general_stats()
-        eq_(stats.total_fixations, len(self.pointpath))
+        eq_(stats.total_fixations, len(self.scanpath))
         
     def test_gen_stats_knows_start_and_end_times(self):
         stats = self.gsa.general_stats()

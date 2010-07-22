@@ -67,11 +67,11 @@ class IView2ScanpathReader(IViewReader):
             self.__header_map(), file_data, skip_comments,
             comment_char, opts_for_parser, filename)
 
-    def pointpath(self):
+    def scanpath(self):
         """Return a list of Points representing the scan path."""
         fact = gazepoint.IView2PointFactory()
         points = fact.from_component_list(self)
-        return gazepoint.IViewPointPath(
+        return gazepoint.IViewScanpath(
             points=points, samples_per_second=self.header()['sample_rate'])
 
     def __header_map(self):
@@ -93,7 +93,7 @@ class IView2ScanpathReader(IViewReader):
             'Sample Rate': ('sample_rate', int)}
 
 
-class IView3PointPathReader(IViewReader):
+class IView3ScanpathReader(IViewReader):
     # A list of 4-tuples:
     # measure_name,
     # measure_column(s),
@@ -116,15 +116,15 @@ class IView3PointPathReader(IViewReader):
         opts_for_parser={}, filename=None, 
         column_mapping=standard_column_mapping):
         
-        super(IView3PointPathReader, self).__init__(
+        super(IView3ScanpathReader, self).__init__(
             self.__header_map, file_data, skip_comments, comment_char, 
             opts_for_parser, filename)
         self.column_mapping = column_mapping
         
-    def pointpath(self):
+    def scanpath(self):
         fact = gazepoint.IView3PointFactory(self.measure_mapping)
         points = fact.from_component_list(self)
-        return gazepoint.IView3Pointpath(
+        return gazepoint.IView3Scanpath(
             points=points, samples_per_second=self.header()['sample_rate'])
     
     @property
@@ -140,7 +140,7 @@ class IView3PointPathReader(IViewReader):
     def _partition_lines(self):
         if len(self._content_lines) > 0:
             return
-        super(IView3PointPathReader, self)._partition_lines()
+        super(IView3ScanpathReader, self)._partition_lines()
         self._column_header_line = self._content_lines[0]
         self._column_headers = self._column_header_line.split("\t")
         self._content_lines = self._content_lines[1:]
@@ -211,8 +211,8 @@ class IViewFixationReader(IViewReader):
             'Minimal Time': ('minimal_time', int),
             'Maximal Pixel': ('maximal_pixel', int)}
 
-    def pointpath(self):
+    def scanpath(self):
         """Return a list of Points representing the scan path."""
         fact = gazepoint.IViewFixationFactory()
         points = fact.from_component_list(self)
-        return gazepoint.PointPath(points = points)
+        return gazepoint.Scanpath(points = points)

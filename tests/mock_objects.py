@@ -45,10 +45,10 @@ def smi_ary_spreadout():
     ])
 
 def iview_points_noisy():
-    return gazepoint.PointPath(iview_noisy_point_list())
+    return gazepoint.Scanpath(iview_noisy_point_list())
 
 def iview_points_blinky():
-    return gazepoint.PointPath(gazepoint.IView2PointFactory().from_component_list([
+    return gazepoint.Scanpath(gazepoint.IView2PointFactory().from_component_list([
     ['0', '0', '5034', '3490', '4687', '3380', '358', '577', '2400', '2080'],
     ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
     ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -82,7 +82,7 @@ def iview_points_blinky():
     ]))
 
 def iview_problem_blink():
-    return gazepoint.PointPath(gazepoint.IView2PointFactory().from_component_list(
+    return gazepoint.Scanpath(gazepoint.IView2PointFactory().from_component_list(
         [[6350, 0, 6061, 3610, 5408, 3672, 536, 247, 1697, 1814],
         [6367, 0, 6055, 3608, 5404, 3670, 538, 246, 1717, 1819],
         [6384, 0, 6058, 3606, 5406, 3669, 537, 245, 1688, 1821],
@@ -102,12 +102,12 @@ def iview_problem_blink():
         [6617, 0, 6045, 3558, 5400, 3615, 535, 280, 1689, 1815],
         [6634, 0, 6044, 3544, 5401, 3626, 537, 282, 1690, 1823]]))
         
-def smi_pointpath_normal():
+def smi_scanpath_normal():
     lines = []
     with open(EX_PATH+"/iview_normal.txt") as f:
         lines = f.readlines()
     ir = readers.iview.IView2ScanpathReader(lines)
-    return ir.pointpath()
+    return ir.scanpath()
 
 def smi_fixation_ary():
     # Fields are:
@@ -125,7 +125,7 @@ def smi_fixation_ary():
 
 def smi_fixation_points():
     ivf = gazepoint.IViewFixationFactory()
-    return gazepoint.PointPath(ivf.from_component_list(smi_fixation_ary()))
+    return gazepoint.Scanpath(ivf.from_component_list(smi_fixation_ary()))
 
 def tiny_timeline():
     lines = []
@@ -135,15 +135,15 @@ def tiny_timeline():
     return tr.timeline
     
 def tiny_viewings():
-    pointpath = smi_pointpath_normal()
+    scanpath = smi_scanpath_normal()
     timeline = tiny_timeline()
     return viewing.Combiner(
-        pointpath = pointpath, timeline = timeline
+        scanpath = scanpath, timeline = timeline
     ).viewings()
 
-def smi_pointpath_spreadout():
+def smi_scanpath_spreadout():
     ivf = gazepoint.IView2PointFactory()
-    return gazepoint.PointPath(ivf.from_component_list(smi_ary_spreadout()))
+    return gazepoint.Scanpath(ivf.from_component_list(smi_ary_spreadout()))
     
 
 def standard_timeline():

@@ -13,11 +13,11 @@ class Event(object):
     name. Can also contain viewing data (Is this a good idea?)
     """
 
-    def __init__(self, start=None, end=None, name=None, pointpath=None):
+    def __init__(self, start=None, end=None, name=None, scanpath=None):
         self.start = start
         self.end = end
         self.name = name
-        self.pointpath = pointpath
+        self.scanpath = scanpath
 
     def valid(self):
         try:

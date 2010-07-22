@@ -6,7 +6,7 @@ import json
 
 # So ok the plan of attack here is to go all like
 # 1: Make a Timeline for every subject, decorated with points
-# 2: Convert that into a list of events, with a pointpath for each
+# 2: Convert that into a list of events, with a scanpath for each
 #    subject. Maybe order by event name?
 # 3: Write the resulting structure out as javascript
 # 
@@ -40,16 +40,16 @@ for snum in SUBJECTS:
     tlfile = "stim_timings/stims_%s.txt" % snum
     tline = TimelineReader(filename=tlfile).timeline
     
-    pointpaths = {}
+    scanpaths = {}
     
-    spath = IView2ScanpathReader(filename=spfile).pointpath()
+    spath = IView2ScanpathReader(filename=spfile).scanpath()
     # print("tl: %s, sp: %s" % (len(tline), len(spath)))
-    pointpaths['raw'] = Combiner(timeline=tline, pointpath=spath).viewings()
+    scanpaths['raw'] = Combiner(timeline=tline, scanpath=spath).viewings()
     
     denoised = iview.Denoise().process(spath)
     deblinked = iview.Deblink().deblink(denoised)
-    pointpaths['deblinked'] = Combiner(timeline=tline, pointpath=deblinked).viewings()
-    pointpaths['recentered'] = pointpaths['deblinked'].recenter_on(
+    scanpaths['deblinked'] = Combiner(timeline=tline, scanpath=deblinked).viewings()
+    scanpaths['recentered'] = scanpaths['deblinked'].recenter_on(
             "fix_S", 399, 299).recenter_on("fix_D", 399, 299)
     
     for group in viewer_groups:
@@ -57,13 +57,13 @@ for snum in SUBJECTS:
         viewer_directory[swg] = i
         viewers.append({'name': swg, 'group': group})
         i += 1
-        for e in pointpaths['raw']:
+        for e in scanpaths['raw']:
             if e.name not in all_events:
                 stim_images[e.name] = "%s.png" % e.name
                 all_events[e.name] = {}
             if swg not in all_events[e.name]:
                 all_events[e.name][swg] = []
-            all_events[e.name][swg].append([[p.x, p.y] for p in e.pointpath])
+            all_events[e.name][swg].append([[p.x, p.y] for p in e.scanpath])
 
 
 names = all_events.keys()

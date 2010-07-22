@@ -22,17 +22,17 @@ class Deblink(object):
         self.start_dy_threshold = start_dy_threshold
         self.end_dy_threshold = end_dy_threshold
 
-    def deblink(self, pointpath):
+    def deblink(self, scanpath):
         """
-        Interpolates blinks out of pointpath.
+        Interpolates blinks out of scanpath.
 
         Interpolation is done by taking the point immediately before the blink
         and using its interpolable values for the rest of the points during
         the blink. Not using any averaging -- saccades during blinks are
         common, and averaging-type methods seem wrong to me here.
         """
-        blinks = self.blinks(pointpath)
-        pc = deepcopy(pointpath)
+        blinks = self.blinks(scanpath)
+        pc = deepcopy(scanpath)
         for b in blinks:
             # Interpolate from the point before start_index -- no averaging.
             if b.start_index > 0:
@@ -42,27 +42,27 @@ class Deblink(object):
                     point.interpolate_from(prev_pt)
         return pc
 
-    def blinks(self, pointpath):
+    def blinks(self, scanpath):
         """
         Return a Timeline of Blinks. Each blink will have a start_index
         and end_index field, which point to the first and last indices in
-        pointpath of a blink event.
+        scanpath of a blink event.
         In other words, the point before start_index and the point after
         end_index are guaranteed to have good, interpolable data.
         Currently, the "guaranteed valid data" window is actually one point
         wider -- but that may not remain true in future versions.
         """
-        candidates = self.all_blink_candidates(pointpath)
-        expanded = self.expand_blinks(candidates, pointpath)
+        candidates = self.all_blink_candidates(scanpath)
+        expanded = self.expand_blinks(candidates, scanpath)
         filtered = self.filter_for_length(expanded)
         deduped = self.deduplicate(filtered)
         return deduped
 
-    def all_blink_candidates(self, pointpath):
+    def all_blink_candidates(self, scanpath):
         candidates = []
         current = None
-        for i in range(len(pointpath)):
-            point = pointpath[i]
+        for i in range(len(scanpath)):
+            point = scanpath[i]
             if point.x == 0 and point.y == 0:
                 # It's blank!
                 if current is None:
@@ -91,16 +91,16 @@ class Deblink(object):
                     new_blinks.append(blink)
         return Timeline(events=new_blinks)
 
-    def expand_blinks(self, blinks, pointpath):
-        expanded = [self.expand_blink_bidir(b, pointpath) for b in blinks]
+    def expand_blinks(self, blinks, scanpath):
+        expanded = [self.expand_blink_bidir(b, scanpath) for b in blinks]
         expanded = [b for b in expanded if b is not None]
 
         return Timeline(events = expanded)
 
-    def expand_blink_dir(self, blink, pointpath, forward=True):
+    def expand_blink_dir(self, blink, scanpath, forward=True):
         """
         Return a new Blink with end time (and indexes) set to
-        next area of pointpath with a stable y value.
+        next area of scanpath with a stable y value.
         If no such area exists, return None
         """
         b = deepcopy(blink)
@@ -109,27 +109,27 @@ class Deblink(object):
         else:
             idx = b.start_index
 
-        next_idx = self.__stable_yval_idx(pointpath, idx, forward)
+        next_idx = self.__stable_yval_idx(scanpath, idx, forward)
         if next_idx is None:
             b = None
         elif forward:
             next_idx -= 1
             b.end_index = next_idx
-            b.end = pointpath[next_idx].time
+            b.end = scanpath[next_idx].time
         else:
             next_idx += 1
             b.start_index = next_idx
-            b.start = pointpath[next_idx].time
+            b.start = scanpath[next_idx].time
             
         return b
 
-    def expand_blink_bidir(self, blink, pointpath):
-        bf = self.expand_blink_dir(blink, pointpath, False)
+    def expand_blink_bidir(self, blink, scanpath):
+        bf = self.expand_blink_dir(blink, scanpath, False)
         if bf is not None:
-            bf = self.expand_blink_dir(bf, pointpath, True)
+            bf = self.expand_blink_dir(bf, scanpath, True)
         return bf
 
-    def __stable_yval_idx(self, pointpath, start_index, forward=True):
+    def __stable_yval_idx(self, scanpath, start_index, forward=True):
         i1 = start_index
         i2 = i1
         if forward:
@@ -140,16 +140,16 @@ class Deblink(object):
             dy_thresh = self.start_dy_threshold
         i2 += step
         
-        while i2 >= 0 and i2 < len(pointpath):
-            p1 = pointpath[i1]
-            p2 = pointpath[i2]
+        while i2 >= 0 and i2 < len(scanpath):
+            p1 = scanpath[i1]
+            p2 = scanpath[i2]
             dy = abs(p1.y - p2.y)
             if (dy <= dy_thresh and p1.y != 0 and p2.y != 0):
                 # print("%s %s %s %s %s" % (p1.time, p1.y, p2.y, dy, forward))
                 return i1 
             i1 = i2
             i2 += step
-        # If we're here, we ran off the end of pointpath
+        # If we're here, we ran off the end of scanpath
         return None
 
     def filter_for_length(self, timeline):
@@ -169,12 +169,12 @@ class Denoise(object):
     def __init__(self, max_noise_samples=2):
         self.max_noise_samples = max_noise_samples
 
-    def process(self, pointpath):
+    def process(self, scanpath):
         """
-        Runs a deblinking on the pointpath. Returns a copy of pointpath --
+        Runs a deblinking on the scanpath. Returns a copy of scanpath --
         does not modify it.
         """
-        pp = deepcopy(pointpath)
+        pp = deepcopy(scanpath)
         win = self.Window(pp, self.max_noise_samples)
         for i in range(len(pp)):
             win.apply(i)
@@ -183,14 +183,14 @@ class Denoise(object):
     class Window(object):
         """ The thing that's going to slid along and correct noise """
 
-        def __init__(self, pointpath, max_noise_len = 2):
-            self.pointpath = pointpath
+        def __init__(self, scanpath, max_noise_len = 2):
+            self.scanpath = scanpath
             self.max_noise_len = max_noise_len
 
         def points_to_correct(self, pos):
             points = []
             for i in range(self.max_noise_len):
-                point = self.pointpath[pos+i]
+                point = self.scanpath[pos+i]
                 if not point.standard_valid():
                     points.append(point)
                 else:
@@ -201,7 +201,7 @@ class Denoise(object):
             vals = None
             try:
                 if pos > 0 and width > 0:
-                    vals = (self.pointpath[pos-1], self.pointpath[pos+width])
+                    vals = (self.scanpath[pos-1], self.scanpath[pos+width])
                     if not (vals[0].standard_valid() and
                             vals[1].standard_valid()):
                         vals = None
@@ -211,7 +211,7 @@ class Denoise(object):
 
         def apply(self, pos):
             """
-            Modifies self.pointpath, either interpolating at potision
+            Modifies self.scanpath, either interpolating at potision
             pos or doing nothing.
             Return the next position
             """

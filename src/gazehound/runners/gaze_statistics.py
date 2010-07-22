@@ -11,7 +11,7 @@ import os.path
 from optparse import OptionParser
 from gazehound import timeline, viewing, shapes
 from gazehound.writers import delimited
-from gazehound.readers.auto_pointpath import AutoPointpathReader
+from gazehound.readers.auto_scanpath import AutoScanpathReader
 from gazehound.readers.timeline import TimelineReader
 
 def main(argv = None):
@@ -54,7 +54,7 @@ class GazeStatisticsOptionParser(object):
         self.options, self.args = parser.parse_args(argv[1:])
             
         if len(self.args) == 0:
-            parser.error("No pointpath file specified")
+            parser.error("No scanpath file specified")
 
         if (self.options.recenter_on is not None and 
                 self.options.stim_file is None):
@@ -78,8 +78,8 @@ class GazeStatsRunner(object):
         op = GazeStatisticsOptionParser(argv)
         # Read and parse the gazestream
 
-        ar = AutoPointpathReader()
-        self.pointpath = ar.read_pointpath(filename=op.gaze_file)
+        ar = AutoScanpathReader()
+        self.scanpath = ar.read_scanpath(filename=op.gaze_file)
 
         self.timeline = None
         
@@ -102,7 +102,7 @@ class GazeStatsRunner(object):
             
         # And build the analyzer
         self.analyzer = GazeStatisticsAnalyzer(
-            pointpath = self.pointpath,
+            scanpath = self.scanpath,
             timeline = self.timeline
         )
     
@@ -118,19 +118,19 @@ class GazeStatsRunner(object):
         """Build the timeline from a file."""
         reader = TimelineReader(filename=filename)
         timeline_with_points = viewing.Combiner(
-            timeline = reader.timeline, pointpath = self.pointpath
+            timeline = reader.timeline, scanpath = self.scanpath
         ).viewings()
         return timeline_with_points
         
 class GazeStatisticsAnalyzer(object):
     
     def __init__(self, 
-        pointpath = None,
+        scanpath = None,
         strict_valid_fun = None,
-        pointpath_meta = None,
+        scanpath_meta = None,
         timeline = []):
         super(GazeStatisticsAnalyzer, self).__init__()
-        self.pointpath = pointpath
+        self.scanpath = scanpath
         self.timeline = timeline
         
         # TODO: Don't hardcode these.
@@ -165,18 +165,18 @@ class GazeStatisticsAnalyzer(object):
         self.in_fun = in_fun
 
     def general_stats(self):
-        """Return a GazeStats containing basic data about the pointpath"""
+        """Return a GazeStats containing basic data about the scanpath"""
         
         data = GazeStats(
             presented = 'screen',
             area = 'all',
-            total_points = len(self.pointpath),
-            start_ms = self.pointpath[0].time,
-            end_ms = self.pointpath[-1].time,
-            valid_strict = len(self.pointpath.valid_points(
+            total_points = len(self.scanpath),
+            start_ms = self.scanpath[0].time,
+            end_ms = self.scanpath[-1].time,
+            valid_strict = len(self.scanpath.valid_points(
                 self.strict_valid_fun
             )),
-            valid_lax = len(self.pointpath.valid_points(
+            valid_lax = len(self.scanpath.valid_points(
                 self.lax_valid_fun
             ))
         )
@@ -198,13 +198,13 @@ class GazeStatisticsAnalyzer(object):
             stats = GazeStats(
                 presented = pres.name,
                 area = 'all',
-                total_points = len(pres.pointpath),
+                total_points = len(pres.scanpath),
                 start_ms = pres.start,
                 end_ms = pres.end,
-                valid_strict = len(pres.pointpath.valid_points(
+                valid_strict = len(pres.scanpath.valid_points(
                     self.strict_valid_fun
                 )),
-                valid_lax = len(pres.pointpath.valid_points(
+                valid_lax = len(pres.scanpath.valid_points(
                     self.lax_valid_fun
                 ))
             )
@@ -228,13 +228,13 @@ class GazeStatisticsAnalyzer(object):
             stats = GazeStats(
                 presented = pres.name,
                 area = s.name,
-                total_points = len(pres.pointpath),
+                total_points = len(pres.scanpath),
                 start_ms = pres.start,
                 end_ms = pres.end,
-                valid_strict = len(pres.pointpath.valid_points(
+                valid_strict = len(pres.scanpath.valid_points(
                     self.strict_valid_fun
                 )),
-                valid_lax = len(pres.pointpath.valid_points(
+                valid_lax = len(pres.scanpath.valid_points(
                     self.lax_valid_fun
                 ))
             )
@@ -242,14 +242,14 @@ class GazeStatisticsAnalyzer(object):
             def f(point):
                 return self.in_fun(s, point)
                 
-            stats.points_in = len(pres.pointpath.valid_points(f))
+            stats.points_in = len(pres.scanpath.valid_points(f))
             stats.points_out = stats.total_points - stats.points_in
             stats_list.append(stats)
             
         return stats_list
 
 class GazeStats(object):
-    """A data structure containing stats about a pointpath"""
+    """A data structure containing stats about a scanpath"""
     def __init__(self, 
     presented = None, area = None, start_ms = 0, end_ms = 0, total_points = 0, 
     points_in = 0, points_out = 0, valid_strict = 0, valid_lax = 0

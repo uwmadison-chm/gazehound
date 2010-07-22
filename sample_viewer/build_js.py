@@ -6,7 +6,7 @@ import json
 
 # So ok the plan of attack here is to go all like
 # 1: Make a Timeline for every subject, decorated with points
-# 2: Convert that into a list of events, with a pointpath for each
+# 2: Convert that into a list of events, with a scanpath for each
 #    subject. Maybe order by event name?
 # 3: Write the resulting structure out as javascript
 # 
@@ -45,9 +45,9 @@ for snum in [s['name'] for s in SUBJECTS]:
     spfile = "scanpaths/scanpath_%s.txt" % snum
     tlfile = "stim_timings/stims_%s.txt" % snum
     tline = TimelineReader(filename=tlfile).timeline
-    spath = IView2ScanpathReader(filename=spfile).pointpath()
+    spath = IView2ScanpathReader(filename=spfile).scanpath()
     # print("tl: %s, sp: %s" % (len(tline), len(spath)))
-    decorated = Combiner(timeline=tline, pointpath=spath).viewings()
+    decorated = Combiner(timeline=tline, scanpath=spath).viewings()
     
     for e in decorated:
         if e.name not in all_events:
@@ -55,7 +55,7 @@ for snum in [s['name'] for s in SUBJECTS]:
             all_events[e.name] = {}
         if snum not in all_events[e.name]:
             all_events[e.name][snum] = []
-        all_events[e.name][snum].append([[p.x, p.y] for p in e.pointpath])
+        all_events[e.name][snum].append([[p.x, p.y] for p in e.scanpath])
 
 names = all_events.keys()
 names.sort()

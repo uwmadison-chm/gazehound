@@ -132,11 +132,11 @@ class TestIView2ScanpathReader(object):
         
         eq_(h.get('calibration_size'), [800,600])
     
-    def test_pointpath_returns_expected_points(self):
+    def test_scanpath_returns_expected_points(self):
         ir = IView2ScanpathReader(self.norm_lines)
         
-        pointpath = ir.pointpath()
-        eq_(len(pointpath), self.EXPECTED_LINES)
+        scanpath = ir.scanpath()
+        eq_(len(scanpath), self.EXPECTED_LINES)
 
 
 class TestIViewFixationReader(object):

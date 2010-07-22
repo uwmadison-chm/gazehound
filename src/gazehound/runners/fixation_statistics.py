@@ -80,7 +80,7 @@ class FixationStatsRunner(object):
 
         ir = readers.iview.IViewFixationReader(filename=op.fix_file)
         self.file_data = ir
-        self.pointpath = ir.pointpath()
+        self.scanpath = ir.scanpath()
 
         self.timeline = None
 
@@ -102,7 +102,7 @@ class FixationStatsRunner(object):
 
         # And build the analyzer
         self.analyzer = FixationStatisticsAnalyzer(
-            pointpath=self.pointpath,
+            scanpath=self.scanpath,
             timeline=self.timeline)
 
     def print_analysis(self):
@@ -116,19 +116,19 @@ class FixationStatsRunner(object):
         """Build the timeline from a file."""
         reader = readers.timeline.TimelineReader(filename=filename)
         timeline_with_points = viewing.Combiner(
-            timeline=reader.timeline, pointpath=self.pointpath).viewings()
+            timeline=reader.timeline, scanpath=self.scanpath).viewings()
         return timeline_with_points
 
 
 class FixationStatisticsAnalyzer(object):
 
     def __init__(self,
-        pointpath=None,
+        scanpath=None,
         strict_valid_fun=None,
-        pointpath_meta=None,
+        scanpath_meta=None,
         timeline=[]):
         super(FixationStatisticsAnalyzer, self).__init__()
-        self.pointpath = pointpath
+        self.scanpath = scanpath
         self.timeline = timeline
 
         # TODO: Don't hardcode these.
@@ -162,18 +162,18 @@ class FixationStatisticsAnalyzer(object):
         self.in_fun = in_fun
 
     def general_stats(self):
-        """Return a FixationStats containing basic data about the pointpath"""
+        """Return a FixationStats containing basic data about the scanpath"""
 
         data = FixationStats(
             presented='screen',
             area='all',
-            start_ms=self.pointpath[0].time,
-            end_ms=self.pointpath[-1].time+self.pointpath[-1].duration,
-            total_fixations=len(self.pointpath),
-            time_fixating=self.__time_fixating(self.pointpath),
-            fixations_per_second=self.__fixations_per_second(self.pointpath),
+            start_ms=self.scanpath[0].time,
+            end_ms=self.scanpath[-1].time+self.scanpath[-1].duration,
+            total_fixations=len(self.scanpath),
+            time_fixating=self.__time_fixating(self.scanpath),
+            fixations_per_second=self.__fixations_per_second(self.scanpath),
             distance_between_fixations=self.__distance_between_fixations(
-                self.pointpath))
+                self.scanpath))
 
         data.time_in = data.time_fixating
         data.time_out = (data.end_ms - data.start_ms) - data.time_fixating
@@ -189,7 +189,7 @@ class FixationStatisticsAnalyzer(object):
         data = []
         doshapes = hasattr(self.timeline, 'has_shapes')
         for pres in self.timeline:
-            if len(pres.pointpath) == 0:
+            if len(pres.scanpath) == 0:
                 stats = FixationStats(
                     presented=pres.name,
                     area='all')
@@ -197,14 +197,14 @@ class FixationStatisticsAnalyzer(object):
                 stats = FixationStats(
                     presented=pres.name,
                     area='all',
-                    start_ms=pres.pointpath[0].time,
-                    end_ms=pres.pointpath[-1].time+pres.pointpath[-1].duration,
-                    total_fixations=len(pres.pointpath),
-                    time_fixating=self.__time_fixating(pres.pointpath),
+                    start_ms=pres.scanpath[0].time,
+                    end_ms=pres.scanpath[-1].time+pres.scanpath[-1].duration,
+                    total_fixations=len(pres.scanpath),
+                    time_fixating=self.__time_fixating(pres.scanpath),
                     fixations_per_second=self.__fixations_per_second(
-                        pres.pointpath),
+                        pres.scanpath),
                     distance_between_fixations=self.__distance_between_fixations(
-                        pres.pointpath))
+                        pres.scanpath))
 
                 stats.time_in = stats.time_fixating
                 stats.time_out = ((stats.end_ms - stats.start_ms) -
@@ -223,7 +223,7 @@ class FixationStatisticsAnalyzer(object):
                 presented=pres.name,
                 area="Can't read shape file")]
         for s in pres.shapes:
-            if len(pres.pointpath) == 0:
+            if len(pres.scanpath) == 0:
                 stats = FixationStats(
                     presented=pres.name,
                     area=s.name)
@@ -231,64 +231,64 @@ class FixationStatisticsAnalyzer(object):
                 stats = FixationStats(
                     presented=pres.name,
                     area=s.name,
-                    start_ms=pres.pointpath[0].time,
-                    end_ms=pres.pointpath[-1].time+pres.pointpath[-1].duration,
-                    total_fixations=len(pres.pointpath),
-                    time_fixating=self.__time_fixating(pres.pointpath),
+                    start_ms=pres.scanpath[0].time,
+                    end_ms=pres.scanpath[-1].time+pres.scanpath[-1].duration,
+                    total_fixations=len(pres.scanpath),
+                    time_fixating=self.__time_fixating(pres.scanpath),
                     fixations_per_second=self.__fixations_per_second(
-                        pres.pointpath),
+                        pres.scanpath),
                     distance_between_fixations=self.__distance_between_fixations(
-                        pres.pointpath))
+                        pres.scanpath))
 
                 def f(point):
                     return self.in_fun(s, point)
 
                 stats.time_in = sum(p.duration
-                                    for p in pres.pointpath.valid_points(f))
+                                    for p in pres.scanpath.valid_points(f))
                 stats.time_out =(stats.end_ms - stats.start_ms) - stats.time_in
             stats_list.append(stats)
 
         return stats_list
 
-    def __total_fixations(self, pointpath):
+    def __total_fixations(self, scanpath):
         """The total number of fixations in a point path"""
-        return len(pointpath)
+        return len(scanpath)
 
-    def __time_fixating(self, pointpath):
+    def __time_fixating(self, scanpath):
         """Time spent fixating during a point path"""
-        return sum(p.duration for p in pointpath)
+        return sum(p.duration for p in scanpath)
 
-    def __pp_duration(self, pointpath):
-        if len(pointpath) == 0:
+    def __pp_duration(self, scanpath):
+        if len(scanpath) == 0:
             return 0
-        start = pointpath[0].time
-        end = pointpath[-1].time+pointpath[-1].duration
+        start = scanpath[0].time
+        end = scanpath[-1].time+scanpath[-1].duration
         return end-start
 
-    def __fixations_per_second(self, pointpath):
+    def __fixations_per_second(self, scanpath):
         """ Number of fixations divided by seconds fixating """
-        tf = self.__time_fixating(pointpath)*1000.0
+        tf = self.__time_fixating(scanpath)*1000.0
         if tf == 0:
             return 0
         return (
-            float(self.__total_fixations(pointpath)) /
-            (self.__pp_duration(pointpath)/1000.0))
+            float(self.__total_fixations(scanpath)) /
+            (self.__pp_duration(scanpath)/1000.0))
 
-    def __distance_between_fixations(self, pointpath):
-        if len(pointpath) < 2:
+    def __distance_between_fixations(self, scanpath):
+        if len(scanpath) < 2:
             return 0
 
         def dist(p1, p2):
             return math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2)
 
         dsum = 0
-        for i in range(1, len(pointpath)):
-            dsum += dist(pointpath[i-1], pointpath[i])
-        return float(dsum) / (len(pointpath)-1)
+        for i in range(1, len(scanpath)):
+            dsum += dist(scanpath[i-1], scanpath[i])
+        return float(dsum) / (len(scanpath)-1)
 
 
 class FixationStats(object):
-    """A data structure containing stats about a pointpath"""
+    """A data structure containing stats about a scanpath"""
 
     def __init__(self,
     presented=None, area=None, start_ms=0, end_ms=0,

@@ -10,17 +10,17 @@ from gazehound import timeline, gazepoint
 
 
 class Combiner(object):
-    """Combines timelines of eventss with pointpath data"""
+    """Combines timelines of eventss with scanpath data"""
 
-    def __init__(self, timeline=None, pointpath=None):
+    def __init__(self, timeline=None, scanpath=None):
         self.timeline = timeline
-        self.pointpath = pointpath
+        self.scanpath = scanpath
 
     def viewings(self):
         t2 = copy.copy(self.timeline)
         for pres in t2:
-            points = [p for p in self.pointpath
+            points = [p for p in self.scanpath
                 if (p.time_midpoint() >= pres.start
                     and p.time_midpoint() < pres.end)]
-            pres.pointpath = gazepoint.PointPath(points)
+            pres.scanpath = gazepoint.Scanpath(points)
         return timeline.Timeline(t2)

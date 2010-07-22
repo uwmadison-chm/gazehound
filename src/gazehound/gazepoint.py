@@ -85,7 +85,7 @@ class IViewPoint(Point):
         self.diam_v = diam_v
 
 
-class PointPath(object):
+class Scanpath(object):
     """ A set of Points arranged sequentially in time """
     uniformely_sampled = False # Subclass to make this true.
 
@@ -105,13 +105,13 @@ class PointPath(object):
         return self.points[i]
 
     def __getslice__(self, i, j):
-        return PointPath(self.points[i:j])
+        return Scanpath(self.points[i:j])
 
     def extend(self, sp):
         self.points.extend(sp.points)
 
     def valid_points(self, criterion):
-        return PointPath(
+        return Scanpath(
             [point for point in self.points if criterion(point)])
 
     def mean(self):
@@ -129,7 +129,7 @@ class PointPath(object):
         for point in points:
             point.x += x
             point.y += y
-        return PointPath(points=points)
+        return Scanpath(points=points)
 
     def constrain_to(self,
         min_x_const = (0,0),
@@ -146,7 +146,7 @@ class PointPath(object):
 
     def points_within(self, shape):
         plist = copy.deepcopy(self.points)
-        return PointPath(points=[p for p in plist if (p.x, p.y) in shape])
+        return Scanpath(points=[p for p in plist if (p.x, p.y) in shape])
 
     def as_array(self,
             measures=None,
@@ -169,29 +169,29 @@ class PointPath(object):
             t1 = t2
         return len(self.points)  # It's the last point!
 
-class UniformelySampledPointPath(PointPath):
+class UniformelySampledScanpath(Scanpath):
     uniformely_sampled = True
 
     def __init__(self, samples_per_second, *args, **kwargs):
         self.samples_per_second = samples_per_second
-        super(UniformelySampledPointPath, self).__init__(*args, **kwargs)
+        super(UniformelySampledScanpath, self).__init__(*args, **kwargs)
 
-class IViewPointPath(UniformelySampledPointPath):
+class IViewScanpath(UniformelySampledScanpath):
 
     def __init__(self, *args, **kwargs):
         self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v',
             'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
-        super(IViewPointPath, self).__init__(*args, **kwargs)
+        super(IViewScanpath, self).__init__(*args, **kwargs)
 
 
-class IView3Pointpath(IViewPointPath):
+class IView3Scanpath(IViewScanpath):
 
     def __init__(self, *args, **kwargs):
         self.measures = ('x', 'y', 'time', 'timestamp', 'duration', 'pupil_h',
             'pupil_v', 'corneal_reflex_1_h', 'corneal_reflex_1_v',
             'corneal_reflex_2_h', 'corneal_reflex_2_v', 'diam_h', 'diam_v' )
 
-        super(IView3Pointpath, self).__init__(*args, **kwargs)
+        super(IView3Scanpath, self).__init__(*args, **kwargs)
         self.compute_times()
 
     def compute_times(self):
