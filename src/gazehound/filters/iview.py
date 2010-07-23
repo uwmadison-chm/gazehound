@@ -61,26 +61,41 @@ class Deblink(object):
         return deduped
 
     def all_blink_candidates(self, scanpath):
+        # Basic algo is much like denoising:
+        # 1: Find areas in which our measure is zero
+        # 2: Take the derivative to find edges of those areas
+        # 3: Starts and ends of the blink candidates are the indexes of
+        #    the path in which dy > 0 and dy < 0, respectively.
         candidates = []
-        current = None
-        for i in range(len(scanpath)):
-            point = scanpath[i]
-            if point.x == 0 and point.y == 0:
-                # It's blank!
-                if current is None:
-                    current = Blink(
-                        start=point.time, end=point.computed_end,
-                        name = "blink_%s" % (point.time))
-                    current.start_index = i
-                    current.end_index = i
-                else:
-                    # Add to the current blink
-                    current.end = point.computed_end
-                    current.end_index = i
-            else:
-                if current is not None:
-                    candidates.append(current)
-                    current = None
+        measures = ('x', 'y')
+        arr = scanpath.as_array(measures).T # Transposing makes it all easier
+        self.__arr = arr
+        zeroed_data = arr == 0
+        candidate_times = np.hstack((0, zeroed_data[0]*zeroed_data[1], 0))
+        
+        # All this is just used to make expanding blinks easier later
+        # Stack with inf to keep the start dy arbitrarily high
+        nonzero_ys = arr[1] <> 0
+        self.__dy = np.hstack((np.inf,np.diff(arr[1])))
+        dy_a = np.abs(self.__dy)
+        below_start_thresh = dy_a <= self.start_dy_threshold
+        below_start_thresh *= nonzero_ys
+        self.__below_start_dy_thresh_idx = np.where(below_start_thresh)[0]
+        below_end_thresh = dy_a <= self.end_dy_threshold
+        below_end_thresh *= nonzero_ys
+        self.__below_end_dy_thresh_idx = np.where(below_end_thresh)[0]
+
+        edges = np.diff(candidate_times)
+        starts = np.where(edges > 0)[0]
+        ends = np.where(edges < 0)[0]
+        for i in range(len(starts)):
+            si = starts[i]
+            ei = ends[i]-1
+            b = Blink(start=scanpath[si].time, end=scanpath[ei].time)
+            b.start_index = si
+            b.end_index = ei
+            candidates.append(b)
+        
         return Timeline(events=candidates)
 
     def deduplicate(self, timeline):
@@ -95,64 +110,27 @@ class Deblink(object):
 
     def expand_blinks(self, blinks, scanpath):
         expanded = [self.expand_blink_bidir(b, scanpath) for b in blinks]
-        expanded = [b for b in expanded if b is not None]
-
-        return Timeline(events = expanded)
-
-    def expand_blink_dir(self, blink, scanpath, forward=True):
-        """
-        Return a new Blink with end time (and indexes) set to
-        next area of scanpath with a stable y value.
-        If no such area exists, return None
-        """
-        b = deepcopy(blink)
-        if forward:
-            idx = b.end_index
-        else:
-            idx = b.start_index
-
-        next_idx = self.__stable_yval_idx(scanpath, idx, forward)
-        if next_idx is None:
-            b = None
-        elif forward:
-            next_idx -= 1
-            b.end_index = next_idx
-            b.end = scanpath[next_idx].time
-        else:
-            next_idx += 1
-            b.start_index = next_idx
-            b.start = scanpath[next_idx].time
-            
-        return b
+        return Timeline(events = [b for b in expanded if b is not None])
 
     def expand_blink_bidir(self, blink, scanpath):
-        bf = self.expand_blink_dir(blink, scanpath, False)
-        if bf is not None:
-            bf = self.expand_blink_dir(bf, scanpath, True)
-        return bf
-
-    def __stable_yval_idx(self, scanpath, start_index, forward=True):
-        i1 = start_index
-        i2 = i1
-        if forward:
-            step = 1
-            dy_thresh = self.end_dy_threshold
-        else:
-            step = -1
-            dy_thresh = self.start_dy_threshold
-        i2 += step
-        
-        while i2 >= 0 and i2 < len(scanpath):
-            p1 = scanpath[i1]
-            p2 = scanpath[i2]
-            dy = abs(p1.y - p2.y)
-            if (dy <= dy_thresh and p1.y != 0 and p2.y != 0):
-                # print("%s %s %s %s %s" % (p1.time, p1.y, p2.y, dy, forward))
-                return i1 
-            i1 = i2
-            i2 += step
-        # If we're here, we ran off the end of scanpath
-        return None
+        try:
+            b = deepcopy(blink)
+            # A little tricky double-dereferencing here: we're looking for the
+            # index of the point
+            idx_before_blink = np.where(self.__below_start_dy_thresh_idx < b.start_index)[0]
+            pre_idx_idx = np.where(
+                self.__below_start_dy_thresh_idx < b.start_index)[0][-1]
+            # Add one -- this will the first point of "bad" data
+            b.start_index = self.__below_start_dy_thresh_idx[pre_idx_idx]+1
+            post_idx_idx = np.where(
+                self.__below_end_dy_thresh_idx > b.end_index)[0][0]
+            # Subtract two -- this will be the last point of bad data
+            b.end_index = self.__below_end_dy_thresh_idx[post_idx_idx]-2
+            b.start = scanpath[b.start_index].time
+            b.end = scanpath[b.end_index].time
+            return b
+        except IndexError:
+            return None
 
     def filter_for_length(self, timeline):
         """ Does not alter timeline, returns a copy. """

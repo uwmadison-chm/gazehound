@@ -28,28 +28,6 @@ class TestDeblink(object):
         filtered = self.deblink.filter_for_length(all_candidates)
         eq_(1, len(filtered)) # For now!
 
-    def test_expand_blink_forward(self):
-        blinks = self.deblink.all_blink_candidates(self.points)
-        b = blinks[0]
-        expanded = self.deblink.expand_blink_dir(b, self.points, True)
-        eq_(150, expanded.end)
-
-        b = blinks[3]
-        expanded = self.deblink.expand_blink_dir(b, self.points, True)
-        eq_(350, expanded.end)
-
-    def test_expand_blink_backward(self):
-        blinks = self.deblink.all_blink_candidates(self.points)
-        b = blinks[3]
-        expanded = self.deblink.expand_blink_dir(b, self.points, False)
-        eq_(233, expanded.start)
-
-    def test_expand_blink_will_return_none(self):
-        blinks = self.deblink.all_blink_candidates(self.points)
-        b = blinks[0]
-        expanded = self.deblink.expand_blink_dir(b, self.points, False)
-        assert expanded is None
-
     def test_expand_blink_bidir_works(self):
         blinks = self.deblink.all_blink_candidates(self.points)
         b = blinks[3]
@@ -83,8 +61,6 @@ class TestDeblink(object):
         eq_(1, len(all_candidates))
         b = all_candidates[0]
         eq_(6450, all_candidates[0].start)
-        b_exp = self.deblink.expand_blink_dir(b, pp, False)
-        eq_(6434, b_exp.start)
         b_exp = self.deblink.expand_blink_bidir(b, pp)
         eq_(6434, b_exp.start)
 
