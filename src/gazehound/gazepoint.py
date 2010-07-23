@@ -90,8 +90,10 @@ class Scanpath(object):
     uniformely_sampled = False # Subclass to make this true.
 
     def __init__(self, points=[], headers = {}):
-        self.measures = ('x', 'y', 'time', 'duration')
-
+        self.continuous_measures = ('x', 'y')
+        self.time_measures = ('time', 'duration')
+        self.measures = self.continuous_measures + self.time_measures
+        
         self.points = points
         self.headers = headers
 
@@ -179,19 +181,25 @@ class UniformelySampledScanpath(Scanpath):
 class IViewScanpath(UniformelySampledScanpath):
 
     def __init__(self, *args, **kwargs):
-        self.measures = ('x', 'y', 'time', 'duration', 'pupil_h', 'pupil_v',
-            'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v' )
         super(IViewScanpath, self).__init__(*args, **kwargs)
+
+        self.continuous_measures = ('x', 'y', 'pupil_h', 'pupil_v',
+            'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v')
+        self.time_measures = ('time', 'duration',)
+        self.measures = self.continuous_measures + self.time_measures
 
 
 class IView3Scanpath(IViewScanpath):
 
     def __init__(self, *args, **kwargs):
-        self.measures = ('x', 'y', 'time', 'timestamp', 'duration', 'pupil_h',
-            'pupil_v', 'corneal_reflex_1_h', 'corneal_reflex_1_v',
-            'corneal_reflex_2_h', 'corneal_reflex_2_v', 'diam_h', 'diam_v' )
-
         super(IView3Scanpath, self).__init__(*args, **kwargs)
+
+        self.continuous_measures = ('x', 'y', 'pupil_h',
+            'pupil_v', 'corneal_reflex_1_h', 'corneal_reflex_1_v',
+            'corneal_reflex_2_h', 'corneal_reflex_2_v', 'diam_h', 'diam_v')
+        self.time_measures = ('time', 'timestamp', 'duration')
+        self.measures = self.continuous_measures + self.time_measures
+
         self.compute_times()
 
     def compute_times(self):

@@ -11,6 +11,8 @@ from gazehound.timeline import Timeline
 
 from copy import deepcopy
 
+import numpy as np
+
 class Deblink(object):
 
     # Literature suggests we're unlikely to se blinks less than 50ms or more
@@ -162,8 +164,8 @@ class Deblink(object):
 
 class Denoise(object):
     """
-    Interpolates out little noise blips from iview data. Not nearly as
-    sophisticated as Deblink. Should be run before Deblink.
+    Interpolates out little noise blips from iview data. Operates on each
+    of the measures in scanpath.continuous_measures.
     """
 
     def __init__(self, max_noise_samples=2):
@@ -171,56 +173,33 @@ class Denoise(object):
 
     def process(self, scanpath):
         """
-        Runs a deblinking on the scanpath. Returns a copy of scanpath --
+        Runs a denoising on the scanpath. Returns a copy of scanpath --
         does not modify it.
         """
-        pp = deepcopy(scanpath)
-        win = self.Window(pp, self.max_noise_samples)
-        for i in range(len(pp)):
-            win.apply(i)
-        return pp
-
-    class Window(object):
-        """ The thing that's going to slid along and correct noise """
-
-        def __init__(self, scanpath, max_noise_len = 2):
-            self.scanpath = scanpath
-            self.max_noise_len = max_noise_len
-
-        def points_to_correct(self, pos):
-            points = []
-            for i in range(self.max_noise_len):
-                point = self.scanpath[pos+i]
-                if not point.standard_valid():
-                    points.append(point)
-                else:
-                    break # Don't allow gaps
-            return points
-
-        def interp_points(self, pos, width):
-            vals = None
-            try:
-                if pos > 0 and width > 0:
-                    vals = (self.scanpath[pos-1], self.scanpath[pos+width])
-                    if not (vals[0].standard_valid() and
-                            vals[1].standard_valid()):
-                        vals = None
-            except IndexError:
-                vals = None
-            return vals
-
-        def apply(self, pos):
-            """
-            Modifies self.scanpath, either interpolating at potision
-            pos or doing nothing.
-            Return the next position
-            """
-            needs_fixin = self.points_to_correct(pos)
-            interps = self.interp_points(pos, len(needs_fixin))
-            if interps is not None:
-                for p in needs_fixin:
-                    for a in p.interp_attrs:
-                        # Compute an interpolated value and set it.
-                        val = 0.5*(
-                            getattr(interps[0], a) + getattr(interps[0], a))
-                        setattr(p, a, val)
+        sp = deepcopy(scanpath)
+        # We'll work on one at a time
+        for i in range(len(sp.continuous_measures)):
+            meas = sp.continuous_measures[i]
+            arr = sp.as_array((meas,)).T.flatten()
+            # This array is 1 everywhere s_arr is zero
+            missing_mask = arr == 0
+            # Pad both ends with zeroes and take the derivative -- it'll be 1
+            # at the start of missing data and -1 at the end
+            padded = np.hstack((0, missing_mask, 0))
+            edges = np.diff(padded)
+            starts = np.where(edges > 0)[0]
+            ends = np.where(edges < 0)[0]
+            lengths = ends - starts
+            # And now, the things to correct are no longer than max_noise
+            idxs_to_correct = np.where(lengths <= self.max_noise_samples)[0]
+            for c_idx in idxs_to_correct:
+                # Find the interp values...
+                known_x = [starts[c_idx]-1, ends[c_idx]+1]
+                interp_x = range(starts[c_idx], ends[c_idx])
+                interp_y = np.interp(interp_x, known_x, arr[known_x])
+                # And save the data in the copied scanpath
+                for i in range(len(interp_x)):
+                    setattr(sp[interp_x[i]], meas, interp_y[i])
+            
+        return sp
+        
