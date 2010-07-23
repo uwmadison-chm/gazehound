@@ -45,10 +45,10 @@ def smi_ary_spreadout():
     ])
 
 def iview_points_noisy():
-    return gazepoint.Scanpath(iview_noisy_point_list())
+    return gazepoint.IViewScanpath(60, iview_noisy_point_list())
 
 def iview_points_blinky():
-    return gazepoint.Scanpath(gazepoint.IView2PointFactory().from_component_list([
+    return gazepoint.IViewScanpath(60, gazepoint.IView2PointFactory().from_component_list([
     ['0', '0', '5034', '3490', '4687', '3380', '358', '577', '2400', '2080'],
     ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
     ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -82,7 +82,7 @@ def iview_points_blinky():
     ]))
 
 def iview_problem_blink():
-    return gazepoint.Scanpath(gazepoint.IView2PointFactory().from_component_list(
+    return gazepoint.IViewScanpath(60, gazepoint.IView2PointFactory().from_component_list(
         [[6350, 0, 6061, 3610, 5408, 3672, 536, 247, 1697, 1814],
         [6367, 0, 6055, 3608, 5404, 3670, 538, 246, 1717, 1819],
         [6384, 0, 6058, 3606, 5406, 3669, 537, 245, 1688, 1821],
