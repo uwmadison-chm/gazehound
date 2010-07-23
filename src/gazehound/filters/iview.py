@@ -172,7 +172,7 @@ class Denoise(object):
             idxs_to_correct = np.where(lengths <= self.max_noise_samples)[0]
             for c_idx in idxs_to_correct:
                 # Find the interp values...
-                known_x = [starts[c_idx]-1, ends[c_idx]+1]
+                known_x = [starts[c_idx]-1, ends[c_idx]]
                 interp_x = range(starts[c_idx], ends[c_idx])
                 interp_y = np.interp(interp_x, known_x, arr[known_x])
                 # And save the data in the copied scanpath
