@@ -59,24 +59,26 @@ class Timeline(object):
                 start = cur_pres.end+1, end = self.min_length))
         return full_list
 
-    def recenter_on(self, name, x_center, y_center, bounds=None):
+    def recenter_on(
+        self, name, x_center, y_center, bounds=None, method='median'):
         newtl = copy.deepcopy(self)
         x_offset, y_offset = 0, 0
         for pres in newtl.events:
             if hasattr(pres, 'scanpath'):
                 if pres.name == name:
                     x_offset, y_offset = self.__recenter_point(
-                        pres, x_offset, y_offset, x_center, y_center, bounds)
+                        pres, x_offset, y_offset, x_center, y_center, bounds,
+                        method)
                 pres.scanpath = pres.scanpath.recenter_by(x_offset, y_offset)
         return newtl
 
     def __recenter_point(
-        self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds=None):
+        self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds, method):
         xoff, yoff = cur_x_offset, cur_y_offset
         sp = pres.scanpath
         if bounds is not None:
             sp = sp.points_within(bounds)
-        m = sp.median()
+        m = getattr(sp, method)() # This is gonna me 'mean' or 'median'
         if m is not None:
             xoff, yoff = int(cx-m[0]), int(cy-m[1])
         return (xoff, yoff)
