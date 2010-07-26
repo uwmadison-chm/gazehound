@@ -174,10 +174,15 @@ class Denoise(object):
                 # Find the interp values...
                 known_x = [starts[c_idx]-1, ends[c_idx]]
                 interp_x = range(starts[c_idx], ends[c_idx])
-                interp_y = np.interp(interp_x, known_x, arr[known_x])
-                # And save the data in the copied scanpath
-                for i in range(len(interp_x)):
-                    setattr(sp[interp_x[i]], meas, interp_y[i])
+                # At this point, IndexErrors are OK -- they'll only fire
+                # on the last point.
+                try:
+                    interp_y = np.interp(interp_x, known_x, arr[known_x])
+                    # And save the data in the copied scanpath
+                    for i in range(len(interp_x)):
+                        setattr(sp[interp_x[i]], meas, interp_y[i])
+                except IndexError:
+                    pass
             
         return sp
         
