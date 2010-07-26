@@ -66,13 +66,13 @@ class Timeline(object):
         for pres in newtl.events:
             if hasattr(pres, 'scanpath'):
                 if pres.name == name:
-                    x_offset, y_offset = self.__recenter_point(
+                    x_offset, y_offset = self.recenter_point(
                         pres, x_offset, y_offset, x_center, y_center, bounds,
                         method)
                 pres.scanpath = pres.scanpath.recenter_by(x_offset, y_offset)
         return newtl
 
-    def __recenter_point(
+    def recenter_point(
         self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds, method):
         xoff, yoff = cur_x_offset, cur_y_offset
         sp = pres.scanpath
