@@ -26,7 +26,7 @@ class TestTimeline(object):
         list = t.filled_list()
         assert len(list) == 12
         
-    def test_timeline_is_subescriptable(self):
+    def test_timeline_is_subscriptable(self):
         t = timeline.Timeline(events = self.events)
         assert t[0] is not None
         
