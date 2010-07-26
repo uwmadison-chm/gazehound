@@ -217,15 +217,18 @@ class TestScanpath(object):
          eq_(int(x), 334)
          eq_(int(y), 494)
         
-    def tets_mean_returns_none_for_zero_length(self):
+    def test_mean_returns_none_for_zero_length(self):
         sp = gazepoint.Scanpath(points = [])
-        p = scanpath.mean()
-        assert p is None
+        assert sp.mean() is None
         
     def test_scanpath_computes_median(self):
         sp = gazepoint.Scanpath(points = self.points)
         x, y = sp.median()
         eq_((x,y), (357.5, 509.0))
+    
+    def test_scanpath_returns_nont_for_zero_length(self):
+        sp = gazepoint.Scanpath(points = [])
+        assert sp.median() is None
 
     def test_recenter_duplicates_scanpath(self):
         scanpath = gazepoint.Scanpath(points = self.points)

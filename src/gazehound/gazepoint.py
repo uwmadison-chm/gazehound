@@ -117,10 +117,16 @@ class Scanpath(object):
             [point for point in self.points if criterion(point)])
 
     def mean(self):
-        return np.apply_along_axis(np.mean, 0, self.as_array(('x', 'y')))
-
+        val = np.apply_along_axis(np.mean, 0, self.as_array(('x', 'y')))
+        if np.any(np.isnan(val)):
+            val = None
+        return val
+        
     def median(self):
-        return np.apply_along_axis(np.median, 0, self.as_array(('x', 'y')))
+        val = np.apply_along_axis(np.median, 0, self.as_array(('x', 'y')))
+        if np.any(np.isnan(val)):
+            val = None
+        return val
 
     @property
     def total_duration(self):
