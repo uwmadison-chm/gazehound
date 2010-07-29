@@ -64,16 +64,13 @@ class Timeline(object):
         
         newtl = copy.deepcopy(self)
         x_offset, y_offset = 0, 0
-        #print("Foo1: %s" % self[0].scanpath.points)
         for pres in newtl.events:
             if hasattr(pres, 'scanpath'):
                 if pres.name == name:
                     sp = pres.scanpath
                     
                     inbounds = sp.points_within(bounds)
-                    print("Inbounds %s" % inbounds.points)
                     result = getattr(inbounds, method)()
-                    print("result %s" % result)
                     if result is not None and len(result) == 2:
                         xpart, ypart = result
                         x_offset = x_center - xpart
@@ -81,9 +78,7 @@ class Timeline(object):
                 s = pres.scanpath.recenter_by(x_offset, y_offset)
                 pres.scanpath = s
                 pres.thinger = (x_offset, y_offset)
-                print("Set thinger for %s to %s" % (pres.name, pres.thinger,))
                 
-        print("Newtl first name %s thinger %s" % (newtl[0].name, newtl[0].thinger,))
         return newtl
 
     def valid(self):
