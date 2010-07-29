@@ -7,11 +7,11 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 from gazehound import gazepoint, shapes
-import numpy
+import numpy as np
 
 import mock_objects
 from nose.tools import *
-from testutils import gt_, lt_, gte_, lte_, includes_
+from testutils import *
 
 
 class TestPointFactory(object):
@@ -100,7 +100,7 @@ class TestPointFactory(object):
                 
 class TestIView2PointFactory(object):
     def setup(self):
-        self.point_ary = mock_objects.smi_ary_spreadout()
+        self.point_ary = mock_objects.iview_points_blinky()
         self.iview_fact = gazepoint.IView2PointFactory()
         
     def test_get_components_returns_proper_number_of_elements(self):
@@ -109,8 +109,8 @@ class TestIView2PointFactory(object):
         
     def test_get_components_returns_points(self):
         points = self.iview_fact.from_component_list(self.point_ary)
-        assert all(isinstance(p, gazepoint.Point) for p in points)
-        
+        assert isinstance(points, np.ndarray)
+
 
 class TestFixationFactory(object):
     def setup(self):
@@ -267,7 +267,7 @@ class TestScanpath(object):
     def test_points_convert_to_numpy(self):
         scanpath = gazepoint.Scanpath(points = self.points)
         npath = scanpath.as_array()
-        eq_(numpy.ndarray, type(npath))
+        eq_(np.ndarray, type(npath))
         eq_(len(scanpath), len(npath))
         
     def test_points_convert_limited_properties(self):
@@ -295,7 +295,8 @@ class TestIViewScanpath(object):
     def setup(self):
         self.points = mock_objects.iview_noisy_point_list()
         self.path = gazepoint.IViewScanpath(
-            samples_per_second=60, points=self.points)
+            samples_per_second=60, points=self.points,
+            measures=gazepoint.IView2PointFactory().numeric_measures)
         
     @raises(TypeError)
     def test_iview_scanpath_requires_samples_per_second(self):
@@ -305,6 +306,12 @@ class TestIViewScanpath(object):
         arr = self.path.as_array()
         eq_(len(self.path), arr.shape[0])
         eq_(len(self.path.measures), arr.shape[1])
+    
+    def test_finds_points_in_shape(self):
+        rect = shapes.Rectangle(300,500,360,600)
+        filtered = self.path.points_within(rect)
+        neq_(0, len(filtered))
+        gt_(len(self.path), len(filtered))
     
 class TestPoint(object):
     def __init__(self):

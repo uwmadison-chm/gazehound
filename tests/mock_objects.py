@@ -34,21 +34,22 @@ def iview_noisy_point_list():
     ['216', '0', '4929', '3946', '4686', '3357', '518', '528', '2144', '1184'],
     ])
 
-def smi_ary_spreadout():
-    return ([
-        ['100', '0', '5034', '3490', '4687', '3380', '358', '543', '2400', '2080'],
-        ['1160', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
-        ['1330', '0', '5050', '3477', '4692', '3388', '357', '490', '2432', '2144'],
-        ['1500', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
-        ['1660', '0', '5017', '3595', '4691', '3367', '58', '986', '2368', '1824'],
-        ['1830', '0', '4929', '3946', '4686', '3357', '518', '-56', '2144', '1184'],
-    ])
+#def smi_ary_spreadout():
+#    return ([
+#        ['100', '0', '5034', '3490', '4687', '3380', '358', '543', '2400', '2080'],
+#        ['1160', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
+#        ['1330', '0', '5050', '3477', '4692', '3388', '357', '490', '2432', '2144'],
+#        ['1500', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
+#        ['1660', '0', '5017', '3595', '4691', '3367', '58', '986', '2368', '1824'],
+#        ['1830', '0', '4929', '3946', '4686', '3357', '518', '-56', '2144', '1184'],
+#    ])
 
 def iview_points_noisy():
-    return gazepoint.IViewScanpath(60, iview_noisy_point_list())
+    return gazepoint.IViewScanpath(60, iview_noisy_point_list(),
+        measures=gazepoint.IView2PointFactory().numeric_measures)
 
 def iview_points_blinky():
-    return gazepoint.IViewScanpath(60, gazepoint.IView2PointFactory().from_component_list([
+    return [
     ['0', '0', '5034', '3490', '4687', '3380', '358', '577', '2400', '2080'],
     ['16', '0', '5042', '3491', '4690', '3388', '353', '528', '2432', '2112'],
     ['33', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
@@ -79,10 +80,16 @@ def iview_points_blinky():
     ['450', '0', '5050', '3472', '4688', '3391', '365', '473', '2432', '2080'], 
     ['467', '0', '5017', '3595', '4691', '3367', '58', '490', '2368', '1824'],
     ['483', '0', '4929', '3946', '4686', '3357', '518', '528', '2144', '1184'],
-    ]))
+    ]
+
+def iview_scanpath_blinky():
+    f = gazepoint.IView2PointFactory()
+    return gazepoint.IViewScanpath(60, 
+        f.from_component_list(iview_points_blinky()), f.numeric_measures)
 
 def iview_problem_blink():
-    return gazepoint.IViewScanpath(60, gazepoint.IView2PointFactory().from_component_list(
+    f = gazepoint.IView2PointFactory()
+    return gazepoint.IViewScanpath(60, f.from_component_list(
         [[6350, 0, 6061, 3610, 5408, 3672, 536, 247, 1697, 1814],
         [6367, 0, 6055, 3608, 5404, 3670, 538, 246, 1717, 1819],
         [6384, 0, 6058, 3606, 5406, 3669, 537, 245, 1688, 1821],
@@ -100,7 +107,8 @@ def iview_problem_blink():
         [6584, 0, 6005, 3661, 5394, 3597, 571, 408, 1727, 1465],
         [6600, 0, 6036, 3576, 5392, 3598, 536, 295, 1725, 1658],
         [6617, 0, 6045, 3558, 5400, 3615, 535, 280, 1689, 1815],
-        [6634, 0, 6044, 3544, 5401, 3626, 537, 282, 1690, 1823]]))
+        [6634, 0, 6044, 3544, 5401, 3626, 537, 282, 1690, 1823]]), 
+        f.numeric_measures)
         
 def smi_scanpath_normal():
     lines = []
@@ -141,10 +149,6 @@ def tiny_viewings():
         scanpath = scanpath, timeline = timeline
     ).viewings()
 
-def smi_scanpath_spreadout():
-    ivf = gazepoint.IView2PointFactory()
-    return gazepoint.Scanpath(ivf.from_component_list(smi_ary_spreadout()))
-    
 
 def standard_timeline():
     data = [
@@ -162,10 +166,10 @@ def standard_timeline():
         )
     )
 
-def simple_timeline():
+def simple_timeline_for_blinky():
     data = [
-        ['120', '1350', 'stim1'],
-        ['1490', '1900', 'objects']
+        ['167', '240', 'stim1'],
+        ['250', '600', 'objects']
     ]
     
     pres_fact = event.EventFactory()

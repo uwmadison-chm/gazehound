@@ -72,7 +72,8 @@ class IView2ScanpathReader(IViewReader):
         fact = gazepoint.IView2PointFactory()
         points = fact.from_component_list(self)
         return gazepoint.IViewScanpath(
-            points=points, samples_per_second=self.header()['sample_rate'])
+            points=points, measures=fact.numeric_measures,
+            samples_per_second=self.header()['sample_rate'])
 
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
@@ -99,7 +100,8 @@ class IView3ScanpathReader(IViewReader):
     # measure_column(s),
     # conversion_from_string_function
     standard_column_mapping = [
-        ('timestamp', 'Time', int),
+        ('timestamp', 'Time', float),
+        ('time', 'Time', float),
         ('x', ['R POR X [px]', 'L POR X [px]'], float),
         ('y', ['R POR Y [px]', 'L POR Y [px]'], float),
         ('pupil_h', ['R Raw X [px]', 'L Raw X [px]'], float),
@@ -124,8 +126,11 @@ class IView3ScanpathReader(IViewReader):
     def scanpath(self):
         fact = gazepoint.IView3PointFactory(self.measure_mapping)
         points = fact.from_component_list(self)
-        return gazepoint.IView3Scanpath(
-            points=points, samples_per_second=self.header()['sample_rate'])
+        sp = gazepoint.IView3Scanpath(
+            points=points, samples_per_second=self.header()['sample_rate'],
+            measures=fact.numeric_measures)
+        sp.correct_times()
+        return sp
     
     @property
     def measure_mapping(self):

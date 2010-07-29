@@ -202,7 +202,7 @@ class TestTimelineDecorator(object):
         self.shape_hash = {
             'objects': mock_objects.shape_tuples()
         }
-        self.timeline = mock_objects.simple_timeline()
+        self.timeline = mock_objects.simple_timeline_for_blinky()
         
     def test_decorator_adds_shapes_to_timeline(self):
         dec = shapes.TimelineDecorator()

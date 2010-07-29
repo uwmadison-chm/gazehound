@@ -40,8 +40,8 @@ class Deblink(object):
             if b.start_index > 0:
                 prev_pt = pc[b.start_index-1]
                 for point in pc[(b.start_index):(b.end_index+1)]:
-                    # +1 needed to get last point of blink
-                    point.interpolate_from(prev_pt)
+                    pc.copy_measures(prev_pt, point)
+
         return pc
 
     def blinks(self, scanpath):
@@ -88,10 +88,11 @@ class Deblink(object):
         edges = np.diff(candidate_times)
         starts = np.where(edges > 0)[0]
         ends = np.where(edges < 0)[0]
+        time_idx = scanpath.measure_index('time')
         for i in range(len(starts)):
             si = starts[i]
             ei = ends[i]-1
-            b = Blink(start=scanpath[si].time, end=scanpath[ei].time)
+            b = Blink(start=scanpath[si][time_idx], end=scanpath[ei][time_idx])
             b.start_index = si
             b.end_index = ei
             candidates.append(b)
@@ -126,8 +127,9 @@ class Deblink(object):
                 self.__below_end_dy_thresh_idx > b.end_index)[0][0]
             # Subtract two -- this will be the last point of bad data
             b.end_index = self.__below_end_dy_thresh_idx[post_idx_idx]-2
-            b.start = scanpath[b.start_index].time
-            b.end = scanpath[b.end_index].time
+            time_idx = scanpath.measure_index('time')
+            b.start = scanpath[b.start_index][time_idx]
+            b.end = scanpath[b.end_index][time_idx]
             return b
         except IndexError:
             return None
@@ -156,8 +158,8 @@ class Denoise(object):
         """
         sp = deepcopy(scanpath)
         # We'll work on one at a time
-        for i in range(len(sp.continuous_measures)):
-            meas = sp.continuous_measures[i]
+        for meas in sp.interpolable_measures:
+            meas_idx = sp.measure_index(meas)
             arr = sp.as_array((meas,)).T.flatten()
             # This array is 1 everywhere s_arr is zero
             missing_mask = arr == 0
@@ -180,7 +182,7 @@ class Denoise(object):
                     interp_y = np.interp(interp_x, known_x, arr[known_x])
                     # And save the data in the copied scanpath
                     for i in range(len(interp_x)):
-                        setattr(sp[interp_x[i]], meas, interp_y[i])
+                        sp[interp_x[i]][meas_idx] = interp_y[i]
                 except IndexError:
                     pass
             

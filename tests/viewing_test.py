@@ -12,14 +12,12 @@ from gazehound import viewing, gazepoint, shapes
 import mock_objects
 from nose.tools import ok_, eq_
 from testutils import lt_, gt_
+import numpy as np
 
 class TestTimelineScanpathCombiner(object):
     def setup(self):
-        self.scanpath = mock_objects.smi_scanpath_spreadout()
-        self.timeline = mock_objects.simple_timeline()
-        
-    def teardown(self):
-        pass
+        self.scanpath = mock_objects.iview_scanpath_blinky()
+        self.timeline = mock_objects.simple_timeline_for_blinky()
         
     def test_combiner_returns_as_many_viewings_as_events(self):
         combiner = viewing.Combiner(
@@ -39,7 +37,8 @@ class TestTimelineScanpathCombiner(object):
         
         viewings = combiner.viewings()
         assert all(p.scanpath is not None for p in viewings)
-
+        assert all(len(p.scanpath) > 0 for p in viewings)
+    
     def test_combiner_adds_gazepoints_to_events(self):
         combiner = viewing.Combiner(
             timeline = self.timeline,
@@ -60,19 +59,7 @@ class TestTimelineScanpathCombiner(object):
             sum(len(pres.scanpath) for pres in viewings),
             len(self.scanpath)
         )
-        
-    def test_combiner_contains_all_points_when_in_bounds(self):
-        combiner = viewing.Combiner(
-            timeline = self.timeline.filled_list(),
-            scanpath = self.scanpath
-        )
-        
-        viewings = combiner.viewings()
-        eq_(
-            sum(len(pres.scanpath) for pres in viewings),
-            len(self.scanpath)
-        )
-        
+                
     def test_viewings_can_recenter(self):
         viewings = viewing.Combiner(
             timeline = self.timeline,
@@ -81,17 +68,23 @@ class TestTimelineScanpathCombiner(object):
         
         centered = viewings.recenter_on('stim1', 400, 300)
         eq_(len(centered.events), len(viewings.events))
-        assert centered[0].scanpath[0].x != viewings[0].scanpath[0].x
+        x_i = self.scanpath.measure_index('x')
+        assert centered[0].scanpath[0][x_i] != viewings[0].scanpath[0][x_i]
         
     def test_viewings_will_recenter_with_bounding_rect(self):
         viewings = viewing.Combiner(
             timeline = self.timeline,
             scanpath = self.scanpath
         ).viewings()
-        bounds = shapes.Rectangle(350, 500, 400, 600)
-        centered = viewings.recenter_on('stim1', 400, 300, bounds = bounds)
-        eq_(centered[0].scanpath[0].x, 400)
-        eq_(centered[0].scanpath[0].y, 300)
+        
+        bounds = shapes.Rectangle(100, 100, 600, 600)
+        centered = viewings.recenter_on('stim1', 400, 300, 
+            bounds=bounds, method="median")
+        
+        pre_xy = viewings[0].scanpath.as_array(('x', 'y'))
+        post_xy = centered[0].scanpath.as_array(('x', 'y'))
+        eq_(pre_xy.shape, post_xy.shape)
+        eq_(0, np.sum(pre_xy == post_xy))
         
 
 class TestFixatedTimeline(object):

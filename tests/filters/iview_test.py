@@ -14,7 +14,7 @@ from ..testutils import neq_, gt_, lt_, gte_, lte_, includes_
 
 class TestDeblink(object):
     def setup(self):
-        self.points = mock_objects.iview_points_blinky()
+        self.points = mock_objects.iview_scanpath_blinky()
         self.deblink = iview.Deblink(
             min_duration=50, max_duration=400,
             start_dy_threshold=20, end_dy_threshold=20)
@@ -49,11 +49,13 @@ class TestDeblink(object):
 
     def test_deblink_interpolates(self):
         deblinked = self.deblink.deblink(self.points)
+        t_idx = self.points.measure_index('time')
+        x_idx = self.points.measure_index('x')
         pt = deblinked[13]
-        eq_(216, pt.time) # For reference
-        eq_(pt.x, deblinked[14].x)
-        eq_(pt.x, deblinked[19].x)
-        neq_(pt.x, deblinked[22].x) # After the blink!
+        eq_(216, pt[t_idx]) # For reference
+        eq_(pt[x_idx], deblinked[14][x_idx])
+        eq_(pt[x_idx], deblinked[19][x_idx])
+        neq_(pt[x_idx], deblinked[22][x_idx]) # After the blink!
 
     def test_problem_candidates(self):
         pp = mock_objects.iview_problem_blink()
@@ -68,10 +70,11 @@ class TestDeblink(object):
         pp = mock_objects.iview_problem_blink()
         deblinked = self.deblink.deblink(pp)
         blinks = self.deblink.blinks(pp)
+        x_idx = pp.measure_index('x')
         eq_(1, len(blinks))
         eq_(6434, blinks[0].start)
         tr = deblinked[4] # Target reference
-        eq_(tr.x, deblinked[5].x)
+        eq_(tr[x_idx], deblinked[5][x_idx])
 
     def test_asymmetric_thresholds(self):
         pp = mock_objects.iview_problem_blink()
@@ -90,9 +93,11 @@ class TestDenoiseFilter(object):
         self.filtered = self.flt.process(self.points)
 
     def test_denoise_denoises(self):
-        eq_(self.points[0].x, self.filtered[0].x)
-        neq_(self.points[2].x, self.filtered[2].x)
+        x_idx = self.points.measure_index('x')
+        eq_(self.points[0][x_idx], self.filtered[0][x_idx])
+        neq_(self.points[2][x_idx], self.filtered[2][x_idx])
 
     def test_denoise_doesnt_change_time(self):
-        eq_(self.points[0].time, self.filtered[0].time)
-        eq_(self.points[2].time, self.filtered[2].time)
+        t_idx = self.points.measure_index('time')
+        eq_(self.points[0][t_idx], self.filtered[0][t_idx])
+        eq_(self.points[2][t_idx], self.filtered[2][t_idx])

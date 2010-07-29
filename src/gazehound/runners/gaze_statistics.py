@@ -136,6 +136,8 @@ class GazeStatisticsAnalyzer(object):
         # TODO: Don't hardcode these.
         MAX_X = 800
         MAX_Y = 600
+
+        SLOP_FRAC = 0.1
         
         def default_valid(x_width, y_width, slop_frac, point):
             xslop = x_width*slop_frac
@@ -163,16 +165,16 @@ class GazeStatisticsAnalyzer(object):
             return (point.x, point.y) in shape
         
         self.in_fun = in_fun
-
+        
     def general_stats(self):
         """Return a GazeStats containing basic data about the scanpath"""
-        
+        time_idx = self.scanpath.measures.index('time')
         data = GazeStats(
             presented = 'screen',
             area = 'all',
             total_points = len(self.scanpath),
-            start_ms = self.scanpath[0].time,
-            end_ms = self.scanpath[-1].time,
+            start_ms = self.scanpath[0][time_idx],
+            end_ms = self.scanpath[-1][time_idx],
             valid_strict = len(self.scanpath.valid_points(
                 self.strict_valid_fun
             )),

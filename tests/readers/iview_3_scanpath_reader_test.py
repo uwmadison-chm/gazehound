@@ -56,7 +56,7 @@ class TestIView3ScanpathReader(object):
         ir = IView3ScanpathReader(self.point_lines)
         mapping = ir.measure_mapping['timestamp']
         eq_(0, mapping[0])
-        eq_(int, mapping[1])
+        eq_(float, mapping[1])
     
     def test_column_mapping_with_two_cols(self):
         ir = IView3ScanpathReader(self.point_lines)
@@ -67,4 +67,5 @@ class TestIView3ScanpathReader(object):
     def test_scanpath_mapping(self):
         ir = IView3ScanpathReader(self.point_lines)
         pp = ir.scanpath()
-        eq_(1776229331031, pp[0].timestamp)
+        ts_idx = pp.measures.index('timestamp')
+        eq_(1776229331031, pp[0][ts_idx])

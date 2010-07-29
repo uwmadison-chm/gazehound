@@ -59,29 +59,32 @@ class Timeline(object):
                 start = cur_pres.end+1, end = self.min_length))
         return full_list
 
-    def recenter_on(
-        self, name, x_center, y_center, bounds=None, method='median'):
+    def recenter_on(self, name, x_center, y_center, bounds=None, 
+                    method='median'):
+        
         newtl = copy.deepcopy(self)
         x_offset, y_offset = 0, 0
+        #print("Foo1: %s" % self[0].scanpath.points)
         for pres in newtl.events:
             if hasattr(pres, 'scanpath'):
                 if pres.name == name:
-                    x_offset, y_offset = self.recenter_point(
-                        pres, x_offset, y_offset, x_center, y_center, bounds,
-                        method)
-                pres.scanpath = pres.scanpath.recenter_by(x_offset, y_offset)
+                    sp = pres.scanpath
+                    
+                    inbounds = sp.points_within(bounds)
+                    print("Inbounds %s" % inbounds.points)
+                    result = getattr(inbounds, method)()
+                    print("result %s" % result)
+                    if result is not None and len(result) == 2:
+                        xpart, ypart = result
+                        x_offset = x_center - xpart
+                        y_offset = y_center - ypart
+                s = pres.scanpath.recenter_by(x_offset, y_offset)
+                pres.scanpath = s
+                pres.thinger = (x_offset, y_offset)
+                print("Set thinger for %s to %s" % (pres.name, pres.thinger,))
+                
+        print("Newtl first name %s thinger %s" % (newtl[0].name, newtl[0].thinger,))
         return newtl
-
-    def recenter_point(
-        self, pres, cur_x_offset, cur_y_offset, cx, cy, bounds, method):
-        xoff, yoff = cur_x_offset, cur_y_offset
-        sp = pres.scanpath
-        if bounds is not None:
-            sp = sp.points_within(bounds)
-        m = getattr(sp, method)() # This is gonna me 'mean' or 'median'
-        if m is not None:
-            xoff, yoff = int(cx-m[0]), int(cy-m[1])
-        return (xoff, yoff)
 
     def valid(self):
         """

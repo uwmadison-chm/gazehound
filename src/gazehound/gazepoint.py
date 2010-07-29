@@ -177,46 +177,108 @@ class Scanpath(object):
             t1 = t2
         return len(self.points)  # It's the last point!
 
+
 class UniformelySampledScanpath(Scanpath):
     uniformely_sampled = True
 
-    def __init__(self, samples_per_second, *args, **kwargs):
+    def __init__(self, samples_per_second, points, measures, headers={}):
+        super(UniformelySampledScanpath, self).__init__(headers=headers)
         self.samples_per_second = samples_per_second
-        super(UniformelySampledScanpath, self).__init__(*args, **kwargs)
+        self.points = points
+        self.measures = measures
+        self.headers = headers
+        self.time_measures = ('time', 'duration')
+    
+    def as_array(self, measures=None):
+        if measures is None:
+            measures = self.measures
+        return self.points[:,self.measure_indexes(measures)]
+    
+    def measure_index(self, name):
+        return self.measures.index(name)
+    
+    def measure_indexes(self, names):
+        return [self.measures.index(n) for n in names]
+
+    @property
+    def interpolable_measures(self):
+        return [m for m in self.measures if m not in self.time_measures]
+    
+    def __len__(self):
+        return self.points.__len__()
+
+    def __iter__(self):
+        return self.points.__iter__()
+
+    def __getitem__(self, i):
+        return self.points[i]
+
+    def __getslice__(self, i, j):
+        sc = copy.copy(self)
+        sc.points = self.points[i:j]
+        return sc
+    
+    def copy_measures(self, from_pt, to_pt):
+        indexes_to_copy = self.measure_indexes(self.interpolable_measures)
+        for i in indexes_to_copy:
+            to_pt[i] = from_pt[i]
+
+    def recenter_by(self, x, y):
+        out = copy.deepcopy(self)
+        indexes = self.measure_indexes(('x', 'y'))
+        out.points[:,[indexes]] += [x,y]
+        return out
+
+    def constrain_to(self,
+        min_x_const = (0,0),
+        min_y_const = (0,0),
+        max_x_const = (1000,1000),
+        max_y_const = (1000,1000)):
+        
+        out = copy.deepcopy(self)
+        x_i = self.measure_index('x')
+        y_i = self.measure_index('y')
+        ar = out.points
+        ar[:,x_i][ar:,x_i < min_x_const[0]] = min_x_const[1]
+        ar[:,x_i][ar:,x_i > max_x_const[0]] = max_x_const[1]
+        ar[:,y_i][ar:,y_i < min_y_const[0]] = min_y_const[1]
+        ar[:,y_i][ar:,y_i > max_y_const[0]] = max_y_const[1]
+        return out
+
+    def points_within(self, shape):
+        sc = copy.deepcopy(self)
+        xy_arr = sc.as_array(('x', 'y'))
+        def in_fx(p):
+            return p in shape
+        if shape is not None and len(xy_arr > 0):
+            match_indexes = np.apply_along_axis(in_fx, 1, xy_arr)
+            sc.points = sc.points[match_indexes]
+        return sc
 
 class IViewScanpath(UniformelySampledScanpath):
 
-    def __init__(self, *args, **kwargs):
-        super(IViewScanpath, self).__init__(*args, **kwargs)
+    def __init__(self, samples_per_second, points, measures, headers={}):
+        super(IViewScanpath, self).__init__(samples_per_second, points, 
+            measures, headers)
 
-        self.continuous_measures = ('x', 'y', 'pupil_h', 'pupil_v',
-            'corneal_reflex_h', 'corneal_reflex_v', 'diam_h', 'diam_v')
         self.time_measures = ('time', 'duration',)
-        self.measures = self.continuous_measures + self.time_measures
 
 
 class IView3Scanpath(IViewScanpath):
 
-    def __init__(self, *args, **kwargs):
-        super(IView3Scanpath, self).__init__(*args, **kwargs)
-
-        self.continuous_measures = ('x', 'y', 'pupil_h',
-            'pupil_v', 'corneal_reflex_1_h', 'corneal_reflex_1_v',
-            'corneal_reflex_2_h', 'corneal_reflex_2_v', 'diam_h', 'diam_v')
+    def __init__(self, samples_per_second, points, measures, 
+                headers={}):
+        super(IView3Scanpath, self).__init__(samples_per_second, points, measures)
+        self.headers = headers
         self.time_measures = ('time', 'timestamp', 'duration')
-        self.measures = self.continuous_measures + self.time_measures
 
-        self.compute_times()
-
-    def compute_times(self):
-        # Frustratingly, times are in microsecond timestamps in v3
-        if len(self.points) == 0:
-            return
-        first_p = self.points[0]
-        for p in self.points:
-            diff = p.timestamp - first_p.timestamp
-            p.time = diff/1000.0
-
+    def correct_times(self):
+        # Frustratingly, times are in microseconds since epoch in v3
+        timestamp_i = self.measures.index('timestamp')
+        time_i = self.measures.index('time')
+        self.points[:][time_i] = (
+            self.points[:][timestamp_i] - self.points[:][timestamp_i][0])/1000
+    
 
 class PointFactory(object):
     """ Maps a list of gaze point data to a list of Points """
@@ -284,9 +346,17 @@ class IView2PointFactory(PointFactory):
             ('diam_v', int)]
 
     def from_component_list(self, components):
-        return super(IView2PointFactory, self).from_component_list(
-            components, self.data_map)
-
+        indexes_to_extract = [
+            i for i in range(len(self.data_map)) if self.data_map[i][1] == int]
+        return np.array([
+                [line[i] for i in indexes_to_extract]
+            for line in components], dtype=float
+        )
+    
+    @property
+    def numeric_measures(self):
+        return [m[0] for m in self.data_map if m[1] == int]
+    
 
 class IView3PointFactory(PointFactory):
     """
@@ -303,16 +373,18 @@ class IView3PointFactory(PointFactory):
         self.measure_map = measure_map
 
     def from_component_list(self, components):
-        #return super(IView3PointFactory, self).from_component_list(
-        #    components, self.data_map)
-        points = []
-        for val_list in components:
-            p = self.type_to_produce()
-            for measure_name, xfm in self.measure_map.iteritems():
-                idx, fx = xfm
-                setattr(p, measure_name, fx(val_list[idx]))
-            points.append(p)
-        return points
+        indexes = [p[0] for p in self.measure_map.values()]
+        return np.array(
+            [
+                [float(line[i]) for i in  indexes]
+            for line in components], dtype=float
+        )
+    
+    @property
+    def numeric_measures(self):
+        return [measure_name for measure_name, mapper 
+            in self.measure_map.iteritems() if mapper[1] in [int, float]]
+
 
 class IViewFixationFactory(PointFactory):
     """
