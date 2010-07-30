@@ -125,7 +125,7 @@ class GazeStatsRunner(object):
 class GazeStatisticsAnalyzer(object):
     
     def __init__(self, 
-        scanpath = None,
+        scanpath,
         strict_valid_fun = None,
         scanpath_meta = None,
         timeline = []):
@@ -138,34 +138,24 @@ class GazeStatisticsAnalyzer(object):
         MAX_Y = self.scanpath.headers['calibration_size'][1]
 
         SLOP_FRAC = 0.1
+        X_SLOP = MAX_X*SLOP_FRAC
+        Y_SLOP = MAX_Y*SLOP_FRAC
+        strict_rect = shapes.Rectangle(0, 0, MAX_X, MAX_Y)
+        lax_rect = shapes.Rectangle(
+            -X_SLOP, -Y_SLOP, MAX_X+X_SLOP, MAX_Y+Y_SLOP)
         
-        def default_valid(x_width, y_width, slop_frac, point):
-            xslop = x_width*slop_frac
-            yslop = y_width*slop_frac
-            max_x = x_width+xslop
-            min_x = 0-xslop
-            max_y = y_width+yslop
-            min_y = 0-yslop
-            
-            return ((point.x >= min_x and point.x < max_x) and
-            (point.y >= min_y and point.y < max_y) and not
-            (point.x == 0 and point.y == 0
-            ))
+        def default_valid(shape, point):
+            return (point in shape) and (tuple(point) <> (0,0))
 
         def svf(point):
-            return default_valid(MAX_X, MAX_Y, 0, point)
+            return default_valid(strict_rect, point)
 
         def lvf(point):
-            return default_valid(MAX_X, MAX_Y, .1, point)
+            return default_valid(lax_rect, point)
             
         self.strict_valid_fun = svf
         self.lax_valid_fun = lvf
-        
-        def in_fun(shape, point):
-            return (point.x, point.y) in shape
-        
-        self.in_fun = in_fun
-        
+                        
     def general_stats(self):
         """Return a GazeStats containing basic data about the scanpath"""
         time_idx = self.scanpath.measures.index('time')
@@ -175,10 +165,10 @@ class GazeStatisticsAnalyzer(object):
             total_points = len(self.scanpath),
             start_ms = self.scanpath[0][time_idx],
             end_ms = self.scanpath[-1][time_idx],
-            valid_strict = len(self.scanpath.valid_points(
+            valid_strict = len(self.scanpath.points_matching(
                 self.strict_valid_fun
             )),
-            valid_lax = len(self.scanpath.valid_points(
+            valid_lax = len(self.scanpath.points_matching(
                 self.lax_valid_fun
             ))
         )
@@ -240,11 +230,8 @@ class GazeStatisticsAnalyzer(object):
                     self.lax_valid_fun
                 ))
             )
-            
-            def f(point):
-                return self.in_fun(s, point)
-                
-            stats.points_in = len(pres.scanpath.valid_points(f))
+                            
+            stats.points_in = len(pres.scanpath.points_within(s))
             stats.points_out = stats.total_points - stats.points_in
             stats_list.append(stats)
             
