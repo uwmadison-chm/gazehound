@@ -245,14 +245,20 @@ class UniformelySampledScanpath(Scanpath):
         ar[:,y_i][ar:,y_i > max_y_const[0]] = max_y_const[1]
         return out
 
+
+    def points_matching(self, fx, measures=('x', 'y')):
+        sc = copy.copy(self)
+        p_arr = self.as_array(measures)
+        matches = self.points[np.apply_along_axis(fx, 1, p_arr)]
+        sc.points = matches
+        return sc
+
     def points_within(self, shape):
-        sc = copy.deepcopy(self)
-        xy_arr = sc.as_array(('x', 'y'))
+        sc = copy.copy(self)
         def in_fx(p):
             return p in shape
-        if shape is not None and len(xy_arr > 0):
-            match_indexes = np.apply_along_axis(in_fx, 1, xy_arr)
-            sc.points = sc.points[match_indexes]
+        if shape is not None:
+            sc = self.points_matching(in_fx, ('x', 'y'))
         return sc
 
 class IViewScanpath(UniformelySampledScanpath):
