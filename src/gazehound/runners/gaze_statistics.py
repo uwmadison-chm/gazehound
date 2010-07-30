@@ -134,8 +134,8 @@ class GazeStatisticsAnalyzer(object):
         self.timeline = timeline
         
         # TODO: Don't hardcode these.
-        MAX_X = 800
-        MAX_Y = 600
+        MAX_X = self.scanpath.headers['calibration_size'][0]
+        MAX_Y = self.scanpath.headers['calibration_size'][1]
 
         SLOP_FRAC = 0.1
         
