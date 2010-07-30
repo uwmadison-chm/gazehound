@@ -73,7 +73,8 @@ class IView2ScanpathReader(IViewReader):
         points = fact.from_component_list(self)
         return gazepoint.IViewScanpath(
             points=points, measures=fact.numeric_measures,
-            samples_per_second=self.header()['sample_rate'])
+            samples_per_second=self.header()['sample_rate'],
+            headers=self.header())
 
     def __header_map(self):
         # The second parameter is a function, taking one string argument,
@@ -128,7 +129,7 @@ class IView3ScanpathReader(IViewReader):
         points = fact.from_component_list(self)
         sp = gazepoint.IView3Scanpath(
             points=points, samples_per_second=self.header()['sample_rate'],
-            measures=fact.numeric_measures)
+            measures=fact.numeric_measures, headers=self.header())
         sp.correct_times()
         return sp
     

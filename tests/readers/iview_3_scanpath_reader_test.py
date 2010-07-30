@@ -69,3 +69,8 @@ class TestIView3ScanpathReader(object):
         pp = ir.scanpath()
         ts_idx = pp.measures.index('timestamp')
         eq_(1776229331031, pp[0][ts_idx])
+    
+    def test_scanpath_gets_headers(self):
+        ir = IView3ScanpathReader(self.point_lines)
+        pp = ir.scanpath()
+        eq_(pp.headers['file_version'], 'IDF Converter 3.0.9')

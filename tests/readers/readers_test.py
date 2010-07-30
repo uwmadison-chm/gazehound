@@ -137,6 +137,11 @@ class TestIView2ScanpathReader(object):
         
         scanpath = ir.scanpath()
         eq_(len(scanpath), self.EXPECTED_LINES)
+    
+    def test_scanpath_gets_header(self):
+        ir = IView2ScanpathReader(self.norm_lines)        
+        scanpath = ir.scanpath()
+        eq_(scanpath.headers['file_version'], '2')
 
 
 class TestIViewFixationReader(object):
