@@ -239,10 +239,10 @@ class UniformelySampledScanpath(Scanpath):
         x_i = self.measure_index('x')
         y_i = self.measure_index('y')
         ar = out.points
-        ar[:,x_i][ar:,x_i < min_x_const[0]] = min_x_const[1]
-        ar[:,x_i][ar:,x_i > max_x_const[0]] = max_x_const[1]
-        ar[:,y_i][ar:,y_i < min_y_const[0]] = min_y_const[1]
-        ar[:,y_i][ar:,y_i > max_y_const[0]] = max_y_const[1]
+        ar[:,x_i][ar[:,x_i] < min_x_const[0]] = min_x_const[1]
+        ar[:,x_i][ar[:,x_i] > max_x_const[0]] = max_x_const[1]
+        ar[:,y_i][ar[:,y_i] < min_y_const[0]] = min_y_const[1]
+        ar[:,y_i][ar[:,y_i] > max_y_const[0]] = max_y_const[1]
         return out
 
 

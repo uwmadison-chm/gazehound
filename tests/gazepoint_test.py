@@ -313,6 +313,14 @@ class TestIViewScanpath(object):
         neq_(0, len(filtered))
         gt_(len(self.path), len(filtered))
     
+    def test_constrain_works(self):
+        pre_ar = self.path.as_array(('x')) < 400
+        lt_(0, np.sum(pre_ar))
+        constrained = self.path.constrain_to(
+            (400, 400), (300,300), (800, 800), (600,600))
+        ar = constrained.as_array(('x'))
+        eq_(0, np.sum(ar < 400))
+    
 class TestPoint(object):
     def __init__(self):
         super(TestPoint, self).__init__()
