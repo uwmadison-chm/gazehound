@@ -59,6 +59,15 @@ class Blink(Event):
         Event.__init__(self, start, end, name)
 
 
+class Saccade(Event):
+    """ A sudden change in gaze position. Has a from and to component. """
+    
+    def __init__(self, start=None, end=None, name=None, from_pt=None, 
+                to_pt=None):
+        Event.__init__(self, start, end, name)
+        self.from_pt = from_pt
+        self.to_pt = to_pt
+
 class EventFactory(object):
     """ A factory that generates lists of Events from enumerable
     things.

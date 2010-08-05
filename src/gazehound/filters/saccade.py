@@ -7,8 +7,10 @@
 # for Brain Imaging and Behavior, University of Wisconsin - Madison.
 
 import numpy as np
-from scipy import ndimage
-from scipy import stats
+from scipy.ndimage import maximum_filter1d as max_flt
+from scipy.stats import scoreatpercentile
+
+from gazehound.event import Saccade
 
 class AdaptiveDetector(object):
     """ 
@@ -21,73 +23,82 @@ class AdaptiveDetector(object):
     Methods, 2010. doi:10.3758/BRM.42.1.188
     """
 
-    def __init__(self, pointpath, use_attrs):
-        self.pointpath = pointpath
-        self.use_attrs = use_attrs
+    def __init__(self, scanpath, measures=('x', 'y'), 
+            clip_speed_percent=99.5, minimum_fixation_ms=117,
+            threshold_start_percent=99.5, threshold_sd_scale=6,
+            threshold_min_change=0.001, threshold_max_iters=10000):
+            
+        self.scanpath = scanpath
+        self.measures = measures
+        self.minimum_fixation_ms = minimum_fixation_ms
+        self.clip_speed_percent = clip_speed_percent
+        self.threshold_start_percent = threshold_start_percent
+        self.threshold_sd_scale = threshold_sd_scale
+        self.threshold_min_change = threshold_min_change
+        self.threshold_max_iters = threshold_max_iters
+
+        self.__minimum_fixation_width = int(np.round(
+            (self.scanpath.samples_per_second/1000.0) * minimum_fixation_ms
+        ))
+        self.__sg_filter_width = self.__minimum_fixation_width
+        # This must be an odd number.
+        if (self.__sg_filter_width % 2) == 0:
+            self.__sg_filter_width += 1
         
-        self.p_arr = np.array(
-            [[getattr(p, at) for at in use_attrs] for p in pointpath],
-            dtype=np.float32)
+        self._p_arr = scanpath.as_array(measures)
+        
+        self._compute_saccades()
     
 
-
-    def find_threshold(self, velocities, start_percentile=99.5, 
-        stop_change_percent=0.01, max_iters=1000):
+    def _find_threshold(self, speeds, start_percentile, min_change_frac, 
+            sd_threshold_scale, max_iters):
         # Find a starting value
-        considered = np.abs(velocities)
-        thresh = stats.scoreatpercentile(velocities, start_percentile)
-        current_change_pct = 1
-        i = 0
-        while current_change_pct > stop_change_percent and i < max_iters:
-            i += 1
+        considered = speeds
+        thresh = scoreatpercentile(considered, start_percentile)
+        current_change_frac = 1
+        self._thresh_iters = 0
+        while (current_change_frac > min_change_frac and 
+                self._thresh_iters < max_iters):
+            self._thresh_iters += 1
             considered = considered[considered < thresh]
-            new_thresh = np.mean(considered) + 6*np.std(considered)
-            current_change_pct = abs((new_thresh-thresh)/thresh)
+            new_thresh = (np.mean(considered) + 
+                            sd_threshold_scale*np.std(considered))
+            current_change_frac = abs((new_thresh-thresh)/thresh)
             thresh = new_thresh
+            #print((self._thresh_iters, thresh, current_change_frac))
             
-        if i == max_iters: thresh = None
+        if self._thresh_iters == max_iters: thresh = None
         
         return thresh
 
 
-    def clamp_to_percentile(self, arr, percentiles):
-        from scipy.stats import scoreatpercentile as sap
-        return arr.clip(sap(arr, percentiles[0]), sap(arr, percentiles[1]))
+    def _clamp_to_percentile(self, arr, percentiles):
+        return arr.clip(
+            scoreatpercentile(arr, percentiles[0]), 
+            scoreatpercentile(arr, percentiles[1]))
+    
+    def _compute_saccades(self):
+        self._p_diffs = np.apply_along_axis(
+            sgolay, 0, self._p_arr, self.__sg_filter_width, 2, 1)
         
-    def saccades(self,
-        start_thresh_pct = 99.5, min_fix_dur = 5, filter_width=7):
-        from scipy.ndimage import maximum_filter1d as max_flt
-                        
-        p_diffs = np.apply_along_axis(
-            sgolay, 0, self.p_arr, filter_width, 2, 1)
-            
-        clamped = self.clamp_to_percentile(
-            p_diffs, (1-start_thresh_pct, start_thresh_pct))
+        csp = self.clip_speed_percent
+        clamped = self._clamp_to_percentile(
+            self._p_diffs, (1-csp, csp))
 
         def normalize(arr):
             return arr / np.max(np.abs(arr))
-        normed = np.apply_along_axis(normalize, 0, clamped)
-        pos_speeds = np.abs(normed)
-        averages = np.apply_along_axis(np.mean, 1, pos_speeds)
+        self._normed = np.apply_along_axis(normalize, 0, clamped)
+        self._speeds = np.sqrt(np.apply_along_axis(np.sum, 1, self._normed**2))
+        #pos_speeds = np.abs(normed)
+        #averages = np.apply_along_axis(np.mean, 1, pos_speeds)
         # Find the peaks
-        max_filtered = max_flt(averages, min_fix_dur)
-        peak_mask = (max_filtered == averages)
-        peaks = averages*peak_mask
-        threshold = self.find_threshold(averages)
-        candidates = peaks >= threshold
-        return {
-            'raw' : self.p_arr,
-            'diffs' : p_diffs,
-            'clamped' : clamped,
-            'normed' : normed,
-            'pos_speeds' : pos_speeds,
-            'averages' : averages,
-            'max_filtered' : max_filtered,
-            'peak_mask': peak_mask,
-            'peaks' : peaks,
-            'threshold' : threshold,
-            'candidates' : candidates
-        }
+        max_filtered = max_flt(self._speeds, self.__minimum_fixation_width)
+        self._peak_mask = (max_filtered == self._speeds)
+        self._peaks = self._speeds*self._peak_mask
+        self._threshold = self._find_threshold(self._speeds, 
+            self.threshold_start_percent, self.threshold_min_change,
+            self.threshold_sd_scale, self.threshold_max_iters)
+        self._candidates = self._peaks >= self._threshold
 
 
 def sgolay(y, window_size, order, deriv=0):
