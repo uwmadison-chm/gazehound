@@ -13,11 +13,12 @@ from copy import deepcopy
 
 import numpy as np
 
+
 class Deblink(object):
 
     # Literature suggests we're unlikely to se blinks less than 50ms or more
     # than 400ms. Paging through data suggests the same.
-    def __init__(self, min_duration=50, max_duration=400, 
+    def __init__(self, min_duration=50, max_duration=400,
         start_dy_threshold=15, end_dy_threshold=5):
         self.min_duration = min_duration
         self.max_duration = max_duration
@@ -72,7 +73,7 @@ class Deblink(object):
         self.__arr = arr
         zeroed_data = arr == 0
         candidate_times = np.hstack((0, zeroed_data[0]*zeroed_data[1], 0))
-        
+
         # All this is just used to make expanding blinks easier later
         # Stack with inf to keep the start dy arbitrarily high
         nonzero_ys = arr[1] <> 0
@@ -96,7 +97,7 @@ class Deblink(object):
             b.start_index = si
             b.end_index = ei
             candidates.append(b)
-        
+
         return Timeline(events=candidates)
 
     def deduplicate(self, timeline):
@@ -163,28 +164,52 @@ class Denoise(object):
             arr = sp.as_array((meas,)).T.flatten()
             # This array is 1 everywhere s_arr is zero
             missing_mask = arr == 0
-            # Pad both ends with zeroes and take the derivative -- it'll be 1
-            # at the start of missing data and -1 at the end
-            padded = np.hstack((0, missing_mask, 0))
-            edges = np.diff(padded)
-            starts = np.where(edges > 0)[0]
-            ends = np.where(edges < 0)[0]
-            lengths = ends - starts
-            # And now, the things to correct are no longer than max_noise
-            idxs_to_correct = np.where(lengths <= self.max_noise_samples)[0]
-            for c_idx in idxs_to_correct:
-                # Find the interp values...
-                known_x = [starts[c_idx]-1, ends[c_idx]]
-                interp_x = range(starts[c_idx], ends[c_idx])
-                # At this point, IndexErrors are OK -- they'll only fire
-                # on the last point.
-                try:
-                    interp_y = np.interp(interp_x, known_x, arr[known_x])
-                    # And save the data in the copied scanpath
-                    for i in range(len(interp_x)):
-                        sp[interp_x[i]][meas_idx] = interp_y[i]
-                except IndexError:
-                    pass
-            
+            sp.points[:,meas_idx] = self._interp_masked(arr, missing_mask)
+
         return sp
-        
+
+    def _interp_masked(self, arr, mask):
+        # Pad both ends with zeroes and take the derivative -- it'll be 1
+        # at the start of missing data and -1 at the end
+        padded = np.hstack((0, mask, 0))
+        edges = np.diff(padded)
+        starts = np.where(edges > 0)[0]
+        ends = np.where(edges < 0)[0]
+        lengths = ends - starts
+        # And now, the things to correct are no longer than max_noise
+        idxs_to_correct = np.where(lengths <= self.max_noise_samples)[0]
+        for c_idx in idxs_to_correct:
+            # Find the interp values...
+            known_x = [starts[c_idx]-1, ends[c_idx]]
+            interp_x = range(starts[c_idx], ends[c_idx])
+            # At this point, IndexErrors are OK -- they'll only fire
+            # on the last point.
+            try:
+                interp_y = np.interp(interp_x, known_x, arr[known_x])
+                # And save the data
+                for i in range(len(interp_x)):
+                    arr[interp_x[i]] = interp_y[i]
+            except IndexError:
+                pass
+        return arr
+
+
+class OutofboundsDenoiser(Denoise):
+    """
+    Finds points with very large/small values and does linear interpolation
+    to get rid of them. Large and small are defined as being the edges of the
+    screen, +/- some fraction of screen size.
+    """
+
+    def __init__(self, measure_bounds, max_noise_samples=4):
+        super(OutofboundsDenoiser, self).__init__(max_noise_samples)
+        self.measure_bounds = measure_bounds
+
+    def process(self, scanpath):
+        sp = deepcopy(scanpath)
+        for measure, bounds in self.measure_bounds:
+            meas_idx = sp.measure_index(measure)
+            arr = sp.points[:,meas_idx]
+            mask = np.logical_or((arr < bounds[0]), (arr > bounds[1]))
+            sp.points[:,meas_idx] = self._interp_masked(arr, mask)
+        return sp

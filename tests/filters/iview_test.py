@@ -86,6 +86,38 @@ class TestDeblink(object):
         eq_(6600, blinks[0].end)
 
 
+class TestOutofboundsDenoiser(object):
+    def setup(self):
+        self.sp = mock_objects.iview_scanpath_oob()
+        self.flt = iview.OutofboundsDenoiser(
+            measure_bounds = (
+                ('x', (0, 800)),
+                ('y', (0, 600))
+            ),
+            max_noise_samples=4)
+    
+    def test_denoiser_processes(self):
+        filtered = self.flt.process(self.sp)
+    
+    def test_denoiser_interps_xs(self):
+        filtered = self.flt.process(self.sp)
+        orig_x = self.sp.as_array(('x'))
+        new_x = filtered.as_array(('x'))
+        
+        diffs = orig_x <> new_x
+        above_cutoff = orig_x > 800
+        assert all(diffs == above_cutoff), "%s != %s" % (diffs, above_cutoff)
+    
+    def test_denoiser_interps_ys(self):
+        filtered = self.flt.process(self.sp)
+        orig_y = self.sp.as_array(('y'))
+        new_y = filtered.as_array(('y'))
+        
+        diffs = orig_y <> new_y
+        below_cutoff = orig_y < 0
+        assert all(diffs == below_cutoff), "%s != %s" % (diffs, above_cutoff)
+
+
 class TestDenoiseFilter(object):
     def setup(self):
         self.points = mock_objects.iview_points_noisy()
