@@ -25,7 +25,7 @@ class AdaptiveDetector(object):
 
     def __init__(self, scanpath, measures=('x', 'y'), 
             clip_speed_percent=99.5, minimum_fixation_ms=117,
-            threshold_start_percent=99.5, threshold_sd_scale=6,
+            threshold_start_percent=99.5, threshold_sd_scale=3,
             threshold_min_change=0.001, threshold_max_iters=10000):
             
         self.scanpath = scanpath
