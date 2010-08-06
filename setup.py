@@ -33,7 +33,7 @@ setup(
     keywords = "gazetracking eyetracking psychology science research",
     url = "http://github.com/njvack/gazehound",
     classifiers = (
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
