@@ -2,6 +2,8 @@
 import ez_setup
 ez_setup.use_setuptools()
 
+import sys
+sys.path.insert(0, "./src")
 from gazehound import version
 from setuptools import setup, find_packages
 setup(
