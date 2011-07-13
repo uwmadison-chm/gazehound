@@ -193,10 +193,10 @@ class GazeStatisticsAnalyzer(object):
                 total_points = len(pres.scanpath),
                 start_ms = pres.start,
                 end_ms = pres.end,
-                valid_strict = len(pres.scanpath.valid_points(
+                valid_strict = len(pres.scanpath.points_matching(
                     self.strict_valid_fun
                 )),
-                valid_lax = len(pres.scanpath.valid_points(
+                valid_lax = len(pres.scanpath.points_matching(
                     self.lax_valid_fun
                 ))
             )
@@ -223,10 +223,10 @@ class GazeStatisticsAnalyzer(object):
                 total_points = len(pres.scanpath),
                 start_ms = pres.start,
                 end_ms = pres.end,
-                valid_strict = len(pres.scanpath.valid_points(
+                valid_strict = len(pres.scanpath.points_matching(
                     self.strict_valid_fun
                 )),
-                valid_lax = len(pres.scanpath.valid_points(
+                valid_lax = len(pres.scanpath.points_matching(
                     self.lax_valid_fun
                 ))
             )
